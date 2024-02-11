@@ -15,12 +15,15 @@ Future<void> main() async { //Link supabase to the project
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Blink',
       theme: ThemeData(
         useMaterial3: true,
+        fontFamily: "HammersmithOne",
         colorScheme:
             ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 183, 236, 236)),
         //scaffoldBackgroundColor: Color.fromARGB(255, 183, 236, 236),

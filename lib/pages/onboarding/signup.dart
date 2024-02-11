@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SignUpScreen extends StatelessWidget {
+  const SignUpScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 41, 41, 41),
+      backgroundColor: const Color.fromARGB(255, 41, 41, 41),
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 41, 41, 41),
+        backgroundColor: const Color.fromARGB(255, 41, 41, 41),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
@@ -19,10 +21,10 @@ class SignUpScreen extends StatelessWidget {
                 // Navigate to the login page when the "Log in" text is tapped
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
                 );
               },
-              child: Text(
+              child: const Text(
                 'Log in',
                 style: TextStyle(
                   color: Color.fromARGB(255, 183, 236, 236),
@@ -40,9 +42,9 @@ class SignUpScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SizedBox(height: 50),
+            const SizedBox(height: 50),
             // Header
-            Text(
+            const Text(
               'Create an account',
               style: TextStyle(
                 color: Color.fromARGB(255, 183, 236, 236),
@@ -50,16 +52,16 @@ class SignUpScreen extends StatelessWidget {
                 fontSize: 28,
               ),
             ),
-            SizedBox(height: 18),
+            const SizedBox(height: 18),
             // Input bars
-            SignUpInput(label: 'First Name'),
-            SizedBox(height: 25),
-            SignUpInput(label: 'Last Name'),
-            SizedBox(height: 25),
-            SignUpInput(label: 'Email Address'),
-            SizedBox(height: 25),
-            SignUpInput(label: 'Password (8+ characters)', isPassword: true),
-            SizedBox(height: 20),
+            const SignUpInput(label: 'First Name'),
+            const SizedBox(height: 25),
+            const SignUpInput(label: 'Last Name'),
+            const SizedBox(height: 25),
+            const SignUpInput(label: 'Email Address'),
+            const SizedBox(height: 25),
+            const SignUpInput(label: 'Password (8+ characters)', isPassword: true),
+            const SizedBox(height: 20),
             // Continue button
             ButtonBar(
               alignment: MainAxisAlignment.center,
@@ -69,11 +71,17 @@ class SignUpScreen extends StatelessWidget {
                     // TODO: Handle continue button press and navigate to Category Selection screen
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => CategoriesPage()),
+                      MaterialPageRoute(builder: (context) => const CategoriesPage()),
                     );
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 183, 236, 236),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100.0),
+                    ),
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(
                         vertical: 12, horizontal: 105),
                     child: Text('Continue',
                         style: TextStyle(
@@ -81,23 +89,17 @@ class SignUpScreen extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                             fontSize: 20)),
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 183, 236, 236),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(100.0),
-                    ),
-                  ),
                 ),
               ],
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             // "Or" Spacer
-            Text('or',
+            const Text('or',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.white, fontSize: 20)),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             // Other sign-up methods
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 // TODO: Add icons for Apple, Facebook, and Google sign-up methods
@@ -124,9 +126,9 @@ class SignUpScreen extends StatelessWidget {
           ),
               ],
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             // Terms & Conditions and Privacy Policy
-            Text(
+            const Text(
               'By continuing, you agree to Blink’s ',
               style: TextStyle(fontSize: 12),
               textAlign: TextAlign.center,
@@ -135,7 +137,7 @@ class SignUpScreen extends StatelessWidget {
               text: TextSpan(
                 style: TextStyle(
                     fontSize: 12, color: Theme.of(context).primaryColor),
-                children: [
+                children: const [
                   TextSpan(
                     text: 'Terms & Conditions',
                     // TODO: Add link handling for "Terms & Conditions"
@@ -161,7 +163,7 @@ class SignUpInput extends StatelessWidget {
   final String label;
   final bool isPassword;
 
-  SignUpInput({required this.label, this.isPassword = false});
+  const SignUpInput({super.key, required this.label, this.isPassword = false});
 
   @override
   Widget build(BuildContext context) {
@@ -169,23 +171,23 @@ class SignUpInput extends StatelessWidget {
       obscureText: isPassword,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(
+        labelStyle: const TextStyle(
           color: Color.fromARGB(255, 183, 236, 236),
           fontSize: 18,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.0),
           borderSide:
-              BorderSide(color: Color.fromARGB(255, 255, 255, 255), width: 1.5),
+              const BorderSide(color: Color.fromARGB(255, 255, 255, 255), width: 1.5),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.0),
           borderSide:
-              BorderSide(color: Color.fromARGB(255, 255, 255, 255), width: 1.5),
+              const BorderSide(color: Color.fromARGB(255, 255, 255, 255), width: 1.5),
         ),
-        contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       ),
-      style: TextStyle(
+      style: const TextStyle(
         color: Color.fromARGB(255, 255, 255, 255),
         fontSize: 18,
       ),
