@@ -7,7 +7,7 @@ class IntroScreen4 extends StatelessWidget{
   Widget build(BuildContext context)
   {
     return const Scaffold(
-      backgroundColor: Colors.purple,
+      backgroundColor: const Color.fromARGB(255, 41, 41, 41),
     );
   }
 }

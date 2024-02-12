@@ -9,11 +9,36 @@ class IntroScreen2 extends StatelessWidget{
     return Scaffold(
       backgroundColor: Colors.white, 
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset("assets/images/Double Blink.png")
-        ],
-      )
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: 
+        [
+          SizedBox(height: 100,),
+          Image.asset("assets/images/Double Blink.png",height: 500, width: 500,),
+          Padding(
+            padding: EdgeInsets.only(left: 30, right: 30),
+            child: Text(
+              "Data-backed recommendations.",
+               style: TextStyle(
+                        fontFamily: "HammersmithOne", 
+                        fontSize: 36,
+                        fontWeight: FontWeight.w500,
+                        height: 1.2),
+                textAlign: TextAlign.center,
+                ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: 30, right: 30, top: 18),
+            child: Text(
+              "Each decision you make informs the next.",
+              style: TextStyle(
+                      fontFamily: "OpenSans",
+                      fontSize: 20,
+                      fontWeight: FontWeight.normal),
+              textAlign: TextAlign.center,
+              ),
+          ),
+        ]
+          ),
     );
   }
 }
