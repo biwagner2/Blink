@@ -1,4 +1,6 @@
+import 'package:blink_v1/pages/onboarding/intro_screens/introScreen4.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:lottie/lottie.dart';
 
 class IntroScreen3 extends StatelessWidget{
@@ -40,10 +42,32 @@ class IntroScreen3 extends StatelessWidget{
             scale: 3.0, // Adjust the scale factor for zoom level
             child: Lottie.asset('assets/icons/Bouncing-Arrow.json', height: 100, width: 100,),
           ),
-          SizedBox(height: 30,),
+          SizedBox(height: 40,),
           GestureDetector(
-            child: Image.asset("assets/images/blink-icon-color.png",height: 250, width: 250,),
-           // onTap: () => ,
+            child: Image.asset("assets/images/blink-icon-color.png",height: 220, width: 220, fit: BoxFit.cover,),
+            onTap: () {
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) => IntroScreen4(),
+                  transitionDuration: Duration(milliseconds: 600),
+                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                    const begin = 0.0;
+                    const end = 1.0;
+                    const curve = Curves.easeInOut;
+
+                    var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+                    var scaleAnimation = animation.drive(tween);
+
+                    return ScaleTransition(
+                      scale: scaleAnimation,
+                      child: child,
+                    );
+                  },
+                ),
+              );
+            },
           )
         ],
       ),

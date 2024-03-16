@@ -67,6 +67,7 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/svgs/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -86,6 +87,12 @@ flutter:
     - family: OpenSans
       fonts:
         - asset: fonts/OpenSans-Regular.ttf
+    - family: OpenSans-ExtraBold
+      fonts:
+        - asset: fonts/OpenSans-ExtraBold.ttf
+    - family: OpenSans-Bold
+      fonts:
+        - asset: fonts/OpenSans-Bold.ttf
   # fonts:
   #   - family: Schyler
   #     fonts:
