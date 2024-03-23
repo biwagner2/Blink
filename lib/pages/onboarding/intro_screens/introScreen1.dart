@@ -15,9 +15,9 @@ class IntroScreen1 extends StatelessWidget{
         mainAxisAlignment: MainAxisAlignment.start,
         children: 
         [
-          SizedBox(height: 100,),
+          const SizedBox(height: 100,),
           Image.asset("assets/images/Triple Blink.png",height: 500, width: 500,),
-          Padding(
+          const Padding(
             padding: EdgeInsets.only(left: 30, right: 30),
             child: Text(
               "Make decisions that matter.",
@@ -29,7 +29,7 @@ class IntroScreen1 extends StatelessWidget{
                 textAlign: TextAlign.center,
                 ),
           ),
-          Padding(
+          const Padding(
             padding: EdgeInsets.only(left: 30, right: 30, top: 18),
             child: Text(
               "Blink is an app that simplifies your everyday decision-making so that you can focus on the time you get back.",

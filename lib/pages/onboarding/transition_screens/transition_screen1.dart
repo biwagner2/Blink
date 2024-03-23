@@ -1,29 +1,31 @@
 import 'dart:async';
 
-import 'package:blink_v1/pages/onboarding/question_screens/questionScreen1.dart';
+import 'package:blink_v1/pages/onboarding/transition_screens/transition_screen2.dart';
 import 'package:flutter/material.dart';
 
-class transitionScreen2 extends StatelessWidget{
+class transitionScreen1 extends StatelessWidget{
+  const transitionScreen1({super.key});
+
   @override
   Widget build(BuildContext context)
   {
-     // Use Timer to navigate after 5 seconds
-    Timer(Duration(seconds: 4), () {
+    // Use Timer to navigate after 5 seconds
+    Timer(const Duration(seconds: 4), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => QuestionScreen1()),
+        MaterialPageRoute(builder: (context) => const transitionScreen2()),
       );
     });
 
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 41, 41, 41),
+    return const Scaffold(
+      backgroundColor: Color.fromARGB(255, 41, 41, 41),
       body: Column(
         children: [
-          SizedBox(height: 432,),
+          SizedBox(height: 390,),
           Padding(
             padding: EdgeInsets.only(left: 30, right: 30),
             child: Text(
-              "I see myself as someone who...",
+              "How well do the following statements describe your personality?",
                style: TextStyle(
                         fontFamily: "HammersmithOne", 
                         fontSize: 36,

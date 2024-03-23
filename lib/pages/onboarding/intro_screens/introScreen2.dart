@@ -12,9 +12,9 @@ class IntroScreen2 extends StatelessWidget{
         mainAxisAlignment: MainAxisAlignment.start,
         children: 
         [
-          SizedBox(height: 100,),
+          const SizedBox(height: 100,),
           Image.asset("assets/images/Double Blink.png",height: 500, width: 500,),
-          Padding(
+          const Padding(
             padding: EdgeInsets.only(left: 30, right: 30),
             child: Text(
               "Data-backed recommendations.",
@@ -26,7 +26,7 @@ class IntroScreen2 extends StatelessWidget{
                 textAlign: TextAlign.center,
                 ),
           ),
-          Padding(
+          const Padding(
             padding: EdgeInsets.only(left: 30, right: 30, top: 18),
             child: Text(
               "Each decision you make informs the next.",

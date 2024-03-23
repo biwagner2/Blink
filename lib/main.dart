@@ -26,7 +26,6 @@ class MyApp extends StatelessWidget {
         fontFamily: "HammersmithOne",
         colorScheme:
             ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 183, 236, 236)),
-        //scaffoldBackgroundColor: Color.fromARGB(255, 183, 236, 236),
       ),
       home: SplashScreen(), // Set SplashScreen as the initial screen
       
