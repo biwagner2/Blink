@@ -87,6 +87,43 @@ class QuestionScreen1 extends StatefulWidget
                   ),
                 ),
               ),
+              const Padding(padding: EdgeInsets.only(left: 10, right: 10),
+                child: Row(
+                  children: [
+                    Text("Disagree\nstrongly",
+                    style: TextStyle(
+                              fontFamily: "HammersmithOne",
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              height: 1.2,
+                              color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                    ),
+                    SizedBox(width: 70,),
+                    Text("Neither agree\nnor disagree",
+                    style: TextStyle(
+                              fontFamily: "HammersmithOne",
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              height: 1.2,
+                              color: Colors.white,),
+                              textAlign: TextAlign.center,
+                      ),
+                    SizedBox(width: 60,),
+                    Text("Agree\nstrongly",
+                    style:  TextStyle(
+                              fontFamily: "HammersmithOne",
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              height: 1.2,
+                              color: Colors.white,),
+                              textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              
+              ),
             const SizedBox(height: 100), // Adjust as needed
             
               ElevatedButton(
