@@ -15,7 +15,7 @@ class IntroScreen1 extends StatelessWidget{
         mainAxisAlignment: MainAxisAlignment.start,
         children: 
         [
-          const SizedBox(height: 100,),
+          const SizedBox(height: 60,),
           Image.asset("assets/images/Triple Blink.png",height: 500, width: 500,),
           const Padding(
             padding: EdgeInsets.only(left: 30, right: 30),

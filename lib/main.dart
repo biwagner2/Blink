@@ -3,6 +3,7 @@
 import 'package:blink_v1/pages/onboarding/splashScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
 
 Future<void> main() async { //Link supabase to the project
