@@ -1,4 +1,3 @@
-
 import 'package:blink_v1/pages/decision_making/category_selection.dart';
 import 'package:blink_v1/pages/onboarding/legal/PrivacyPolicyPage.dart';
 import 'package:blink_v1/pages/onboarding/legal/TermsAndConditionsPage.dart';
@@ -7,10 +6,24 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:developer';
 
-class SignUpScreen extends StatelessWidget {
-  const SignUpScreen({super.key});
+final supabase = Supabase.instance.client;
+
+class SignUp extends StatefulWidget {
+  const SignUp({super.key});
+
+  @override
+  State<SignUp> createState() => _SignUpState();
+}
+
+class _SignUpState extends State<SignUp> {
+
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +86,7 @@ class SignUpScreen extends StatelessWidget {
             const SizedBox(height: 20),
             
             TextFormField(
+              controller: firstNameController,
               decoration: InputDecoration(
                 labelText: 'First Name',
                 labelStyle: const TextStyle(
@@ -103,6 +117,7 @@ class SignUpScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             TextFormField(
+              controller: lastNameController,
               decoration: InputDecoration(
                 labelText: 'Last Name',
                 labelStyle: const TextStyle(
@@ -133,6 +148,7 @@ class SignUpScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             TextFormField(
+              controller: emailController,
               decoration: InputDecoration(
                 labelText: 'Email Address',
                 labelStyle: const TextStyle(
@@ -163,6 +179,7 @@ class SignUpScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             TextFormField(
+              controller: passwordController,
               obscureText: true,
               decoration: InputDecoration(
                 labelText: 'Password (8+ characters)',
@@ -199,12 +216,62 @@ class SignUpScreen extends StatelessWidget {
               alignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () {
-                    // TODO: Handle continue button press and navigate to Category Selection screen
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => const CategoriesPage()),
-                    );
+                  onPressed: () async {
+                    if(emailController.text.isEmpty || passwordController.text.isEmpty || firstNameController.text.isEmpty || lastNameController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Please fill in all fields'),
+                        ),
+                      );
+                      return;
+                    }
+                    if(passwordController.text.length < 8) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Password must be at least 8 characters long'),
+                        ),
+                      );
+                      return;
+                    }
+                   
+                    final sm = ScaffoldMessenger.of(context);
+                    try{
+                      final authResponse = await supabase.auth.signUp(email: emailController.text, password: passwordController.text);
+                       sm.showSnackBar(SnackBar(
+                        content: Text("An email has been sent to ${authResponse.user!.email!}. Please verify your email."),
+                      ));
+                      print("Email Confirmed at: ${authResponse.user?.emailConfirmedAt}");
+                      // while(authResponse.user?.emailConfirmedAt == null) {
+                      //   //Display confirmation box. Get rid of snack bar thing
+                      //   print("In the while looooooop");
+                      //   print(authResponse.user?.emailConfirmedAt);
+                      //   Container(
+                      //     color: Colors.white,
+                      //     child: const Center(
+                      //       child: CircularProgressIndicator(),
+                      //     ),
+                      //   );
+                      // }
+                       if (!context.mounted) return;
+                       Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const CategoriesPage()),
+                      );
+                    }
+                    catch(e) {
+                      print(e.toString());
+                      sm.showSnackBar(const SnackBar(
+                        content: Text("Sign-up failed. Please try again.",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                        textAlign: TextAlign.center,
+                        ),
+                        backgroundColor: Colors.red,
+                      ));
+                      return;
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 183, 236, 236),

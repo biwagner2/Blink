@@ -49,7 +49,7 @@ class IntroScreen3 extends StatelessWidget{
               Navigator.push(
                 context,
                 PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) => const SignUpScreen(),
+                  pageBuilder: (context, animation, secondaryAnimation) => const SignUp(),
                   transitionDuration: const Duration(milliseconds: 600),
                   transitionsBuilder: (context, animation, secondaryAnimation, child) {
                     const begin = 0.0;
