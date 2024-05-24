@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:blink_v1/pages/decision_making/category_selection.dart';
 import 'package:blink_v1/pages/onboarding/legal/PrivacyPolicyPage.dart';
 import 'package:blink_v1/pages/onboarding/legal/TermsAndConditionsPage.dart';
@@ -241,26 +243,49 @@ class _SignUpState extends State<SignUp> {
                         content: Text("An email has been sent to ${authResponse.user!.email!}. Please verify your email."),
                       ));
                       print("Email Confirmed at: ${authResponse.user?.emailConfirmedAt}");
-                      // while(authResponse.user?.emailConfirmedAt == null) {
-                      //   //Display confirmation box. Get rid of snack bar thing
-                      //   print("In the while looooooop");
-                      //   print(authResponse.user?.emailConfirmedAt);
-                      //   Container(
-                      //     color: Colors.white,
-                      //     child: const Center(
-                      //       child: CircularProgressIndicator(),
-                      //     ),
-                      //   );
-                      // }
-                       if (!context.mounted) return;
-                       Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const CategoriesPage()),
-                      );
+                      AlertDialog(
+                            title: const Text('Email Confirmation'),
+                            content: Text("An email has been sent to ${authResponse.user!.email!}. Please verify your email."),
+                            actions: [
+                              TextButton(
+                                child: const Text('OK'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+
+                       // Periodically check the user's email confirmation status
+                      Timer.periodic(const Duration(seconds: 5), (timer) async {
+                        final user = supabase.auth.currentUser;
+                        if (user != null && user.emailConfirmedAt != null) {
+                          timer.cancel();
+                          if (!context.mounted) return;
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const CategoriesPage()),
+                          );
+                        }
+                      });
                     }
                     catch(e) {
                       print(e.toString());
-                      sm.showSnackBar(const SnackBar(
+                      if(e.toString().contains("User already registered"))
+                      {
+                        sm.showSnackBar(const SnackBar(
+                        content: Text("Sign-up failed. An account with that email already exists.",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                        textAlign: TextAlign.center,
+                        ),
+                        backgroundColor: Colors.red,
+                      ));
+                      }
+                      else{
+                        sm.showSnackBar(const SnackBar(
                         content: Text("Sign-up failed. Please try again.",
                         style: TextStyle(
                           color: Colors.white,
@@ -270,6 +295,7 @@ class _SignUpState extends State<SignUp> {
                         ),
                         backgroundColor: Colors.red,
                       ));
+                      }
                       return;
                     }
                   },
