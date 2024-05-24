@@ -1,4 +1,5 @@
 import 'package:blink_v1/pages/onboarding/intro_screens/introScreen4.dart';
+import 'package:blink_v1/pages/onboarding/signup.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
@@ -48,7 +49,7 @@ class IntroScreen3 extends StatelessWidget{
               Navigator.push(
                 context,
                 PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) => const IntroScreen4(),
+                  pageBuilder: (context, animation, secondaryAnimation) => const SignUp(),
                   transitionDuration: const Duration(milliseconds: 600),
                   transitionsBuilder: (context, animation, secondaryAnimation, child) {
                     const begin = 0.0;

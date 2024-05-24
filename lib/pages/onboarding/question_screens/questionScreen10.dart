@@ -67,7 +67,7 @@ class QuestionScreen10 extends StatelessWidget
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const SignUpScreen()),
+                MaterialPageRoute(builder: (context) => const SignUp()),
                 );
             },
             style: ButtonStyle(
