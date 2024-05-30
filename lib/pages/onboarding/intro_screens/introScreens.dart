@@ -13,32 +13,35 @@ class IntroScreens extends StatelessWidget{
   @override
   Widget build(BuildContext context)
   {
-    return Scaffold(
-      body: Stack(
-        children: [
-          PageView(
-              controller: _controller,
-              scrollDirection: Axis.horizontal,
-              children: const [
-                IntroScreen1(),
-                IntroScreen2(),
-                IntroScreen3(),
-              ],
-            ),
-         Container(
-          alignment: const Alignment(0, 0.9),
-          child: SmoothPageIndicator(
-            controller: _controller, 
-            count: 3, 
-            effect: const SlideEffect(
-                activeDotColor: Colors.black,
-                dotColor: Color.fromARGB(255, 168, 168, 168),
-                spacing: 20.0,
-                dotHeight: 8,
-                dotWidth: 8,
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        body: Stack(
+          children: [
+            PageView(
+                controller: _controller,
+                scrollDirection: Axis.horizontal,
+                children: const [
+                  IntroScreen1(),
+                  IntroScreen2(),
+                  IntroScreen3(),
+                ],
               ),
-              )),
-        ],
+           Container(
+            alignment: const Alignment(0, 0.9),
+            child: SmoothPageIndicator(
+              controller: _controller, 
+              count: 3, 
+              effect: const SlideEffect(
+                  activeDotColor: Colors.black,
+                  dotColor: Color.fromARGB(255, 168, 168, 168),
+                  spacing: 20.0,
+                  dotHeight: 8,
+                  dotWidth: 8,
+                ),
+                )),
+          ],
+        ),
       ),
     );
   }
