@@ -42,6 +42,7 @@ dependencies:
   lottie: ^3.0.0
   supabase_auth_ui: ^0.4.4
   url_launcher: ^6.2.6
+  shared_preferences: ^2.2.3
 
 dev_dependencies:
   flutter_test:

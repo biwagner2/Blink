@@ -88,7 +88,7 @@ class _FriendHubState extends State<FriendHub> {
                   children: [
                     CircleAvatar(
                       radius: 40,
-                      backgroundImage: AssetImage("assets/images/profile.jpg"),
+                      backgroundImage: AssetImage("assets/images/logo-white-transparent.png"),
                     ),
                     SizedBox(width: 16),
                     Column(

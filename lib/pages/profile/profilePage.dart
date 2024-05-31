@@ -1,8 +1,9 @@
-import "package:blink_v1/navigation/customNavBar.dart";
-import "package:blink_v1/pages/decision_making/category_selection.dart";
-import "package:blink_v1/pages/friends/friendHub.dart";
-import "package:flutter/material.dart";
-import "package:flutter_svg/flutter_svg.dart";
+import 'package:blink_v1/navigation/customNavBar.dart';
+import 'package:blink_v1/pages/decision_making/category_selection.dart';
+import 'package:blink_v1/pages/friends/friendHub.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -12,8 +13,23 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-
   int _selectedIndex = 2;
+  String _displayName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDisplayName();
+  }
+
+  Future<void> _fetchDisplayName() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      setState(() {
+        _displayName = user.userMetadata?['display_name'] as String? ?? '';
+      });
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -30,17 +46,16 @@ class _ProfilePageState extends State<ProfilePage> {
         break;
       case 1:
         Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CategoriesPage()),
-          );
+          context,
+          MaterialPageRoute(builder: (context) => const CategoriesPage()),
+        );
         break;
-
       case 2:
-      // Do nothing since we already on the correct page.
+        // Do nothing since we already on the correct page.
         break;
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -78,41 +93,41 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ],
         ),
-        body: const SingleChildScrollView(
+        body: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Row(
                   children: [
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 40,
-                      backgroundImage: AssetImage("assets/images/profile.jpg"),
+                      backgroundImage: AssetImage("assets/images/logo-white-transparent.png"),
                     ),
-                    SizedBox(width: 16),
+                    const SizedBox(width: 16),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Coming Soon",
-                          style: TextStyle(
+                          _displayName.isNotEmpty ? _displayName : 'Coming Soon',
+                          style: const TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
                           ),
                         ),
-                        SizedBox(height: 4),
-                      ]
-                    )
-                  ]
-                )
-              ]
-            )
-          )
-        )
+                        const SizedBox(height: 4),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
-  }}
-                    
+  }
+}

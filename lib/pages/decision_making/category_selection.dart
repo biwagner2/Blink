@@ -3,6 +3,7 @@ import 'package:blink_v1/pages/friends/friendHub.dart';
 import 'package:blink_v1/pages/profile/profilePage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CategoriesPage extends StatefulWidget {
   const CategoriesPage({super.key});
@@ -13,6 +14,39 @@ class CategoriesPage extends StatefulWidget {
 
 class _CategoriesPageState extends State<CategoriesPage> {
   int _selectedIndex = 1;
+  List<String> _recentCategories = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecentCategories();
+  }
+
+  Future<void> _loadRecentCategories() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> savedCategories = prefs.getStringList('recentCategories') ?? [];
+    setState(() {
+      _recentCategories = savedCategories;
+    });
+  }
+
+  Future<void> _saveRecentCategories() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('recentCategories', _recentCategories);
+  }
+
+  void _onCategoryTapped(String category) {
+    setState(() {
+      if (_recentCategories.contains(category)) {
+        _recentCategories.remove(category);
+      }
+      _recentCategories.insert(0, category);
+      if (_recentCategories.length > 4) {
+        _recentCategories.removeLast();
+      }
+    });
+    _saveRecentCategories();
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -92,15 +126,17 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
-                  height: 100,
-                  child: ListView(
+                  height: 150,
+                  child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    children: [
-                       _buildRecentCategoryBox(SvgPicture.asset("assets/svgs/restaurant illustration.svg"), 'Restaurants'),
-                      _buildRecentCategoryBox(SvgPicture.asset("assets/svgs/movie illustration.svg"), 'Movies'),
-                      _buildRecentCategoryBox(SvgPicture.asset("assets/svgs/recipes illustration.svg"), 'Recipes'),
-                      _buildRecentCategoryBox(SvgPicture.asset("assets/svgs/book illustration.svg"), 'Books'),
-                    ],
+                    itemCount: _recentCategories.length,
+                    itemBuilder: (context, index) {
+                      String category = _recentCategories[index];
+                      return _buildRecentCategoryBox(
+                        _getCategoryIcon(category),
+                        category,
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -112,12 +148,30 @@ class _CategoriesPageState extends State<CategoriesPage> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                _buildCategoryBox(SvgPicture.asset("assets/svgs/restaurant illustration.svg"), 'Restaurants'),
-                _buildCategoryBox(SvgPicture.asset("assets/svgs/movie illustration.svg"), 'Movies'),
-                _buildCategoryBox(SvgPicture.asset("assets/svgs/recipes illustration.svg"), 'Recipes'),
-                _buildCategoryBox(SvgPicture.asset("assets/svgs/book illustration.svg"), 'Books'),
-                _buildCategoryBox(SvgPicture.asset("assets/svgs/outfit illustration.svg"), 'Outfits'),
-                _buildCategoryBox(SvgPicture.asset("assets/svgs/college illustration.svg"), 'Colleges'),
+                _buildCategoryBox(
+                  SvgPicture.asset("assets/svgs/restaurant illustration.svg"),
+                  'Restaurants',
+                ),
+                _buildCategoryBox(
+                  SvgPicture.asset("assets/svgs/movie illustration.svg"),
+                  'Movies',
+                ),
+                _buildCategoryBox(
+                  SvgPicture.asset("assets/svgs/recipes illustration.svg"),
+                  'Recipes',
+                ),
+                _buildCategoryBox(
+                  SvgPicture.asset("assets/svgs/book illustration.svg"),
+                  'Books',
+                ),
+                _buildCategoryBox(
+                  SvgPicture.asset("assets/svgs/outfit illustration.svg"),
+                  'Outfits',
+                ),
+                _buildCategoryBox(
+                  SvgPicture.asset("assets/svgs/college illustration.svg"),
+                  'Colleges',
+                ),
               ],
             ),
           ),
@@ -144,66 +198,90 @@ class _CategoriesPageState extends State<CategoriesPage> {
     );
   }
 
-// 
-// 
-// 
-// 
-//
-//Widgets to build the the category boxes
-
+  // Widgets to build the category boxes
 
   Widget _buildRecentCategoryBox(SvgPicture icon, String label) {
-  return Container(
-    width: 100,
-    margin: const EdgeInsets.only(right: 12),
-    decoration: BoxDecoration(
-      color: Colors.grey[200],
-      borderRadius: BorderRadius.circular(10),
-    ),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          height: 50,
-          child: icon,
+    return GestureDetector(
+      onTap: () => _onCategoryTapped(label),
+      child: Container(
+        width: 100,
+        margin: const EdgeInsets.only(right: 12),
+        child: Column(
+          children: [
+            Container(
+              height: 100,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Center(
+                child: SizedBox(
+                  height: 70,
+                  child: icon,
+                ),
+              ),
+            ),
+            const SizedBox(height: 15),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 14,
+                fontFamily: 'OpenSans',
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 16),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    ),
-  );
-}
-
+      ),
+    );
+  }
 
   Widget _buildCategoryBox(SvgPicture icon, String label) {
-  return Container(
-    height: 80,
-    margin: const EdgeInsets.only(bottom: 12),
-    decoration: BoxDecoration(
-      color: Colors.grey[200],
-      borderRadius: BorderRadius.circular(10),
-    ),
-    child: Row(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SizedBox(
-            height: 50,
-            child: icon,
-          ),
+    return GestureDetector(
+      onTap: () => _onCategoryTapped(label),
+      child: Container(
+        height: 80,
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(10),
         ),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 18),
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                height: 50,
+                child: icon,
+              ),
+            ),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 18),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
-}
+      ),
+    );
+  }
 
-
+  SvgPicture _getCategoryIcon(String category) {
+    switch (category) {
+      case 'Restaurants':
+        return SvgPicture.asset("assets/svgs/restaurant illustration.svg");
+      case 'Movies':
+        return SvgPicture.asset("assets/svgs/movie illustration.svg");
+      case 'Recipes':
+        return SvgPicture.asset("assets/svgs/recipes illustration.svg");
+      case 'Books':
+        return SvgPicture.asset("assets/svgs/book illustration.svg");
+      case 'Outfits':
+        return SvgPicture.asset("assets/svgs/outfit illustration.svg");
+      case 'Colleges':
+        return SvgPicture.asset("assets/svgs/college illustration.svg");
+      default:
+        return SvgPicture.asset("assets/svgs/default illustration.svg");
+    }
+  }
 }

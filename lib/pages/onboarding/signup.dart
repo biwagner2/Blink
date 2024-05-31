@@ -241,7 +241,18 @@ class _SignUpState extends State<SignUp> {
                      
                       final sm = ScaffoldMessenger.of(context);
                       try{
+                        
+                        //Sign up new user
                         final authResponse = await supabase.auth.signUp(email: emailController.text, password: passwordController.text);
+                        
+                        // Update the user's display name
+                        await supabase.auth.updateUser(
+                          UserAttributes(
+                            data: {
+                              'display_name': '${firstNameController.text} ${lastNameController.text}',
+                            },
+                          ),
+                        );
                          sm.showSnackBar(SnackBar(
                           content: Text("An email has been sent to ${authResponse.user!.email!}. Please verify your email."),
                         ));
