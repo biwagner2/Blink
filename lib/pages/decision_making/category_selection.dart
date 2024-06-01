@@ -1,4 +1,5 @@
 import 'package:blink_v1/navigation/customNavBar.dart';
+import 'package:blink_v1/pages/decision_making/Categories/Restaurants/RestaurantCriteriaPage1.dart';
 import 'package:blink_v1/pages/friends/friendHub.dart';
 import 'package:blink_v1/pages/profile/profilePage.dart';
 import 'package:flutter/material.dart';
@@ -46,6 +47,14 @@ class _CategoriesPageState extends State<CategoriesPage> {
       }
     });
     _saveRecentCategories();
+    switch(category){
+      case "Restaurants":
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const RestaurantCriteriaPage1()),
+        );
+        break;
+    }
   }
 
   void _onItemTapped(int index) {
