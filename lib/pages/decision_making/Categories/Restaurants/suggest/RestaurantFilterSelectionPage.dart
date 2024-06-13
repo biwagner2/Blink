@@ -1,48 +1,91 @@
-import 'package:blink_v1/pages/decision_making/Categories/Restaurants/RestaurantCriteriaPage1.dart';
 import 'package:flutter/material.dart';
+import 'package:syncfusion_flutter_sliders/sliders.dart';
 
 class RestaurantFilterSelectionPage extends StatefulWidget {
-  final Set<String> selectedFoodTypes;
-
-  const RestaurantFilterSelectionPage({Key? key, required this.selectedFoodTypes}) : super(key: key);
+  const RestaurantFilterSelectionPage({super.key});
 
   @override
   _RestaurantFilterSelectionPageState createState() => _RestaurantFilterSelectionPageState();
 }
 
 class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectionPage> {
-  late Set<String> _selectedFoodTypes;
+  
   final ScrollController _scrollController = ScrollController();
   String? _selectedPricing;
   String? _selectedDistance;
+  String? _selectedOccasion;
+  List<String> _selectedCuisines = [];
+  bool _isCuisineDropdownOpen = false;
+
+  double _minRating = 3.0;
+double _maxRating = 5.0;
+
+  final List<String> _cuisineOptions = [
+    'American', 'Bakery', 'Caribbean', 'Coffee', 'East Asian', 'Fast Food',
+    'Halal', 'Healthy', 'Indian', 'Italian', 'Mediterranean', 'Mexican',
+    'Sweet', 'Tea', 'Vegan', 'Vegetarian'
+  ];
+
+  void _toggleCuisineDropdown() {
+    setState(() {
+      _isCuisineDropdownOpen = !_isCuisineDropdownOpen;
+    });
+  }
+
+  void _toggleCuisineSelection(String cuisine) {
+    setState(() {
+      if (_selectedCuisines.contains(cuisine)) {
+        _selectedCuisines.remove(cuisine);
+      } else {
+        _selectedCuisines.add(cuisine);
+      }
+    });
+  }
+
+  void _removeCuisine(String cuisine) {
+    setState(() {
+      _selectedCuisines.remove(cuisine);
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    _selectedFoodTypes = Set<String>.from(widget.selectedFoodTypes);
   }
 
-  void _removeTag(String tag) {
+  void _selectOccasion(String occasion) {
     setState(() {
-      _selectedFoodTypes.remove(tag);
+      if(occasion == _selectedOccasion) {
+        _selectedOccasion = null;
+        return;
+      }
+      else {
+        _selectedOccasion = occasion;
+      }
     });
-    if (_selectedFoodTypes.isEmpty) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const RestaurantCriteriaPage1()),
-      );
-    }
   }
 
   void _selectPricing(String pricing) {
     setState(() {
-      _selectedPricing = pricing;
+      if(pricing == _selectedPricing) {
+        _selectedPricing = null;
+        return;
+      }
+      else {
+        _selectedPricing = pricing;
+      }
     });
   }
 
   void _selectDistance(String distance) {
     setState(() {
-      _selectedDistance = distance;
+      if(distance == _selectedDistance) {
+        _selectedDistance = null;
+        return;
+      }
+      else {
+        _selectedDistance = distance;
+      }
     });
   }
 
@@ -67,38 +110,8 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 5),
-              const Text(
-                "Cuisine",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
               const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _selectedFoodTypes.map((tag) {
-                  return Chip(
-                    label: Text(
-                      tag,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'HammerSmithOne-Regular',
-                      ),
-                    ),
-                    backgroundColor: const Color.fromARGB(255, 237, 237, 237),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: const BorderSide(color: Colors.grey),
-                    ),
-                    onDeleted: () => _removeTag(tag),
-                    deleteIcon: const Icon(Icons.close, size: 18),
-                    deleteIconColor: Colors.grey[600],
-                  );
-                }).toList(),
-              ),
+               _buildCuisineDropdown(),
               const SizedBox(height: 15),
               const Text(
                 "Occasion",
@@ -164,6 +177,8 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
                   _buildDistanceBox('30+ min'),
                 ],
               ),
+              const SizedBox(height: 20),
+              _buildRatingsBottomSheet(),
             ],
           ),
         ),
@@ -171,24 +186,32 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
     );
   }
 
-  Widget _buildOccasionBox(IconData icon, String label) {
-    return Container(
-      width: 130,
-      margin: const EdgeInsets.only(right: 5),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 47),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-              fontFamily: 'HammerSmithOne-Regular',
+  Widget _buildOccasionBox(IconData icon, String occasion) {
+     final isSelected = _selectedOccasion == occasion;
+    return GestureDetector(
+      onTap: () => _selectOccasion(occasion),
+      child: Container(
+        decoration: BoxDecoration(
+          border: isSelected ? Border.all(color: Colors.black) : Border.all(color: Colors.transparent),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        width: 130,
+        margin: const EdgeInsets.only(right: 5, bottom: 15),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 47),
+            const SizedBox(height: 8),
+            Text(
+              occasion,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                fontFamily: 'HammerSmithOne-Regular',
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -238,4 +261,260 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
       ),
     );
   }
+
+  Widget _buildCuisineDropdown() {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      GestureDetector(
+        onTap: _toggleCuisineDropdown,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          width: MediaQuery.of(context).size.width / 2.5,
+          decoration: BoxDecoration(
+            color: _selectedCuisines.isNotEmpty
+                ? const Color.fromARGB(255, 183, 236, 236)
+                : Colors.white,
+            border: _selectedCuisines.isNotEmpty
+                ? Border.all(color: Colors.transparent)
+                : Border.all(color: Colors.black),
+            borderRadius: BorderRadius.circular(25),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Cuisine",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Icon(
+                _isCuisineDropdownOpen
+                    ? Icons.keyboard_arrow_up
+                    : Icons.keyboard_arrow_down,
+                color: Colors.black,
+                size: 30,
+              ),
+            ],
+          ),
+        ),
+      ),
+      if (_isCuisineDropdownOpen)
+        Container(
+          margin: const EdgeInsets.only(top: 8),
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.black),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _cuisineOptions.map((cuisine) {
+              final isSelected = _selectedCuisines.contains(cuisine);
+              return GestureDetector(
+                onTap: () => _toggleCuisineSelection(cuisine),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? const Color.fromARGB(255, 183, 236, 236)
+                        : Colors.white,
+                    border: Border.all(color: Colors.black),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    cuisine,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'HammerSmithOne-Regular',
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      if (_selectedCuisines.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _selectedCuisines.map((cuisine) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: const Color.fromARGB(255, 137, 137, 137)),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      cuisine,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color.fromARGB(255, 101, 101, 101),
+                        fontFamily: 'HammerSmithOne-Regular',
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      onTap: () => _removeCuisine(cuisine),
+                      child: const Icon(
+                        Icons.close,
+                        size: 24,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+    ],
+  );
+}
+
+
+  Widget _buildRatingsBottomSheet() {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      GestureDetector(
+        onTap: _showRatingsBottomSheet,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          width: MediaQuery.of(context).size.width / 2.1,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.black),
+            borderRadius: BorderRadius.circular(25),
+          ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Icon(
+                Icons.keyboard_arrow_up,
+                color: Colors.black,
+                size: 30,
+              ),
+              Text(
+                "Ratings",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Icon(
+                Icons.keyboard_arrow_up,
+                color: Colors.black,
+                size: 30,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+void _showRatingsBottomSheet() {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Rating',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Move the slider to adjust the range you\'re looking for.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Color.fromARGB(255, 84, 84, 84),
+                    fontWeight: FontWeight.w400,
+                    fontFamily: 'HammerSmithOne-Regular',
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SliderTheme(
+                  data: const SliderThemeData(
+                    trackHeight: 10,
+                  ),
+                  child: SfRangeSlider(
+                    min: 3.0,
+                    max: 5.0,
+                    values: SfRangeValues(_minRating, _maxRating),
+                    showLabels: true,
+                    activeColor: const Color.fromARGB(255, 183, 236, 236),
+                    inactiveColor: Colors.grey,
+                    onChanged: (SfRangeValues values) {
+                      setState(() {
+                        _minRating = values.start;
+                        _maxRating = values.end;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('3.0', style: TextStyle(fontSize: 12)),
+                    Text('3.5', style: TextStyle(fontSize: 12)),
+                    Text('4.0', style: TextStyle(fontSize: 12)),
+                    Text('4.5', style: TextStyle(fontSize: 12)),
+                    Text('5.0', style: TextStyle(fontSize: 12)),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 183, 236, 236),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    // You can add logic here to use the _minRating and _maxRating values
+                  },
+                  child: const Text(
+                    'Save',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
 }

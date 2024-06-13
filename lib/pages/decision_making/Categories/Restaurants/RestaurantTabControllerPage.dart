@@ -1,5 +1,4 @@
 import 'package:blink_v1/navigation/customNavBar.dart';
-import 'package:blink_v1/pages/decision_making/Categories/Restaurants/RestaurantCriteriaPage1.dart';
 import 'package:blink_v1/pages/decision_making/Categories/Restaurants/select/RestaurantInputPage.dart';
 import 'package:blink_v1/pages/decision_making/Categories/Restaurants/suggest/RestaurantFilterSelectionPage.dart';
 import 'package:blink_v1/pages/decision_making/category_selection.dart';
@@ -8,16 +7,15 @@ import 'package:blink_v1/pages/profile/profilePage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class RestaurantCriteriaPage2 extends StatefulWidget {
-  final Set<String> selectedFoodTypes;
+class RestaurantTabControllerPage extends StatefulWidget {
 
-  const RestaurantCriteriaPage2({super.key, this.selectedFoodTypes = const <String>{}});
+  const RestaurantTabControllerPage({super.key});
 
   @override
-  _RestaurantCriteriaPage2State createState() => _RestaurantCriteriaPage2State();
+  _RestaurantTabControllerPageState createState() => _RestaurantTabControllerPageState();
 }
 
-class _RestaurantCriteriaPage2State extends State<RestaurantCriteriaPage2> {
+class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPage> {
   int _selectedIndex = 1;
 
   void _onItemTapped(int index) {
@@ -74,7 +72,7 @@ class _RestaurantCriteriaPage2State extends State<RestaurantCriteriaPage2> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const RestaurantCriteriaPage1()),
+                  MaterialPageRoute(builder: (context) => const CategoriesPage()),
                 );
               },
             ),
@@ -113,11 +111,11 @@ class _RestaurantCriteriaPage2State extends State<RestaurantCriteriaPage2> {
               ),
             ),
           ),
-          body: TabBarView(
-            physics: const NeverScrollableScrollPhysics(),
+          body: const TabBarView(
+            physics: NeverScrollableScrollPhysics(),
             children: [
-              RestaurantFilterSelectionPage(selectedFoodTypes: widget.selectedFoodTypes),
-              const RestaurantInputPage(),
+              RestaurantFilterSelectionPage(),
+              RestaurantInputPage(),
             ],
           ),
           bottomNavigationBar: CustomBottomNavigationBar(

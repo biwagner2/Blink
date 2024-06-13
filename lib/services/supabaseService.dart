@@ -15,5 +15,19 @@ class SupabaseService {
         });
   }
 
+    Future<String> getUserId() async {
+    final user = await supabase.auth.currentUser;
+    return user?.id ?? '';
+  }
+
+  Future<void> saveCuisinePreferences({required String userId, required List<String> cuisines,}) async 
+  {
+    await supabase.from('user_cuisine_preferences')
+        .upsert({
+          'user_id': userId,
+          'cuisines': cuisines,
+        });
+  }
+
   
   }

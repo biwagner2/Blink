@@ -1,5 +1,6 @@
 import 'package:blink_v1/navigation/customNavBar.dart';
-import 'package:blink_v1/pages/decision_making/Categories/Restaurants/RestaurantCriteriaPage1.dart';
+import 'package:blink_v1/pages/decision_making/Categories/Restaurants/RestaurantCuisineSurvey.dart';
+import 'package:blink_v1/pages/decision_making/Categories/Restaurants/RestaurantTabControllerPage.dart';
 import 'package:blink_v1/pages/friends/friendHub.dart';
 import 'package:blink_v1/pages/profile/profilePage.dart';
 import 'package:flutter/material.dart';
@@ -49,10 +50,28 @@ class _CategoriesPageState extends State<CategoriesPage> {
     _saveRecentCategories();
     switch(category){
       case "Restaurants":
+      //Need to check if user has done the cuisine survey before
+      //If yes, go to RestaurantTabControllerPage
+      //If no, go to RestaruantCuisineSurvey
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const RestaurantCriteriaPage1()),
+          MaterialPageRoute(builder: (context) => const RestaurantTabControllerPage()),
         );
+        break;
+      case "Movies":
+        //Navigate to the Movies page
+        break;
+      case "Recipes":
+        //Navigate to the Recipes page
+        break;
+      case "Books":
+        //Navigate to the Books page
+        break;
+      case "Outfits":
+        //Navigate to the Outfits page
+        break;
+      case "Colleges":
+        //Navigate to the Colleges page
         break;
     }
   }

@@ -43,6 +43,7 @@ dependencies:
   supabase_auth_ui: ^0.4.4
   url_launcher: ^6.2.6
   shared_preferences: ^2.2.3
+  syncfusion_flutter_sliders: ^26.1.35
 
 dev_dependencies:
   flutter_test:

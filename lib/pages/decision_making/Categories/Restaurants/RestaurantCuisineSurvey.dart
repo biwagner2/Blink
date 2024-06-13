@@ -1,41 +1,22 @@
 import 'package:blink_v1/navigation/customNavBar.dart';
-import 'package:blink_v1/pages/decision_making/Categories/Restaurants/RestaurantCriteriaPage2.dart';
-import 'package:blink_v1/pages/decision_making/category_selection.dart';
+import 'package:blink_v1/pages/decision_making/Categories/Restaurants/RestaurantTabControllerPage.dart';
 import 'package:blink_v1/pages/friends/friendHub.dart';
 import 'package:blink_v1/pages/profile/profilePage.dart';
+import 'package:blink_v1/services/supabaseService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class RestaurantCriteriaPage1 extends StatefulWidget {
-  const RestaurantCriteriaPage1({Key? key}) : super(key: key);
+class RestaurantCuisineSurvey extends StatefulWidget {
+  const RestaurantCuisineSurvey({super.key});
 
   @override
-  _RestaurantCriteriaPage1State createState() => _RestaurantCriteriaPage1State();
+  _RestaurantCuisineSurveyState createState() => _RestaurantCuisineSurveyState();
 }
 
-class _RestaurantCriteriaPage1State extends State<RestaurantCriteriaPage1> {
+class _RestaurantCuisineSurveyState extends State<RestaurantCuisineSurvey> {
   int _selectedIndex = 1;
-
-  final List<String> foodTypes = [
-    'Vegan',
-    'Fast Food',
-    'East Asian',
-    'Mexican',
-    'Indian',
-    'Mediterranean',
-    'American',
-    'Vegetarian',
-    'Halal',
-    'Caribbean',
-    'Italian',
-    'Healthy',
-    'Coffee',
-    'Sweet',
-    'Bakery',
-    'Tea',
-  ];
-
-  final Set<String> selectedFoodTypes = <String>{};
+  final Set<String> _selectedCuisines = <String>{};
+  final SupabaseService _supabaseService = SupabaseService();
 
   void _onItemTapped(int index) {
     setState(() {
@@ -51,13 +32,8 @@ class _RestaurantCriteriaPage1State extends State<RestaurantCriteriaPage1> {
         );
         break;
       case 1:
-        // Navigate to the Categories page
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const CategoriesPage()),
-        );
+        // Do nothing since we're already on the correct page
         break;
-
       case 2:
         // Navigate to the Profile page
         Navigator.push(
@@ -65,6 +41,31 @@ class _RestaurantCriteriaPage1State extends State<RestaurantCriteriaPage1> {
           MaterialPageRoute(builder: (context) => const ProfilePage()),
         );
         break;
+    }
+  }
+
+  void _toggleCuisineSelection(String cuisine) {
+    setState(() {
+      if (_selectedCuisines.contains(cuisine)) {
+        _selectedCuisines.remove(cuisine);
+      } else {
+        _selectedCuisines.add(cuisine);
+      }
+    });
+  }
+
+  void _saveCuisinePreferences() async {
+    await _supabaseService.saveCuisinePreferences(
+      userId: await _supabaseService.getUserId(),
+      cuisines: _selectedCuisines.toList(),
+    );
+
+    // Navigate to the RestaurantTabControllerPage
+     if (context.mounted){
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const RestaurantTabControllerPage()),
+      );
     }
   }
 
@@ -86,10 +87,7 @@ class _RestaurantCriteriaPage1State extends State<RestaurantCriteriaPage1> {
             icon: const Icon(Icons.chevron_left_rounded, color: Colors.black),
             iconSize: iconSize,
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CategoriesPage()),
-              );
+              Navigator.pop(context);
             },
           ),
           leadingWidth: iconSize + 8,
@@ -102,7 +100,7 @@ class _RestaurantCriteriaPage1State extends State<RestaurantCriteriaPage1> {
               ),
               SizedBox(width: spacing),
               const Text(
-                'Restaurants',
+                'Restaurant Cuisine Survey',
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 25,
@@ -113,12 +111,12 @@ class _RestaurantCriteriaPage1State extends State<RestaurantCriteriaPage1> {
           ),
         ),
         body: Padding(
-          padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text(
-                'Which of these are you craving?',
+                'Select the types of cuisine you enjoy:',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w400,
@@ -134,20 +132,12 @@ class _RestaurantCriteriaPage1State extends State<RestaurantCriteriaPage1> {
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 15,
                   ),
-                  itemCount: foodTypes.length,
+                  itemCount: _cuisineOptions.length,
                   itemBuilder: (context, index) {
-                    final foodType = foodTypes[index];
-                    final isSelected = selectedFoodTypes.contains(foodType);
+                    final cuisine = _cuisineOptions[index];
+                    final isSelected = _selectedCuisines.contains(cuisine);
                     return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          if (isSelected) {
-                            selectedFoodTypes.remove(foodType);
-                          } else {
-                            selectedFoodTypes.add(foodType);
-                          }
-                        });
-                      },
+                      onTap: () => _toggleCuisineSelection(cuisine),
                       child: Container(
                         decoration: BoxDecoration(
                           color: isSelected ? const Color.fromARGB(255, 183, 236, 236) : Colors.white,
@@ -156,7 +146,7 @@ class _RestaurantCriteriaPage1State extends State<RestaurantCriteriaPage1> {
                         ),
                         child: Center(
                           child: Text(
-                            addEmoji(foodType),
+                            addEmoji(cuisine),
                             style: const TextStyle(fontSize: 16),
                           ),
                         ),
@@ -169,55 +159,20 @@ class _RestaurantCriteriaPage1State extends State<RestaurantCriteriaPage1> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
-                  onPressed: () {
-                    if (selectedFoodTypes.isEmpty) {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: const Text('No food types selected'),
-                            content: const Text(
-                              'Please select at least one food type to continue.',
-                              style: TextStyle(fontSize: 18),
-                            ),
-                            actions: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: const Text(
-                                  'OK',
-                                  style: TextStyle(fontSize: 16, color: Colors.black),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                      return;
-                    }
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RestaurantCriteriaPage2(
-                          selectedFoodTypes: selectedFoodTypes,
-                        ),
+                    onPressed: _selectedCuisines.isNotEmpty ? _saveCuisinePreferences : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 183, 236, 236),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
                       ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 183, 236, 236),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                      minimumSize: const Size(250, 0),
                     ),
-                    minimumSize: const Size(250, 0),
+                    child: const Text(
+                      'Save',
+                      style: TextStyle(fontSize: 18, color: Colors.black),
+                    ),
                   ),
-                  child: const Text(
-                    'Save',
-                    style: TextStyle(fontSize: 18, color: Colors.black),
-                  ),
-                ),
                 ],
               ),
               SizedBox(height: spacing + 8)
@@ -246,9 +201,8 @@ class _RestaurantCriteriaPage1State extends State<RestaurantCriteriaPage1> {
     );
   }
 
-  String addEmoji(String foodType)
-  {
-    switch (foodType) {
+  String addEmoji(String cuisine) {
+    switch (cuisine) {
       case 'Vegan':
         return '🌱Vegan';
       case 'Fast Food':
@@ -282,7 +236,26 @@ class _RestaurantCriteriaPage1State extends State<RestaurantCriteriaPage1> {
       case 'Tea':
         return '🍵Tea';
       default:
-        return foodType;
+        return cuisine;
     }
   }
+
+  final List<String> _cuisineOptions = [
+    'Vegan',
+    'Fast Food',
+    'East Asian',
+    'Mexican',
+    'Indian',
+    'Mediterranean',
+    'American',
+    'Vegetarian',
+    'Halal',
+    'Caribbean',
+    'Italian',
+    'Healthy',
+    'Coffee',
+    'Sweet',
+    'Bakery',
+    'Tea',
+  ];
 }
