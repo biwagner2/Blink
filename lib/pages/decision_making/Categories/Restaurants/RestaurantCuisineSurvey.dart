@@ -100,7 +100,7 @@ class _RestaurantCuisineSurveyState extends State<RestaurantCuisineSurvey> {
               ),
               SizedBox(width: spacing),
               const Text(
-                'Restaurant Cuisine Survey',
+                'Restaurant Cuisine',
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 25,
@@ -116,7 +116,7 @@ class _RestaurantCuisineSurveyState extends State<RestaurantCuisineSurvey> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text(
-                'Select the types of cuisine you enjoy:',
+                'Which of these do you enjoy?',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w400,
@@ -175,7 +175,7 @@ class _RestaurantCuisineSurveyState extends State<RestaurantCuisineSurvey> {
                   ),
                 ],
               ),
-              SizedBox(height: spacing + 8)
+              SizedBox(height: spacing)
             ],
           ),
         ),

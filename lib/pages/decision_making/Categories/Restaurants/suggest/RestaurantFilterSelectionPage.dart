@@ -1,5 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
+import 'package:syncfusion_flutter_core/theme.dart';
 
 class RestaurantFilterSelectionPage extends StatefulWidget {
   const RestaurantFilterSelectionPage({super.key});
@@ -9,7 +13,7 @@ class RestaurantFilterSelectionPage extends StatefulWidget {
 }
 
 class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectionPage> {
-  
+
   final ScrollController _scrollController = ScrollController();
   String? _selectedPricing;
   String? _selectedDistance;
@@ -91,7 +95,11 @@ double _maxRating = 5.0;
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final spacing = screenWidth * 0.05;
+    
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -431,7 +439,10 @@ void _showRatingsBottomSheet() {
     builder: (BuildContext context) {
       return StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
+          final deviceHeight = MediaQuery.of(context).size.height;
+          final deviceWidth = MediaQuery.of(context).size.width;
           return Container(
+            height: deviceHeight / 2.8,
             decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.only(
@@ -443,6 +454,7 @@ void _showRatingsBottomSheet() {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                SizedBox(height: deviceHeight/20 - 10),
                 const Text(
                   'Rating',
                   style: TextStyle(
@@ -450,7 +462,7 @@ void _showRatingsBottomSheet() {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 const Text(
                   'Move the slider to adjust the range you\'re looking for.',
                   style: TextStyle(
@@ -460,44 +472,44 @@ void _showRatingsBottomSheet() {
                     fontFamily: 'HammerSmithOne-Regular',
                   ),
                 ),
-                const SizedBox(height: 24),
-                SliderTheme(
-                  data: const SliderThemeData(
-                    trackHeight: 10,
-                  ),
-                  child: SfRangeSlider(
-                    min: 3.0,
-                    max: 5.0,
-                    values: SfRangeValues(_minRating, _maxRating),
-                    showLabels: true,
-                    activeColor: const Color.fromARGB(255, 183, 236, 236),
-                    inactiveColor: Colors.grey,
-                    onChanged: (SfRangeValues values) {
-                      setState(() {
-                        _minRating = values.start;
-                        _maxRating = values.end;
-                      });
-                    },
-                  ),
-                ),
                 const SizedBox(height: 8),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('3.0', style: TextStyle(fontSize: 12)),
-                    Text('3.5', style: TextStyle(fontSize: 12)),
-                    Text('4.0', style: TextStyle(fontSize: 12)),
-                    Text('4.5', style: TextStyle(fontSize: 12)),
-                    Text('5.0', style: TextStyle(fontSize: 12)),
-                  ],
+                SizedBox(
+                  child: SfSliderTheme(
+                    data: const SfSliderThemeData(
+                      //activeTrackHeight: 1,
+                      activeTrackColor: Color.fromARGB(255, 183, 236, 236),
+                  ),
+                    child: SfRangeSlider(
+                        min: 3.0,
+                        max: 5.0,
+                        interval: .5,
+                        dragMode: SliderDragMode.onThumb,
+                        values: SfRangeValues(_minRating, _maxRating),
+                        showLabels: true,
+                        activeColor: const Color.fromARGB(255, 183, 236, 236),
+                        inactiveColor: const Color.fromARGB(255, 191, 191, 191),
+                        stepSize: .5,
+                        showDividers: true,
+                        dividerShape: _DividerShape(),
+                        trackShape: _SfTrackShape(),
+                        thumbShape: _SfThumbShape(),
+                        onChanged: (SfRangeValues values) {
+                          setState(() {
+                            _minRating = values.start;
+                            _maxRating = values.end;
+                          });
+                        },
+                      ),
+                  )
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: deviceHeight/20 - 10),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 183, 236, 236),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
                     ),
+                    minimumSize:  Size(deviceWidth/1.5, deviceHeight/20),
                   ),
                   onPressed: () {
                     Navigator.pop(context);
@@ -505,7 +517,7 @@ void _showRatingsBottomSheet() {
                   },
                   child: const Text(
                     'Save',
-                    style: TextStyle(color: Colors.black),
+                    style: TextStyle(fontSize: 18, color:Colors.black),
                   ),
                 ),
               ],
@@ -516,5 +528,91 @@ void _showRatingsBottomSheet() {
     },
   );
 }
+}
 
+class _DividerShape extends SfDividerShape {
+  @override
+  void paint(PaintingContext context, Offset center, Offset? thumbCenter,
+      Offset? startThumbCenter, Offset? endThumbCenter,
+      {required RenderBox parentBox,
+      required SfSliderThemeData themeData,
+      SfRangeValues? currentValues,
+      dynamic currentValue,
+      required Paint? paint,
+      required Animation<double> enableAnimation,
+      required TextDirection textDirection}) 
+  {
+    final bool isActive = center.dx >= startThumbCenter!.dx && center.dx <= endThumbCenter!.dx;
+    if (!isActive) {
+      context.canvas.drawCircle(center, 8.0,
+          Paint()
+            ..isAntiAlias = true
+            ..style = PaintingStyle.fill
+            ..color = const Color.fromARGB(255, 100, 100, 100));
+    }
+  }
+}
+
+class _SfTrackShape extends SfTrackShape {
+  @override
+  void paint(PaintingContext context, Offset offset, Offset? thumbCenter,
+      Offset? startThumbCenter, Offset? endThumbCenter,
+      {required RenderBox parentBox,
+      required SfSliderThemeData themeData,
+      SfRangeValues? currentValues,
+      dynamic currentValue,
+      required Animation<double> enableAnimation,
+      required Paint? inactivePaint,
+      required Paint? activePaint,
+      required TextDirection textDirection}) 
+  {
+    final Paint activePaint = Paint()
+      ..color = const Color.fromARGB(255, 183, 236, 236)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 6;
+    
+    final Paint inactivePaint = Paint()
+      ..color = const Color.fromARGB(255, 191, 191, 191)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 6;
+
+    super.paint(context, offset, thumbCenter, startThumbCenter, endThumbCenter,
+        parentBox: parentBox,
+        themeData: themeData,
+        enableAnimation: enableAnimation,
+        inactivePaint: inactivePaint,
+        activePaint: activePaint,
+        textDirection: textDirection
+    );
+  }
+}
+
+class _SfThumbShape extends SfThumbShape {
+  @override
+  void paint(PaintingContext context, Offset center,
+      {required RenderBox parentBox,
+      required RenderBox? child,
+      required SfSliderThemeData themeData,
+      SfRangeValues? currentValues,
+      dynamic currentValue,
+      required Paint? paint,
+      required Animation<double> enableAnimation,
+      required TextDirection textDirection,
+      required SfThumb? thumb}) {
+    context.canvas.drawCircle(
+      center,
+      17.0,
+      Paint()
+        ..color = const Color.fromARGB(255, 183, 236, 236)
+        ..style = PaintingStyle.fill
+        ..strokeWidth = 10
+    );
+    context.canvas.drawCircle(
+      center,
+      9.0,
+      Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.fill
+    );
+  }
 }

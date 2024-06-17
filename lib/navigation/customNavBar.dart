@@ -17,6 +17,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
     return Stack(
       children: [
         BottomNavigationBar(
+          backgroundColor: Colors.white,
           currentIndex: selectedIndex,
           onTap: onTap,
           items: items,
