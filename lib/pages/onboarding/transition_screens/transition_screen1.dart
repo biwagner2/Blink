@@ -17,27 +17,30 @@ class transitionScreen1 extends StatelessWidget{
       );
     });
 
-    return const Scaffold(
-      backgroundColor: Color.fromARGB(255, 41, 41, 41),
-      body: Column(
-        children: [
-          SizedBox(height: 390,),
-          Padding(
-            padding: EdgeInsets.only(left: 30, right: 30),
-            child: Text(
-              "How well do the following statements describe your personality?",
-               style: TextStyle(
-                        fontFamily: "HammersmithOne", 
-                        fontSize: 36,
-                        fontWeight: FontWeight.w500,
-                        height: 1.2,
-                        color: Colors.white,
-                        ),
-                textAlign: TextAlign.center,
-                ),
-          ),
-        ],
-      )
-      );
+    return const PopScope(
+      canPop: false,
+      child: Scaffold(
+        backgroundColor: Color.fromARGB(255, 41, 41, 41),
+        body: Column(
+          children: [
+            SizedBox(height: 390,),
+            Padding(
+              padding: EdgeInsets.only(left: 30, right: 30),
+              child: Text(
+                "How well do the following statements describe your personality?",
+                 style: TextStyle(
+                          fontFamily: "HammersmithOne", 
+                          fontSize: 36,
+                          fontWeight: FontWeight.w500,
+                          height: 1.2,
+                          color: Colors.white,
+                          ),
+                  textAlign: TextAlign.center,
+                  ),
+            ),
+          ],
+        )
+        ),
+    );
   }
 }

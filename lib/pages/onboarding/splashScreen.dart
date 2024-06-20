@@ -51,20 +51,23 @@ class _SplashScreenState extends State<SplashScreen>
     @override
     Widget build(BuildContext context)
     {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Your company logo goes here
-              Image.asset('assets/images/logo-white-transparent.png',
-                  width: 250, height: 250),
-              const SizedBox(height: 20),
-              // Text('Blink'),
-            ],
+      return PopScope(
+        canPop: false,
+        child: Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Your company logo goes here
+                Image.asset('assets/images/logo-white-transparent.png',
+                    width: 250, height: 250),
+                const SizedBox(height: 20),
+                // Text('Blink'),
+              ],
+            ),
           ),
+          backgroundColor: const Color.fromARGB(255, 183, 236, 236),
         ),
-        backgroundColor: const Color.fromARGB(255, 183, 236, 236),
       );
     }
 }

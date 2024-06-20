@@ -5,12 +5,16 @@ class PrivacyPolicyPage extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Privacy Policy'),
-      ),
-      body: const Center(
-        child: Text('Privacy Policy'),
+    return PopScope(
+      canPop: true,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Privacy Policy'),
+          automaticallyImplyLeading: true,
+        ),
+        body: const Center(
+          child: Text('Privacy Policy'),
+        ),
       ),
     );
   }

@@ -59,7 +59,7 @@ class QuestionScreen1 extends StatefulWidget
                         ),
               const SizedBox(height: 35), // Adjust as needed
               Padding(
-                padding: const EdgeInsets.only(left: 25, right: 25),
+                padding: const EdgeInsets.only(left: 10, right: 10),
                 child: SliderTheme(
                   data: const SliderThemeData(
                     trackHeight: 10,
@@ -100,7 +100,7 @@ class QuestionScreen1 extends StatefulWidget
                     ),
                     textAlign: TextAlign.center,
                     ),
-                    SizedBox(width: 70,),
+                    SizedBox(width: 40,),
                     Text("Neither agree\nnor disagree",
                     style: TextStyle(
                               fontFamily: "HammersmithOne",
