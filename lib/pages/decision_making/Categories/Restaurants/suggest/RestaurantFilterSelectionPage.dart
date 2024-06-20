@@ -22,7 +22,8 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
   bool _isCuisineDropdownOpen = false;
 
   double _minRating = 3.0;
-double _maxRating = 5.0;
+  double _maxRating = 5.0;
+  bool _isRatingsSelected = false;
 
   final List<String> _cuisineOptions = [
     'American', 'Bakery', 'Caribbean', 'Coffee', 'East Asian', 'Fast Food',
@@ -120,7 +121,7 @@ double _maxRating = 5.0;
               const SizedBox(height: 5),
               const SizedBox(height: 8),
                _buildCuisineDropdown(),
-              const SizedBox(height: 15),
+              const SizedBox(height: 18),
               const Text(
                 "Occasion",
                 style: TextStyle(
@@ -393,38 +394,52 @@ double _maxRating = 5.0;
 
 
   Widget _buildRatingsBottomSheet() {
+    String formatRating(double rating) {
+      return (rating % 1 == 0) ? rating.toStringAsFixed(0) : rating.toStringAsFixed(1);
+    }
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       GestureDetector(
         onTap: _showRatingsBottomSheet,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.only(left: 8, top: 8, bottom: 8),
           width: MediaQuery.of(context).size.width / 2.1,
           decoration: BoxDecoration(
             border: Border.all(color: Colors.black),
             borderRadius: BorderRadius.circular(25),
           ),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Icon(
-                Icons.keyboard_arrow_up,
-                color: Colors.black,
-                size: 30,
-              ),
-              Text(
-                "Ratings",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+              Container(
+                margin:  const EdgeInsets.only(bottom: 5),
+                child:  const Icon(
+                  Icons.star_rate_rounded,
+                  color: Color.fromARGB(255, 183, 236, 236),
+                  size: 33,
                 ),
               ),
-              Icon(
-                Icons.keyboard_arrow_up,
-                color: Colors.black,
-                size: 30,
-              ),
+              _isRatingsSelected
+                  ? Text(
+                      "${formatRating(_minRating)} - ${formatRating(_maxRating)}",
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  : const Text(
+                      "Ratings",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+              const Icon(
+                  Icons.keyboard_arrow_up,
+                  color: Colors.black,
+                  size: 32,
+                ),
             ],
           ),
         ),
@@ -476,8 +491,8 @@ void _showRatingsBottomSheet() {
                 SizedBox(
                   child: SfSliderTheme(
                     data: const SfSliderThemeData(
-                      //activeTrackHeight: 1,
                       activeTrackColor: Color.fromARGB(255, 183, 236, 236),
+                      labelOffset: Offset(0, 55),
                   ),
                     child: SfRangeSlider(
                         min: 3.0,
@@ -514,6 +529,9 @@ void _showRatingsBottomSheet() {
                   onPressed: () {
                     Navigator.pop(context);
                     // You can add logic here to use the _minRating and _maxRating values
+                    this.setState(() {
+                      _isRatingsSelected = true;
+                    });
                   },
                   child: const Text(
                     'Save',
@@ -601,7 +619,7 @@ class _SfThumbShape extends SfThumbShape {
       required SfThumb? thumb}) {
     context.canvas.drawCircle(
       center,
-      17.0,
+      16.0,
       Paint()
         ..color = const Color.fromARGB(255, 183, 236, 236)
         ..style = PaintingStyle.fill
@@ -609,7 +627,7 @@ class _SfThumbShape extends SfThumbShape {
     );
     context.canvas.drawCircle(
       center,
-      9.0,
+      8.0,
       Paint()
         ..color = Colors.white
         ..style = PaintingStyle.fill

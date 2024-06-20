@@ -1,3 +1,4 @@
+import 'package:blink_v1/navigation/blinkButton.dart';
 import 'package:blink_v1/navigation/customNavBar.dart';
 import 'package:blink_v1/pages/decision_making/Categories/Restaurants/select/RestaurantInputPage.dart';
 import 'package:blink_v1/pages/decision_making/Categories/Restaurants/suggest/RestaurantFilterSelectionPage.dart';
@@ -118,6 +119,27 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
               RestaurantInputPage(),
             ],
           ),
+          floatingActionButton: FloatingActionButton.large(
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            onPressed:  () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CategoriesPage()),
+              );
+            },
+            child: 
+            BlinkButton(
+              isEnlarged: true,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CategoriesPage()),
+                );
+              },
+            ),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
           bottomNavigationBar: CustomBottomNavigationBar(
             selectedIndex: _selectedIndex,
             onTap: _onItemTapped,
@@ -127,9 +149,9 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
                 label: '',
               ),
               BottomNavigationBarItem(
-                icon: Image.asset("assets/images/blink-icon-color.png", height: 40),
-                label: '',
-              ),
+              icon: Image.asset("assets/images/blink-icon-color.png", height: 0),
+              label: '',
+            ),
               BottomNavigationBarItem(
                 icon: SvgPicture.asset("assets/svgs/Profile.svg", height: 40),
                 label: '',
