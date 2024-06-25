@@ -6,7 +6,9 @@ import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 
 class RestaurantFilterSelectionPage extends StatefulWidget {
-  const RestaurantFilterSelectionPage({super.key});
+  final Function(Map<String, dynamic>) onFilterChanged;
+
+  const RestaurantFilterSelectionPage({Key? key, required this.onFilterChanged}) : super(key: key);
 
   @override
   _RestaurantFilterSelectionPageState createState() => _RestaurantFilterSelectionPageState();
@@ -45,12 +47,14 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
         _selectedCuisines.add(cuisine);
       }
     });
+    _updateFilters();
   }
 
   void _removeCuisine(String cuisine) {
     setState(() {
       _selectedCuisines.remove(cuisine);
     });
+    _updateFilters();
   }
 
   @override
@@ -68,6 +72,7 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
         _selectedOccasion = occasion;
       }
     });
+    _updateFilters();
   }
 
   void _selectPricing(String pricing) {
@@ -80,6 +85,7 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
         _selectedPricing = pricing;
       }
     });
+    _updateFilters();
   }
 
   void _selectDistance(String distance) {
@@ -91,6 +97,18 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
       else {
         _selectedDistance = distance;
       }
+    });
+    _updateFilters();
+  }
+
+   void _updateFilters() {
+    widget.onFilterChanged({
+      'cuisines': _selectedCuisines,
+      'occasion': _selectedOccasion,
+      'pricing': _selectedPricing,
+      'distance': _selectedDistance,
+      'minRating': _minRating,
+      'maxRating': _maxRating,
     });
   }
 
