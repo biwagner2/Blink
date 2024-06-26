@@ -5,9 +5,11 @@ import 'package:blink_v1/pages/decision_making/Categories/Restaurants/suggest/Re
 import 'package:blink_v1/pages/decision_making/category_selection.dart';
 import 'package:blink_v1/pages/friends/friendHub.dart';
 import 'package:blink_v1/pages/profile/profilePage.dart';
+import 'package:blink_v1/services/LocationService.dart';
 import 'package:blink_v1/services/Restaurants/RestaurantService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:geolocator/geolocator.dart';
 
 class RestaurantTabControllerPage extends StatefulWidget {
 
@@ -19,15 +21,36 @@ class RestaurantTabControllerPage extends StatefulWidget {
 
 class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPage> with SingleTickerProviderStateMixin {
   int _selectedIndex = 1;
-  final recommender = GeminiRestaurantService();
+   final recommender = YelpRestaurantService();
+  final locationService = LocationService();
   Map<String, dynamic> _filterData = {};
   late TabController _tabController;
+  Position? _currentPosition;
 
-     @override
+
+  @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _getCurrentLocation();
   }
+  
+   Future<void> _getCurrentLocation() async
+   {
+      Position? position = await locationService.getCurrentLocation();
+      position ??= await locationService.getLastKnownPosition();
+      if (position != null) {
+        setState(() {
+          _currentPosition = position;
+        });
+        recommender.setUserLocation(position);
+        print('Location: ${position.latitude}, ${position.longitude}');
+      } else {
+        print('Failed to get location');
+        // Handle the error, maybe show a message to the user
+      }
+    }
+
 
   @override
   void dispose() {
@@ -66,17 +89,21 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
     }
   }
 
-  void _handleFilterData(Map<String, dynamic> data) {
+  void _handleFilterData(Map<String, dynamic> data) 
+  {
     setState(() {
       _filterData = data;
     });
+    print('Updated filter data: $_filterData');
   }
 
   Future<void> _onBlinkButtonPressed() async {
     if (_tabController.index == 0) {
-      // Suggest tab
-      await _getRecommendations();
-    } else {
+    // Suggest tab
+    recommender.clearCache(); // Clear the cache before fetching new recommendations
+    await _getRecommendations();
+    } 
+    else {
       // Select tab
       // Implement the logic for selecting the best option from user input
       // This should be implemented in RestaurantInputPage
@@ -85,22 +112,17 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
     }
   }
 
-  Future<void> _getRecommendations() async {
+
+  Future<void> _getRecommendations() async
+  {
     try {
-      List<String> recommendations;
-      if (_filterData.isEmpty) {
-        // No criteria selected, get nearby restaurants
-        recommendations = await recommender.getNearbyRestaurants();
-      } else {
-        recommendations = await recommender.getRestaurantRecommendations(
-          cuisines: _filterData['cuisines'],
-          occasion: _filterData['occasion'],
-          pricing: _filterData['pricing'],
-          distance: _filterData['distance'],
-          minRating: _filterData['minRating'],
-          maxRating: _filterData['maxRating'],
-        );
-      }
+      List<Map<String, dynamic>> recommendations = await recommender.getRestaurantRecommendations(
+        cuisines: _filterData['cuisines'],
+        occasion: _filterData['occasion'],
+        pricing: _filterData['pricing'],
+        distance: _filterData['distance'],
+        rating: _filterData['minRating'],
+      );
       _showRecommendations(recommendations);
     } catch (e) {
       print('Error: $e');
@@ -109,6 +131,42 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
       );
     }
   }
+
+//   Future<void> _getRecommendations() async {
+//   try {
+//     String query = "Find restaurants";
+
+//     if (_filterData['cuisines'] != null && _filterData['cuisines'].isNotEmpty) {
+//       query += " serving ${_filterData['cuisines'].join(', ')} cuisine";
+//     }
+
+//     if (_filterData['occasion'] != null) {
+//       query += " for ${_filterData['occasion']}";
+//     }
+
+//     if (_filterData['pricing'] != null) {
+//       query += " with ${_filterData['pricing']} pricing";
+//     }
+
+//     if (_filterData['distance'] != null) {
+//       query += " within ${_filterData['distance']}";
+//     }
+
+//     if (_filterData['minRating'] != null) {
+//       query += " rated ${_filterData['minRating']} stars or higher";
+//     }
+
+//     print('Natural language query: $query');
+
+//     List<Map<String, dynamic>> recommendations = await recommender.naturalLanguageSearch(query);
+//     _showRecommendations(recommendations);
+//   } catch (e) {
+//     print('Error: $e');
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       SnackBar(content: Text('Error getting recommendations: $e')),
+//     );
+//   }
+// }
 
   @override
   Widget build(BuildContext context) {
@@ -212,20 +270,20 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
       ),
     );
   }
-  void _showRecommendations(List<String> recommendations) {
+   void _showRecommendations(List<Map<String, dynamic>> recommendations) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Restaurant Recommendations'),
+          title: const Text('Restaurant Recommendations'),
           content: SingleChildScrollView(
             child: ListBody(
-              children: recommendations.map((restaurant) => Text(restaurant)).toList(),
+              children: recommendations.map((restaurant) => Text(restaurant['name'] as String)).toList(),
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Close'),
+              child: const Text('Close'),
               onPressed: () {
                 Navigator.of(context).pop();
               },

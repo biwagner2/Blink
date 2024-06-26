@@ -41,10 +41,10 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
 
   void _toggleCuisineSelection(String cuisine) {
     setState(() {
-      if (_selectedCuisines.contains(cuisine)) {
-        _selectedCuisines.remove(cuisine);
+      if (_selectedCuisines.contains(cuisine.toLowerCase())) {
+        _selectedCuisines.remove(cuisine.toLowerCase());
       } else {
-        _selectedCuisines.add(cuisine);
+        _selectedCuisines.add(cuisine.toLowerCase());
       }
     });
     _updateFilters();
@@ -384,7 +384,7 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      cuisine,
+                      cuisine.substring(0,1).toUpperCase() + cuisine.substring(1),
                       style: const TextStyle(
                         fontSize: 14,
                         color: Color.fromARGB(255, 101, 101, 101),
@@ -411,10 +411,19 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
 }
 
 
-  Widget _buildRatingsBottomSheet() {
-    String formatRating(double rating) {
-      return (rating % 1 == 0) ? rating.toStringAsFixed(0) : rating.toStringAsFixed(1);
+ Widget _buildRatingsBottomSheet() {
+  String formatRating(double rating) {
+    return (rating % 1 == 0) ? rating.toStringAsFixed(0) : rating.toStringAsFixed(1);
+  }
+
+  String getRatingDisplay() {
+    if (_minRating == _maxRating) {
+      return formatRating(_minRating);
+    } else {
+      return "${formatRating(_minRating)} - ${formatRating(_maxRating)}";
     }
+  }
+
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -440,7 +449,7 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
               ),
               _isRatingsSelected
                   ? Text(
-                      "${formatRating(_minRating)} - ${formatRating(_maxRating)}",
+                      getRatingDisplay(),
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -454,10 +463,10 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
                       ),
                     ),
               const Icon(
-                  Icons.keyboard_arrow_up,
-                  color: Colors.black,
-                  size: 32,
-                ),
+                Icons.keyboard_arrow_up,
+                color: Colors.black,
+                size: 32,
+              ),
             ],
           ),
         ),

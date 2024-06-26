@@ -1,91 +1,191 @@
-import 'package:google_generative_ai/google_generative_ai.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:geolocator/geolocator.dart';
 
-class GeminiRestaurantService {
-  late final GenerativeModel _model;
+class YelpRestaurantService {
+  final String _apiKey;
+  final String _baseUrl = dotenv.env['YELP_URL'] ?? '';
+  Position? _userLocation;
+  final Map<String, dynamic> _cache = {};
 
-  GeminiRestaurantService() {
-    final apiKey = dotenv.env['GEMINI_API_KEY'];
-    if (apiKey == null) {
-      throw Exception('GEMINI_API_KEY not found in .env file');
+  YelpRestaurantService() : _apiKey = dotenv.env['YELP_API_KEY'] ?? '' {
+    if (_apiKey.isEmpty) {
+      throw Exception('YELP_API_KEY not found in .env file');
     }
-    _model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
   }
 
-  Future<List<String>> getRestaurantRecommendations({
-    List<String>? cuisines,
-    String? occasion,
-    String? pricing,
-    String? distance,
-    double? minRating,
-    double? maxRating,
-  }) async {
-    final prompt = _buildPrompt(
-      cuisines: cuisines,
-      occasion: occasion,
-      pricing: pricing,
-      distance: distance,
-      minRating: minRating,
-      maxRating: maxRating,
+  void setUserLocation(Position location) {
+    _userLocation = location;
+  }
+
+  Future<List<Map<String, dynamic>>> getRestaurantRecommendations({
+  List<String>? cuisines,
+  String? pricing,
+  String? distance,
+  double? rating,
+  String? occasion,
+}) async {
+  if (_userLocation == null) {
+    throw Exception('User location not set');
+  }
+
+  List<String> termCuisines = [];
+  List<String> categoryCuisines = [];
+
+  final specialCuisines = ['bakery', 'east asian', 'fast food', 'healthy', 'indian', 'sweet'];
+
+  cuisines?.forEach((cuisine) {
+    if (specialCuisines.contains(cuisine.toLowerCase())) {
+      termCuisines.add(cuisine);
+    } else {
+      categoryCuisines.add(cuisine);
+    }
+  });
+
+  String term = termCuisines.isNotEmpty ? termCuisines.join(', ') : '';
+  if (occasion != null) {
+    term += ' ${_convertOccasion(occasion)}';
+  }
+
+  term += ' restaurant';
+
+  final queryParameters = {
+    'term': term,
+    'latitude': _userLocation!.latitude.toString(),
+    'longitude': _userLocation!.longitude.toString(),
+    'categories': categoryCuisines.isNotEmpty ? categoryCuisines.join(',') : null,
+    'price': _convertPricing(pricing),
+    'radius': _convertDistance(distance),
+    'sort_by': 'best_match',
+    'limit': '10',
+  };
+
+  print(_userLocation!.latitude.toString());
+  print(_userLocation!.longitude.toString());
+
+  queryParameters.removeWhere((key, value) => value == null);
+
+  final uri = Uri.parse('$_baseUrl/businesses/search').replace(queryParameters: queryParameters);
+  final cacheKey = uri.toString();
+
+  if (_cache.containsKey(cacheKey)) {
+    return _cache[cacheKey];
+  }
+
+  print(uri);
+
+  try {
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $_apiKey'},
     );
 
-    final content = [Content.text(prompt)];
-    final response = await _model.generateContent(content);
-
-    if (response.text == null) {
-      throw Exception('No recommendations generated');
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final businesses = data['businesses'] as List;
+      final results = businesses.map((business) => business as Map<String, dynamic>).toList();
+      _cache[cacheKey] = results;
+      return results;
+    } else if (response.statusCode == 429) {
+      throw Exception('API rate limit exceeded. Please try again later.');
+    } else {
+      throw Exception('Failed to get recommendations: ${response.body}');
     }
+  } catch (e) {
+    throw Exception('Network error: $e');
+  }
+}
 
-    // Parse the response and extract restaurant names
-    final recommendations = response.text!.split('\n')
-        .where((line) => line.trim().isNotEmpty)
-        .take(10)
-        .toList();
-
-    return recommendations;
+  Future<List<Map<String, dynamic>>> getNearbyRestaurants() async {
+    return getRestaurantRecommendations();
   }
 
-  String _buildPrompt({
-    List<String>? cuisines,
-    String? occasion,
-    String? pricing,
-    String? distance,
-    double? minRating,
-    double? maxRating,
-  }) {
-    final buffer = StringBuffer();
-    buffer.writeln('Recommend 10 restaurants based on the following criteria:');
-
-    if (cuisines != null && cuisines.isNotEmpty) {
-      buffer.writeln('Cuisines: ${cuisines.join(", ")}');
+  String? _convertPricing(String? pricing) {
+    switch (pricing?.toLowerCase()) {
+      case 'inexpensive':
+        return '1';
+      case 'moderate':
+        return '1,2';
+      case 'expensive':
+        return '3,4';
+      default:
+        return null;
     }
-    if (occasion != null) buffer.writeln('Occasion: $occasion');
-    if (pricing != null) buffer.writeln('Pricing: $pricing');
-    if (distance != null) buffer.writeln('Distance: $distance');
-    if (minRating != null && maxRating != null) {
-      buffer.writeln('Rating range: $minRating - $maxRating');
-    }
-
-    buffer.writeln('Please provide a list of 10 restaurant names, one per line.');
-    return buffer.toString();
   }
 
-   Future<List<String>> getNearbyRestaurants() async {
-    const prompt = 'Recommend 10 nearby restaurants. Please provide a list of 10 restaurant names, one per line.';
-    final content = [Content.text(prompt)];
-    final response = await _model.generateContent(content);
+  String? _convertDistance(String? distance) {
+  switch (distance) {
+    case '<10 min':
+      return '5000';  // 5 km in meters
+    case '10-30 min':
+      return '15000'; // 15 km in meters
+    case '30+ min':
+      return '40000'; // 40 km in meters
+    default:
+      return null;
+  }
+}
 
-    if (response.text == null) {
-      throw Exception('No recommendations generated');
+  String? _convertOccasion(String? occasion) {
+    switch (occasion?.toLowerCase()) {
+      case 'breakfast/brunch':
+        return 'breakfast_brunch';
+      case 'lunch':
+        return 'lunch';
+      case 'dinner':
+        return 'dinner';
+      case 'take-out':
+        return 'takeout';
+      case 'late-night':
+        return 'late night';
+      default:
+        return null;
     }
-
-    final recommendations = response.text!.split('\n')
-        .where((line) => line.trim().isNotEmpty)
-        .take(10)
-        .toList();
-
-    return recommendations;
   }
 
+  void clearCache() 
+  {
+    _cache.clear();
+  }
 
+//   Future<List<Map<String, dynamic>>> naturalLanguageSearch(String query) async {
+//   if (_userLocation == null) {
+//     throw Exception('User location not set');
+//   }
+
+//   final uri = Uri.parse('$_baseUrl/businesses/natural_language_search');
+
+//   final Map<String, dynamic> requestBody = {
+//     'messages': [
+//       {'role': 'user', 'content': query}
+//     ],
+//     'latitude': _userLocation!.latitude,
+//     'longitude': _userLocation!.longitude,
+//     'limit': 10, // You can adjust this as needed
+//   };
+
+//   try {
+//     final response = await http.post(
+//       uri,
+//       headers: {
+//         'Authorization': 'Bearer $_apiKey',
+//         'Content-Type': 'application/json',
+//       },
+//       body: json.encode(requestBody),
+//     );
+
+//     if (response.statusCode == 200) {
+//       final data = json.decode(response.body);
+//       final businesses = data['businesses'] as List;
+//       return businesses.map((business) => business as Map<String, dynamic>).toList();
+//     } else if (response.statusCode == 429) {
+//       throw Exception('API rate limit exceeded. Please try again later.');
+//     } else {
+//       throw Exception('Failed to get recommendations: ${response.body}');
+//     }
+//   } catch (e) {
+//     throw Exception('Network error: $e');
+//   }
+// }
 }

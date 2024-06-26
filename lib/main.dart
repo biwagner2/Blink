@@ -6,8 +6,11 @@ import 'package:blink_v1/pages/onboarding/question_screens/questionScreen1.dart'
 import 'package:blink_v1/pages/onboarding/question_screens/questionScreen4.dart';
 import 'package:blink_v1/pages/onboarding/signup.dart';
 import 'package:blink_v1/pages/onboarding/splashScreen.dart';
+import 'package:blink_v1/services/LocationService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
@@ -23,6 +26,10 @@ Future<void> main() async { //Link supabase to the project
     url: '$supaUrl',
     anonKey: "$supaApiKey");
 
+  // Initialize location services
+  final locationService = LocationService();
+  await locationService.initializeLocationServices();
+  
   runApp(MyApp());
 }
 
