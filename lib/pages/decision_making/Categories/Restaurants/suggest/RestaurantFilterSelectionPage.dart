@@ -1,14 +1,12 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 
 class RestaurantFilterSelectionPage extends StatefulWidget {
   final Function(Map<String, dynamic>) onFilterChanged;
 
-  const RestaurantFilterSelectionPage({Key? key, required this.onFilterChanged}) : super(key: key);
+  const RestaurantFilterSelectionPage({super.key, required this.onFilterChanged});
 
   @override
   _RestaurantFilterSelectionPageState createState() => _RestaurantFilterSelectionPageState();

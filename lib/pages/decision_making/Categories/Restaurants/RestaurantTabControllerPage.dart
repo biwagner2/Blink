@@ -1,5 +1,6 @@
 import 'package:blink_v1/navigation/blinkButton.dart';
 import 'package:blink_v1/navigation/customNavBar.dart';
+import 'package:blink_v1/navigation/readingMindScreen.dart';
 import 'package:blink_v1/pages/decision_making/Categories/Restaurants/select/RestaurantInputPage.dart';
 import 'package:blink_v1/pages/decision_making/Categories/Restaurants/suggest/RestaurantFilterSelectionPage.dart';
 import 'package:blink_v1/pages/decision_making/category_selection.dart';
@@ -98,39 +99,39 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
   }
 
   Future<void> _onBlinkButtonPressed() async {
-    if (_tabController.index == 0) {
+  if (_tabController.index == 0) {
     // Suggest tab
     recommender.clearCache(); // Clear the cache before fetching new recommendations
-    await _getRecommendations();
-    } 
-    else {
-      // Select tab
-      // Implement the logic for selecting the best option from user input
-      // This should be implemented in RestaurantInputPage
-      // For now, we'll just print a message
-      print('Selecting best option from user input');
-    }
+    List<Map<String, dynamic>> recommendations = await _getRecommendations();
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ReadingMindScreen(recommendations: recommendations)),
+    );
+  } else {
+    // Select tab
+    // Implement the logic for selecting the best option from user input
+    print('Selecting best option from user input');
   }
+}
 
 
-  Future<void> _getRecommendations() async
-  {
-    try {
-      List<Map<String, dynamic>> recommendations = await recommender.getRestaurantRecommendations(
-        cuisines: _filterData['cuisines'],
-        occasion: _filterData['occasion'],
-        pricing: _filterData['pricing'],
-        distance: _filterData['distance'],
-        rating: _filterData['minRating'],
-      );
-      _showRecommendations(recommendations);
-    } catch (e) {
-      print('Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error getting recommendations: $e')),
-      );
-    }
+  Future<List<Map<String, dynamic>>> _getRecommendations() async {
+  try {
+    return await recommender.getRestaurantRecommendations(
+      cuisines: _filterData['cuisines'],
+      occasion: _filterData['occasion'],
+      pricing: _filterData['pricing'],
+      distance: _filterData['distance'],
+      rating: _filterData['minRating'],
+    );
+  } catch (e) {
+    print('Error: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error getting recommendations: $e')),
+    );
+    return [];
   }
+}
 
 //   Future<void> _getRecommendations() async {
 //   try {
