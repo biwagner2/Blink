@@ -148,44 +148,4 @@ class YelpRestaurantService {
   {
     _cache.clear();
   }
-
-//   Future<List<Map<String, dynamic>>> naturalLanguageSearch(String query) async {
-//   if (_userLocation == null) {
-//     throw Exception('User location not set');
-//   }
-
-//   final uri = Uri.parse('$_baseUrl/businesses/natural_language_search');
-
-//   final Map<String, dynamic> requestBody = {
-//     'messages': [
-//       {'role': 'user', 'content': query}
-//     ],
-//     'latitude': _userLocation!.latitude,
-//     'longitude': _userLocation!.longitude,
-//     'limit': 10, // You can adjust this as needed
-//   };
-
-//   try {
-//     final response = await http.post(
-//       uri,
-//       headers: {
-//         'Authorization': 'Bearer $_apiKey',
-//         'Content-Type': 'application/json',
-//       },
-//       body: json.encode(requestBody),
-//     );
-
-//     if (response.statusCode == 200) {
-//       final data = json.decode(response.body);
-//       final businesses = data['businesses'] as List;
-//       return businesses.map((business) => business as Map<String, dynamic>).toList();
-//     } else if (response.statusCode == 429) {
-//       throw Exception('API rate limit exceeded. Please try again later.');
-//     } else {
-//       throw Exception('Failed to get recommendations: ${response.body}');
-//     }
-//   } catch (e) {
-//     throw Exception('Network error: $e');
-//   }
-// }
 }
