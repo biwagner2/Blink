@@ -1,3 +1,4 @@
+import 'package:blink_v1/models/categories/Restaurant.dart';
 import 'package:blink_v1/navigation/blinkButton.dart';
 import 'package:blink_v1/navigation/customNavBar.dart';
 import 'package:blink_v1/navigation/readingMindScreen.dart';
@@ -26,7 +27,6 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
   final locationService = LocationService();
   Map<String, dynamic> _filterData = {};
   late TabController _tabController;
-  Position? _currentPosition;
 
 
   @override
@@ -42,7 +42,6 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
       position ??= await locationService.getLastKnownPosition();
       if (position != null) {
         setState(() {
-          _currentPosition = position;
         });
         recommender.setUserLocation(position);
         print('Location: ${position.latitude}, ${position.longitude}');
@@ -102,10 +101,10 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
   if (_tabController.index == 0) {
     // Suggest tab
     recommender.clearCache(); // Clear the cache before fetching new recommendations
-    List<Map<String, dynamic>> recommendations = await _getRecommendations();
+    Future<List<Restaurant>?> recommendationsFuture = _getRecommendations();
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => ReadingMindScreen(recommendations: recommendations)),
+      MaterialPageRoute(builder: (context) => ReadingMindScreen(recommendations: recommendationsFuture)),
     );
   } else {
     // Select tab
@@ -115,7 +114,7 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
 }
 
 
-  Future<List<Map<String, dynamic>>> _getRecommendations() async {
+  Future<List<Restaurant>?> _getRecommendations() async {
   try {
     return await recommender.getRestaurantRecommendations(
       cuisines: _filterData['cuisines'],
@@ -132,42 +131,6 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
     return [];
   }
 }
-
-//   Future<void> _getRecommendations() async {
-//   try {
-//     String query = "Find restaurants";
-
-//     if (_filterData['cuisines'] != null && _filterData['cuisines'].isNotEmpty) {
-//       query += " serving ${_filterData['cuisines'].join(', ')} cuisine";
-//     }
-
-//     if (_filterData['occasion'] != null) {
-//       query += " for ${_filterData['occasion']}";
-//     }
-
-//     if (_filterData['pricing'] != null) {
-//       query += " with ${_filterData['pricing']} pricing";
-//     }
-
-//     if (_filterData['distance'] != null) {
-//       query += " within ${_filterData['distance']}";
-//     }
-
-//     if (_filterData['minRating'] != null) {
-//       query += " rated ${_filterData['minRating']} stars or higher";
-//     }
-
-//     print('Natural language query: $query');
-
-//     List<Map<String, dynamic>> recommendations = await recommender.naturalLanguageSearch(query);
-//     _showRecommendations(recommendations);
-//   } catch (e) {
-//     print('Error: $e');
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       SnackBar(content: Text('Error getting recommendations: $e')),
-//     );
-//   }
-// }
 
   @override
   Widget build(BuildContext context) {

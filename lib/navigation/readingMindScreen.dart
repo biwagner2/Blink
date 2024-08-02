@@ -1,11 +1,12 @@
+import 'package:blink_v1/models/categories/Restaurant.dart';
 import 'package:blink_v1/pages/decision_making/Categories/Restaurants/suggest/RestaurantSuggestionsPage.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
 class ReadingMindScreen extends StatefulWidget {
-  final List<Map<String, dynamic>> recommendations;
+  final Future<List<Restaurant>?> recommendations;
 
-  const ReadingMindScreen({super.key, required this.recommendations});
+  const ReadingMindScreen({Key? key, required this.recommendations}) : super(key: key);
 
   @override
   _ReadingMindScreenState createState() => _ReadingMindScreenState();
@@ -22,12 +23,14 @@ class _ReadingMindScreenState extends State<ReadingMindScreen> with SingleTicker
       vsync: this,
     )..repeat();
 
-    Timer(const Duration(seconds: 2), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => RestaurantSuggestionsPage(recommendations: widget.recommendations),
-        ),
-      );
+    widget.recommendations.then((restaurants) {
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => RestaurantSuggestionsPage(recommendations: restaurants ?? []),
+          ),
+        );
+      }
     });
   }
 

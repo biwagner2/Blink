@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:blink_v1/models/categories/Restaurant.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
@@ -7,7 +8,7 @@ class YelpRestaurantService {
   final String _apiKey;
   final String _baseUrl = dotenv.env['YELP_URL'] ?? '';
   Position? _userLocation;
-  final Map<String, dynamic> _cache = {};
+  final Map<String, List<Restaurant>> _cache = {};
 
   YelpRestaurantService() : _apiKey = dotenv.env['YELP_API_KEY'] ?? '' {
     if (_apiKey.isEmpty) {
@@ -19,7 +20,7 @@ class YelpRestaurantService {
     _userLocation = location;
   }
 
-  Future<List<Map<String, dynamic>>> getRestaurantRecommendations({
+  Future<List<Restaurant>?> getRestaurantRecommendations({
   List<String>? cuisines,
   String? pricing,
   String? distance,
@@ -58,7 +59,7 @@ class YelpRestaurantService {
     'price': _convertPricing(pricing),
     'radius': _convertDistance(distance),
     'sort_by': 'best_match',
-    'limit': '10',
+    'limit': '50',
   };
 
   print(_userLocation!.latitude.toString());
@@ -81,15 +82,19 @@ class YelpRestaurantService {
       headers: {'Authorization': 'Bearer $_apiKey'},
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200) 
+    {
       final data = json.decode(response.body);
       final businesses = data['businesses'] as List;
-      final results = businesses.map((business) => business as Map<String, dynamic>).toList();
+      final results = businesses.map((business) => Restaurant.fromJson(business)).toList();
       _cache[cacheKey] = results;
       return results;
-    } else if (response.statusCode == 429) {
+    } 
+    else if (response.statusCode == 429) 
+    {
       throw Exception('API rate limit exceeded. Please try again later.');
-    } else {
+    } 
+    else {
       throw Exception('Failed to get recommendations: ${response.body}');
     }
   } catch (e) {
@@ -97,7 +102,7 @@ class YelpRestaurantService {
   }
 }
 
-  Future<List<Map<String, dynamic>>> getNearbyRestaurants() async {
+  Future<List<Restaurant>?> getNearbyRestaurants() async {
     return getRestaurantRecommendations();
   }
 
@@ -149,3 +154,23 @@ class YelpRestaurantService {
     _cache.clear();
   }
 }
+
+// Future<Restaurant> getRestaurantDetails(String id) async {
+//   final uri = Uri.parse('$_baseUrl/businesses/$id');
+  
+//   try {
+//     final response = await http.get(
+//       uri,
+//       headers: {'Authorization': 'Bearer $_apiKey'},
+//     );
+
+//     if (response.statusCode == 200) {
+//       final data = json.decode(response.body);
+//       return Restaurant.fromJson(data);
+//     } else {
+//       throw Exception('Failed to get restaurant details: ${response.body}');
+//     }
+//   } catch (e) {
+//     throw Exception('Network error: $e');
+//   }
+// }

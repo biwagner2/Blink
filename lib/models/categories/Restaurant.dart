@@ -1,3 +1,7 @@
+import 'package:blink_v1/services/LocationService.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart';
+
 class Restaurant {
   final String id;
   final String name;
@@ -6,8 +10,8 @@ class Restaurant {
   final String url;
   final int reviewCount;
   final List<String> categories;
-  final double rating;
-  final String price;
+  final double? rating;
+  final String? price;
   final String address;
   final String phone;
   final double distance;
@@ -28,7 +32,7 @@ class Restaurant {
     required this.url,
     required this.reviewCount,
     required this.categories,
-    required this.rating,
+    this.rating,
     required this.price,
     required this.address,
     required this.phone,
@@ -42,6 +46,8 @@ class Restaurant {
   });
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {
+    print('Restaurant: ${json['name']}, Price: ${json['price']}');
+
     return Restaurant(
       id: json['id'],
       name: json['name'],
@@ -51,19 +57,25 @@ class Restaurant {
       reviewCount: json['review_count'],
       categories: (json['categories'] as List).map((c) => c['title'] as String).toList(),
       rating: json['rating'].toDouble(),
-      price: json['price'] ?? '',
+      price: json['price'],
       address: json['location']['display_address'].join(', '),
       phone: json['phone'],
       distance: json['distance'],
-    );
-  }
 
-  String getPriceString() {
-    return '\$' * price.length;
+    );
   }
 
   String getFormattedDistance() {
     return '${(distance / 1609.34).toStringAsFixed(1)} mi';
+  }
+
+  String getFormattedEta()
+  {
+    //Every .2 miles is 1 minute of driving.
+    final miles = distance/1609.34;
+    final minutes = (miles / 0.2).ceil();
+
+    return '$minutes min';
   }
 
   //Get the description of the current restaurant...

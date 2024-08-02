@@ -1,18 +1,20 @@
 import 'dart:math';
 
+import 'package:blink_v1/models/categories/Restaurant.dart';
 import 'package:blink_v1/pages/decision_making/Categories/Restaurants/suggest/RestaurantDetailsPage.dart';
 import 'package:blink_v1/pages/decision_making/category_selection.dart';
 import 'package:blink_v1/pages/friends/friendHub.dart';
 import 'package:blink_v1/pages/profile/profilePage.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:blink_v1/navigation/customNavBar.dart';
 import 'package:flutter_svg/svg.dart';
 
 class RestaurantSuggestionsPage extends StatefulWidget {
-  final List<Map<String, dynamic>> recommendations;
+  final List<Restaurant> recommendations;
 
-  const RestaurantSuggestionsPage({super.key, required this.recommendations});
+  const RestaurantSuggestionsPage({Key? key, required this.recommendations}) : super(key: key);
 
   @override
   _RestaurantSuggestionsPageState createState() => _RestaurantSuggestionsPageState();
@@ -20,6 +22,8 @@ class RestaurantSuggestionsPage extends StatefulWidget {
 
 class _RestaurantSuggestionsPageState extends State<RestaurantSuggestionsPage> {
   int _selectedIndex = 1; // Assuming this is the index for the current page in the bottom nav bar
+  Map<String, bool> likedRestaurants = {};
+  Map<String, bool> dislikedRestaurants = {};
 
   void _onItemTapped(int index) {
     setState(() {
@@ -52,21 +56,50 @@ class _RestaurantSuggestionsPageState extends State<RestaurantSuggestionsPage> {
     }
   }
 
+  void toggleLike(String restaurantId) {
+    setState(() {
+      if (likedRestaurants[restaurantId] == true) {
+        likedRestaurants[restaurantId] = false;
+      } else {
+        likedRestaurants[restaurantId] = true;
+        dislikedRestaurants[restaurantId] = false;
+      }
+    });
+  }
+
+  void toggleDislike(String restaurantId) {
+    setState(() {
+      if (dislikedRestaurants[restaurantId] == true) {
+        dislikedRestaurants[restaurantId] = false;
+      } else {
+        dislikedRestaurants[restaurantId] = true;
+        likedRestaurants[restaurantId] = false;
+      }
+    });
+  }
+
 
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: CardSwiper(
-          cardsCount: (widget.recommendations.length / 3).ceil(),
-          cardBuilder: (context, index, _, __) {
-            int startIndex = index * 3;
-            return Column(
-              children: List.generate(3, (i) {
-                if (startIndex + i < widget.recommendations.length) {
-                  return Expanded(
-                    child: RestaurantCard(recommendation: widget.recommendations[startIndex + i]),
-                  );
+        cardsCount: (widget.recommendations.length / 3).ceil(),
+        cardBuilder: (context, index, _, __) {
+          int startIndex = index * 3;
+          return Column(
+            children: List.generate(3, (i) {
+              if (startIndex + i < widget.recommendations.length) {
+                Restaurant restaurant = widget.recommendations[startIndex + i];
+                return Expanded(
+                  child: RestaurantCard(
+                    restaurant: restaurant,
+                    isLiked: likedRestaurants[restaurant.id] ?? false,
+                    isDisliked: dislikedRestaurants[restaurant.id] ?? false,
+                    onLike: () => toggleLike(restaurant.id),
+                    onDislike: () => toggleDislike(restaurant.id),
+                  ),
+                );
                 } else {
                   return const Expanded(child: SizedBox());
                 }
@@ -103,18 +136,31 @@ class _RestaurantSuggestionsPageState extends State<RestaurantSuggestionsPage> {
 }
 
 class RestaurantCard extends StatelessWidget {
-  final Map<String, dynamic> recommendation;
+  final Restaurant restaurant;
+  final bool isLiked;
+  final bool isDisliked;
+  final VoidCallback onLike;
+  final VoidCallback onDislike;
 
-  const RestaurantCard({super.key, required this.recommendation});
+  const RestaurantCard({
+    super.key,
+    required this.restaurant,
+    required this.isLiked,
+    required this.isDisliked,
+    required this.onLike,
+    required this.onDislike,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => RestaurantDetailsPage(recommendation: recommendation),
+            builder: (context) => RestaurantDetailsPage(restaurant: restaurant),
           ),
         );
       },
@@ -127,9 +173,11 @@ class RestaurantCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.network(
-              recommendation['image_url'] ?? 'https://via.placeholder.com/150',
+            CachedNetworkImage(
+              imageUrl: restaurant.imageUrl,
               fit: BoxFit.cover,
+              placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
             ),
             Container(
               decoration: BoxDecoration(
@@ -141,39 +189,62 @@ class RestaurantCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 16),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Text(
-                    recommendation['name'] ?? 'Unknown',
+                    restaurant.name,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 24,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 2),
                   Row(
                     children: [
-                      const Icon(Icons.star, color: Colors.yellow, size: 20),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${recommendation['rating'] ?? 'N/A'}',
-                        style: const TextStyle(color: Colors.white),
+                      GestureDetector(
+                        onTap: onDislike,
+                        child: Icon(
+                          isDisliked ? Icons.thumb_down : Icons.thumb_down_outlined,
+                          color: const Color.fromARGB(255, 183, 236, 236),
+                          size: 28,
+                        ),
                       ),
-                      const SizedBox(width: 16),
-                      const Icon(Icons.access_time, color: Colors.white, size: 20),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${recommendation['eta'] ?? 'N/A'}',
-                        style: const TextStyle(color: Colors.white),
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.star_rounded, color: Color.fromARGB(255, 183, 236, 236), size: 28),
+                            SizedBox(width: screenWidth/50),
+                            Text(
+                              '${restaurant.rating ?? 'N/A'}',
+                              style: const TextStyle(color: Colors.white, fontSize: 18),
+                            ),
+                            SizedBox(width: screenWidth/25),
+                            const Icon(Icons.access_time, color: Color.fromARGB(255, 183, 236, 236), size: 28),
+                            SizedBox(width: screenWidth/70),
+                            Text(
+                              restaurant.getFormattedEta(),
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            SizedBox(width: screenWidth/40),
+                            Text(
+                              restaurant.price ?? 'N/A',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        ),
                       ),
-                      const Spacer(),
-                      Text(
-                        _getPriceString(recommendation['price']),
-                        style: const TextStyle(color: Colors.white),
+                      GestureDetector(
+                        onTap: onLike,
+                        child: Icon(
+                          isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
+                          color: const Color.fromARGB(255, 183, 236, 236),
+                          size: 28,
+                        ),
                       ),
                     ],
                   ),
@@ -185,72 +256,87 @@ class RestaurantCard extends StatelessWidget {
       ),
     );
   }
-
-  String _getPriceString(String? price) {
-    if (price == null) return 'N/A';
-    return '\$' * price.length;
-  }
 }
 
-class RestaurantDetailsPage extends StatelessWidget {
-  final Map<String, dynamic> recommendation;
+// class RestaurantDetailsPage extends StatelessWidget {
+//   final Restaurant restaurant;
 
-  const RestaurantDetailsPage({super.key, required this.recommendation});
+//   const RestaurantDetailsPage({super.key, required this.restaurant});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(recommendation['name'] ?? 'Restaurant Details'),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image carousel
-            SizedBox(
-              height: 200,
-              child: PageView.builder(
-                itemCount: recommendation['images']?.length ?? 1,
-                itemBuilder: (context, index) {
-                  return Image.network(
-                    recommendation['images']?[index] ?? recommendation['image_url'] ?? 'https://via.placeholder.com/150',
-                    fit: BoxFit.cover,
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    recommendation['name'] ?? 'Unknown',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Color.fromARGB(255, 183, 236, 236)),
-                      Text('${recommendation['rating'] ?? 'N/A'} (${recommendation['review_count'] ?? 0} reviews)'),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text('Distance: ${recommendation['distance'] ?? 'N/A'}'),
-                  Text('Hours: ${recommendation['hours'] ?? 'N/A'}'),
-                  Text('Status: ${recommendation['is_open'] ? 'Open' : 'Closed'}'),
-                  const SizedBox(height: 16),
-                  Text(
-                    recommendation['description'] ?? 'No description available.',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text(restaurant.name),
+//       ),
+//       body: SingleChildScrollView(
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             // Image carousel
+//             SizedBox(
+//               height: 200,
+//               child: PageView.builder(
+//                 itemCount: restaurant.additionalImages?.length ?? 1,
+//                 itemBuilder: (context, index) {
+//                   return Image.network(
+//                     restaurant.additionalImages?[index] ?? restaurant.imageUrl,
+//                     fit: BoxFit.cover,
+//                     errorBuilder: (context, error, stackTrace) {
+//                       return Image.network(
+//                         'https://via.placeholder.com/150',
+//                         fit: BoxFit.cover,
+//                       );
+//                     },
+//                   );
+//                 },
+//               ),
+//             ),
+//             Padding(
+//               padding: const EdgeInsets.all(16.0),
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   Text(
+//                     restaurant.name,
+//                     style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+//                   ),
+//                   const SizedBox(height: 8),
+//                   Row(
+//                     children: [
+//                       const Icon(Icons.star, color: Colors.yellow),
+//                       Text('${restaurant.rating} (${restaurant.reviewCount} reviews)'),
+//                     ],
+//                   ),
+//                   const SizedBox(height: 8),
+//                   Text('Distance: ${restaurant.getFormattedDistance()}'),
+//                   Text('Hours: ${restaurant.businessHours != null ? restaurant.businessHours!.entries.map((e) => '${e.key}: ${e.value}').join(', ') : 'N/A'}'),
+//                   Text('Status: ${restaurant.isClosed ? 'Closed' : 'Open'}'),
+//                   const SizedBox(height: 16),
+//                   Text(
+//                     restaurant.description ?? 'No description available.',
+//                     style: const TextStyle(fontSize: 16),
+//                   ),
+//                   if (restaurant.menuUrl != null)
+//                     ElevatedButton(
+//                       onPressed: () {
+//                         // Implement menu opening logic here
+//                       },
+//                       child: const Text('View Menu'),
+//                     ),
+//                   if (restaurant.reservationUrl != null)
+//                     ElevatedButton(
+//                       onPressed: () {
+//                         // Implement reservation logic here
+//                       },
+//                       child: const Text('Make Reservation'),
+//                     ),
+//                 ],
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
