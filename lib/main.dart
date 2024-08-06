@@ -10,6 +10,7 @@ import 'package:blink_v1/services/LocationService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_directions_api/google_directions_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
@@ -29,6 +30,9 @@ Future<void> main() async { //Link supabase to the project
   // Initialize location services
   final locationService = LocationService();
   await locationService.initializeLocationServices();
+
+  final googleApiKey = dotenv.env['GOOGLE_API_KEY'];
+  DirectionsService.init(googleApiKey!);
   
   runApp(MyApp());
 }

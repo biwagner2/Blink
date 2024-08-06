@@ -23,6 +23,11 @@ class _RestaurantSuggestionsPageState extends State<RestaurantSuggestionsPage> {
   Map<String, bool> likedRestaurants = {};
   Map<String, bool> dislikedRestaurants = {};
 
+  @override
+  void initState() {
+    super.initState();
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -133,7 +138,7 @@ class _RestaurantSuggestionsPageState extends State<RestaurantSuggestionsPage> {
   }
 }
 
-class RestaurantCard extends StatelessWidget {
+class RestaurantCard extends StatefulWidget {
   final Restaurant restaurant;
   final bool isLiked;
   final bool isDisliked;
@@ -150,6 +155,19 @@ class RestaurantCard extends StatelessWidget {
   });
 
   @override
+  _RestaurantCardState createState() => _RestaurantCardState();
+}
+
+class _RestaurantCardState extends State<RestaurantCard> {
+ // late Future<String> _etaFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    //_etaFuture = widget.restaurant.getFormattedEta();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -158,7 +176,7 @@ class RestaurantCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => RestaurantDetailsPage(restaurant: restaurant),
+            builder: (context) => RestaurantDetailsPage(restaurant: widget.restaurant),
           ),
         );
       },
@@ -172,7 +190,7 @@ class RestaurantCard extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             CachedNetworkImage(
-              imageUrl: restaurant.imageUrl,
+              imageUrl: widget.restaurant.imageUrl,
               fit: BoxFit.cover,
               placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
               errorWidget: (context, url, error) => const Icon(Icons.error),
@@ -193,7 +211,7 @@ class RestaurantCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Text(
-                    restaurant.name,
+                    widget.restaurant.name,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 22,
@@ -204,9 +222,9 @@ class RestaurantCard extends StatelessWidget {
                   Row(
                     children: [
                       GestureDetector(
-                        onTap: onDislike,
+                        onTap: widget.onDislike,
                         child: Icon(
-                          isDisliked ? Icons.thumb_down : Icons.thumb_down_outlined,
+                          widget.isDisliked ? Icons.thumb_down : Icons.thumb_down_outlined,
                           color: const Color.fromARGB(255, 183, 236, 236),
                           size: 28,
                         ),
@@ -218,28 +236,28 @@ class RestaurantCard extends StatelessWidget {
                             const Icon(Icons.star_rounded, color: Color.fromARGB(255, 183, 236, 236), size: 28),
                             SizedBox(width: screenWidth/50),
                             Text(
-                              '${restaurant.rating ?? 'N/A'}',
+                              '${widget.restaurant.rating ?? 'N/A'}',
                               style: const TextStyle(color: Colors.white, fontSize: 18),
                             ),
                             SizedBox(width: screenWidth/25),
                             const Icon(Icons.access_time, color: Color.fromARGB(255, 183, 236, 236), size: 28),
                             SizedBox(width: screenWidth/70),
                             Text(
-                              restaurant.getFormattedEta(),
+                              widget.restaurant.formattedEta,
                               style: const TextStyle(color: Colors.white),
                             ),
                             SizedBox(width: screenWidth/40),
                             Text(
-                              restaurant.price ?? 'N/A',
+                              widget.restaurant.price ?? 'N/A',
                               style: const TextStyle(color: Colors.white),
                             ),
                           ],
                         ),
                       ),
                       GestureDetector(
-                        onTap: onLike,
+                        onTap: widget.onLike,
                         child: Icon(
-                          isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
+                          widget.isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
                           color: const Color.fromARGB(255, 183, 236, 236),
                           size: 28,
                         ),

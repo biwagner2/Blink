@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class LocationService {
   static final LocationService _instance = LocationService._internal();
+  Position? _cachedPosition;
+  DateTime? _lastLocationUpdate;
 
   factory LocationService() {
     return _instance;
@@ -66,6 +68,24 @@ class LocationService {
       return null;
     }
   }
+
+   Future<Position?> getCachedOrCurrentLocation() async {
+    if (_cachedPosition != null && _lastLocationUpdate != null) {
+      // Check if the cached location is less than 5 minutes old
+      if (DateTime.now().difference(_lastLocationUpdate!) < const Duration(minutes: 5)) {
+        return _cachedPosition;
+      }
+    }
+
+    // If there's no cached position or it's too old, get a new one
+    Position? newPosition = await getCurrentLocation();
+    if (newPosition != null) {
+      _cachedPosition = newPosition;
+      _lastLocationUpdate = DateTime.now();
+    }
+    return _cachedPosition;
+  }
+
 
   Future<bool> checkLocationPermissionStatus() async 
   {

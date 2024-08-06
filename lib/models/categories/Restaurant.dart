@@ -1,6 +1,6 @@
 import 'package:blink_v1/services/LocationService.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:location/location.dart';
+import 'package:google_directions_api/google_directions_api.dart';
 
 class Restaurant {
   final String id;
@@ -16,10 +16,11 @@ class Restaurant {
   final String phone;
   final double distance;
   
-  // Additional fields for detailed view
+  // Additional fields
   String? description;
   List<String>? additionalImages;
-  String? eta;
+  String? _cachedEta;
+  DateTime? _etaLastUpdated;
   Map<String, String>? businessHours;
   String? menuUrl;
   String? reservationUrl;
@@ -39,14 +40,13 @@ class Restaurant {
     required this.distance,
     this.description,
     this.additionalImages,
-    this.eta,
     this.businessHours,
     this.menuUrl,
     this.reservationUrl,
   });
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {
-    print('Restaurant: ${json['name']}, Price: ${json['price']}');
+    print('Restaurant: ${json['name']}, Price: ${json['price']}, Address: ${json['location']['display_address'].join(', ')}, Distance: ${json['distance']}');
 
     return Restaurant(
       id: json['id'],
@@ -61,26 +61,51 @@ class Restaurant {
       address: json['location']['display_address'].join(', '),
       phone: json['phone'],
       distance: json['distance'],
-
     );
   }
 
-  String getFormattedDistance() {
+ String getFormattedDistance() {
     return '${(distance / 1609.34).toStringAsFixed(1)} mi';
   }
 
-  String getFormattedEta()
-  {
-    //Every .2 miles is 1 minute of driving.
-    final miles = distance/1609.34;
-    final minutes = (miles / 0.2).ceil();
+  Future<void> calculateAndCacheEta(Position userLocation) async {
+    if (_cachedEta != null) return;
 
-    return '$minutes min';
+    try {
+      final directionsService = DirectionsService();
+      final request = DirectionsRequest(
+        origin: '${userLocation.latitude},${userLocation.longitude}',
+        destination: address,
+        travelMode: TravelMode.driving,
+      );
+
+      DirectionsResult? result;
+      DirectionsStatus? status;
+
+      await directionsService.route(request, (DirectionsResult r, DirectionsStatus? s) {
+        result = r;
+        status = s;
+      });
+
+      if (status == DirectionsStatus.ok && result!.routes!.isNotEmpty) {
+        final duration = result!.routes![0].legs![0].duration;
+        _cachedEta = duration!.text;
+      } else {
+        throw Exception('Failed to get directions: $status');
+      }
+    } catch (e) {
+      print('Error getting ETA: $e');
+      // Fallback to estimation
+      final miles = distance / 1609.34;
+      final minutes = (miles / 0.2).ceil();
+      _cachedEta = '$minutes min (est.)';
+    }
   }
 
+  String get formattedEta => _cachedEta ?? 'N/A';
+  
+}
   //Get the description of the current restaurant...
   // String getDescription() {
   //   return description ?? 'No description available';
   // }
-
-}

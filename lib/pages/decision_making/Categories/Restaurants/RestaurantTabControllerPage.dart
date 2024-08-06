@@ -98,13 +98,25 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
   }
 
   Future<void> _onBlinkButtonPressed() async {
-  if (_tabController.index == 0) {
+  if (_tabController.index == 0) 
+  {
     // Suggest tab
     recommender.clearCache(); // Clear the cache before fetching new recommendations
+    Position? userLocation = await locationService.getCachedOrCurrentLocation();
+    if (userLocation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to get location. Please try again.')),
+      );
+      return;
+    }
+    recommender.setUserLocation(userLocation);
     Future<List<Restaurant>?> recommendationsFuture = _getRecommendations();
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => ReadingMindScreen(recommendations: recommendationsFuture)),
+      MaterialPageRoute(builder: (context) => ReadingMindScreen(
+        recommendations: recommendationsFuture,
+        userLocation: userLocation,
+      )),
     );
   } else {
     // Select tab
@@ -232,29 +244,6 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
           ),
         ),
       ),
-    );
-  }
-   void _showRecommendations(List<Map<String, dynamic>> recommendations) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Restaurant Recommendations'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: recommendations.map((restaurant) => Text(restaurant['name'] as String)).toList(),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
     );
   }
 }

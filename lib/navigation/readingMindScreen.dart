@@ -3,10 +3,17 @@ import 'package:blink_v1/pages/decision_making/Categories/Restaurants/suggest/Re
 import 'package:flutter/material.dart';
 import 'dart:async';
 
+import 'package:geolocator/geolocator.dart';
+
 class ReadingMindScreen extends StatefulWidget {
   final Future<List<Restaurant>?> recommendations;
+  final Position userLocation;
 
-  const ReadingMindScreen({Key? key, required this.recommendations}) : super(key: key);
+  const ReadingMindScreen({
+    super.key, 
+    required this.recommendations,
+    required this.userLocation,
+  });
 
   @override
   _ReadingMindScreenState createState() => _ReadingMindScreenState();
@@ -23,15 +30,24 @@ class _ReadingMindScreenState extends State<ReadingMindScreen> with SingleTicker
       vsync: this,
     )..repeat();
 
-    widget.recommendations.then((restaurants) {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => RestaurantSuggestionsPage(recommendations: restaurants ?? []),
-          ),
-        );
-      }
-    });
+    _processRecommendations();
+  }
+
+  Future<void> _processRecommendations() async {
+    List<Restaurant>? restaurants = await widget.recommendations;
+    if (restaurants != null) {
+      // Calculate ETAs for all restaurants
+      await Future.wait(restaurants.map((restaurant) => 
+        restaurant.calculateAndCacheEta(widget.userLocation)
+      ));
+    }
+    if (mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => RestaurantSuggestionsPage(recommendations: restaurants ?? []),
+        ),
+      );
+    }
   }
 
   @override
