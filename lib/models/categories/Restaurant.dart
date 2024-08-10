@@ -1,6 +1,9 @@
-import 'package:blink_v1/services/LocationService.dart';
+import 'dart:convert';
+
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_directions_api/google_directions_api.dart';
+import 'package:http/http.dart' as http;
 
 class Restaurant {
   final String id;
@@ -20,7 +23,6 @@ class Restaurant {
   String? description;
   List<String>? additionalImages;
   String? _cachedEta;
-  DateTime? _etaLastUpdated;
   Map<String, String>? businessHours;
   String? menuUrl;
   String? reservationUrl;
@@ -89,7 +91,7 @@ class Restaurant {
 
       if (status == DirectionsStatus.ok && result!.routes!.isNotEmpty) {
         final duration = result!.routes![0].legs![0].duration;
-        _cachedEta = duration!.text;
+        _cachedEta = duration!.text!.replaceAll('mins', 'min');
       } else {
         throw Exception('Failed to get directions: $status');
       }
@@ -103,7 +105,77 @@ class Restaurant {
   }
 
   String get formattedEta => _cachedEta ?? 'N/A';
-  
+
+  Future<void> getDetails() async 
+  {
+    final String apiKey = dotenv.env['YELP_API_KEY'] ?? '';
+    final String baseUrl = dotenv.env['YELP_URL'] ?? '';
+    final Uri uri = Uri.parse('$baseUrl/businesses/$id');
+
+    try 
+    {
+      final response = await http.get(
+        uri,
+        headers: {'Authorization': 'Bearer $apiKey'},
+      );
+      if (response.statusCode == 200) 
+      {
+        final data = json.decode(response.body);
+        
+        // Set additional images
+        additionalImages = List<String>.from(data['photos']);
+
+        // Set business hours
+        if (data['hours'] != null && data['hours'].isNotEmpty) 
+        {
+          final openHours = data['hours'][0]['open'];
+          businessHours = {};
+          for (var hour in openHours) {
+            String day = _getDayName(hour['day']);
+            String startTime = _formatTime(hour['start']);
+            String endTime = _formatTime(hour['end']);
+            businessHours![day] = '$startTime - $endTime';
+          }
+        }
+      } else if (response.statusCode == 429) {
+        throw Exception('API rate limit exceeded. Please try again later.');
+      } 
+      else 
+      {
+        throw Exception('Failed to get details: ${response.body}');
+      }
+    } 
+    catch (e) 
+    {
+      throw Exception('Network error: $e');
+    }
+}
+
+String _getDayName(int day) {
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  return days[day];
+}
+
+String _formatTime(String time) {
+  int hours = int.parse(time.substring(0, 2));
+  String minutes = time.substring(2);
+  String period = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours == 0 ? 12 : hours;
+  return '$hours:$minutes $period';
+}
+
+  String formatReviewCount()
+  {
+    if(reviewCount > 1000)
+    {
+      return '${(reviewCount / 1000).toStringAsFixed(1)}K';
+    }
+    else
+    {
+      return '($reviewCount)';
+    }
+  }
 }
   //Get the description of the current restaurant...
   // String getDescription() {

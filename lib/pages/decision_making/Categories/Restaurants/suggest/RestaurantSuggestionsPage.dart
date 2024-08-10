@@ -159,12 +159,10 @@ class RestaurantCard extends StatefulWidget {
 }
 
 class _RestaurantCardState extends State<RestaurantCard> {
- // late Future<String> _etaFuture;
 
   @override
   void initState() {
     super.initState();
-    //_etaFuture = widget.restaurant.getFormattedEta();
   }
 
   @override
@@ -172,13 +170,49 @@ class _RestaurantCardState extends State<RestaurantCard> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => RestaurantDetailsPage(restaurant: widget.restaurant),
-          ),
+      onTap: () async {
+        // Store the context in a local variable
+        final context = this.context;
+
+        // Show a loading indicator
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return const Center(child: CircularProgressIndicator());
+          },
         );
+
+        // Wait for getDetails to complete
+        await widget.restaurant.getDetails();
+
+        // Check if the widget is still mounted
+        if (!mounted) return;
+
+        // Hide the loading indicator
+        if(context.mounted)
+        {
+          Navigator.of(context).pop();
+        }
+        else
+        {
+          return;
+        }
+
+        // Navigate to the details page
+        if(!context.mounted)
+        {
+          return;
+        }
+        else
+        {
+            Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RestaurantDetailsPage(restaurant: widget.restaurant),
+            ),
+          );
+        }
       },
       child: Card(
         margin: const EdgeInsets.all(0),

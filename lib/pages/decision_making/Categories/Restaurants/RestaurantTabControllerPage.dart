@@ -104,21 +104,28 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
     recommender.clearCache(); // Clear the cache before fetching new recommendations
     Position? userLocation = await locationService.getCachedOrCurrentLocation();
     if (userLocation == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to get location. Please try again.')),
-      );
+      if(mounted)
+      {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to get location. Please try again.')),
+        );
+      }
       return;
     }
     recommender.setUserLocation(userLocation);
     Future<List<Restaurant>?> recommendationsFuture = _getRecommendations();
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ReadingMindScreen(
-        recommendations: recommendationsFuture,
-        userLocation: userLocation,
-      )),
-    );
-  } else {
+    if(mounted)
+    {
+        Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ReadingMindScreen(
+          recommendations: recommendationsFuture,
+          userLocation: userLocation,
+        )),
+      );
+    }
+  } 
+  else {
     // Select tab
     // Implement the logic for selecting the best option from user input
     print('Selecting best option from user input');

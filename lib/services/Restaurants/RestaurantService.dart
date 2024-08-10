@@ -59,7 +59,7 @@ class YelpRestaurantService {
     'price': _convertPricing(pricing),
     'radius': _convertDistance(distance),
     'sort_by': 'best_match',
-    'limit': '10',
+    'limit': '50',
   };
 
   print(_userLocation!.latitude.toString());
@@ -154,23 +154,3 @@ class YelpRestaurantService {
     _cache.clear();
   }
 }
-
-// Future<Restaurant> getRestaurantDetails(String id) async {
-//   final uri = Uri.parse('$_baseUrl/businesses/$id');
-  
-//   try {
-//     final response = await http.get(
-//       uri,
-//       headers: {'Authorization': 'Bearer $_apiKey'},
-//     );
-
-//     if (response.statusCode == 200) {
-//       final data = json.decode(response.body);
-//       return Restaurant.fromJson(data);
-//     } else {
-//       throw Exception('Failed to get restaurant details: ${response.body}');
-//     }
-//   } catch (e) {
-//     throw Exception('Network error: $e');
-//   }
-// }

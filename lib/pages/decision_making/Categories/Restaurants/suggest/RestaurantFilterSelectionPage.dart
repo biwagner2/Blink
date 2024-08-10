@@ -18,7 +18,7 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
   String? _selectedPricing;
   String? _selectedDistance;
   String? _selectedOccasion;
-  List<String> _selectedCuisines = [];
+  final List<String> _selectedCuisines = [];
   bool _isCuisineDropdownOpen = false;
 
   double _minRating = 3.0;
@@ -112,9 +112,6 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final spacing = screenWidth * 0.05;
-    
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(

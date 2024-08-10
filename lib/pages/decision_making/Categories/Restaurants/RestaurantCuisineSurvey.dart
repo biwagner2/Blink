@@ -61,7 +61,7 @@ class _RestaurantCuisineSurveyState extends State<RestaurantCuisineSurvey> {
     );
 
     // Navigate to the RestaurantTabControllerPage
-     if (context.mounted){
+     if (mounted){
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const RestaurantTabControllerPage()),
