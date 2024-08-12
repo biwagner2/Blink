@@ -3,13 +3,15 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_directions_api/google_directions_api.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class Restaurant {
   final String id;
   final String name;
   final String imageUrl;
-  final bool isClosed;
+  bool isClosed;
   final String url;
   final int reviewCount;
   final List<String> categories;
@@ -20,7 +22,7 @@ class Restaurant {
   final double distance;
   
   // Additional fields
-  String? description;
+  String? _cachedDescription;
   List<String>? additionalImages;
   String? _cachedEta;
   Map<String, String>? businessHours;
@@ -40,7 +42,6 @@ class Restaurant {
     required this.address,
     required this.phone,
     required this.distance,
-    this.description,
     this.additionalImages,
     this.businessHours,
     this.menuUrl,
@@ -149,6 +150,7 @@ class Restaurant {
     {
       throw Exception('Network error: $e');
     }
+    isClosed = isCurrentlyClosed();
 }
 
 String _getDayName(int day) {
@@ -176,8 +178,45 @@ String _formatTime(String time) {
       return '($reviewCount)';
     }
   }
+
+
+  Future<String?> getDescription() async {
+    if (_cachedDescription != null) return _cachedDescription;
+    
+    final String? apiKey = dotenv.env['GEMINI_API_KEY'];
+    if (apiKey == null) {
+      return null;
+    }
+    String descriptionCategories = categories.join(', ');
+    final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
+    final content = [Content.text('Give me a one-sentence, elegant, and succinct description, of the following restaurant: $name located at $address. It should be no more than 191 characters in length. Here is extra information if needed: $descriptionCategories, with a rating of $rating stars and a price range of $price. ONLY use the extra information if you don\'t have enough to generate a description. Thanks!')];
+    final response = await model.generateContent(content);
+    _cachedDescription = response.text;
+    return _cachedDescription;
+  }
+
+  bool isCurrentlyClosed() {
+  if (businessHours == null) return true;
+  
+  final now = DateTime.now();
+  final currentDay = DateFormat('EEEE').format(now);
+  final currentTime = DateFormat('HH:mm').format(now);
+  
+  if (!businessHours!.containsKey(currentDay)) return true;
+  
+  final hours = businessHours![currentDay]!;
+  final times = hours.split(' - ');
+  if (times.length != 2) return true;
+  
+  final openTime = DateFormat('hh:mm a').parse(times[0]);
+  var closeTime = DateFormat('hh:mm a').parse(times[1]);
+  
+  // If closing time is earlier than opening time, it means it closes after midnight
+  if (closeTime.isBefore(openTime)) {
+    closeTime = closeTime.add(const Duration(days: 1));
+  }
+  
+  final currentDateTime = DateFormat('HH:mm').parse(currentTime);
+  return currentDateTime.isBefore(openTime) || currentDateTime.isAfter(closeTime);
 }
-  //Get the description of the current restaurant...
-  // String getDescription() {
-  //   return description ?? 'No description available';
-  // }
+}

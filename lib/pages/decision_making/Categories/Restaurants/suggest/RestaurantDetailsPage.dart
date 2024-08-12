@@ -21,6 +21,20 @@ class RestaurantDetailsPage extends StatefulWidget{
 
 class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
   int _selectedIndex = 1;
+   String? _description;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDescription();
+  }
+
+  Future<void> _loadDescription() async {
+    final description = await widget.restaurant.getDescription();
+    setState(() {
+      _description = description;
+    });
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -217,7 +231,7 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                     SizedBox(width: screenWidth / 110),
                     const Icon(Icons.circle, size: 8,),
                     SizedBox(width: screenWidth / 110),
-                    Text(widget.restaurant.businessHours?[weekday] ?? 'N/A',
+                    Text(widget.restaurant.businessHours?[weekday] ?? '*Check Hours',
                         style: const TextStyle(fontSize: 14, fontFamily: "OpenSans-Bold")
                     ),
                   ],
@@ -226,8 +240,34 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: AutoSizeText(
-                  widget.restaurant.description ?? 'Upmarket standard for Peruvian-accented Japanese fare served in a chic, happening setting.',
+                  _description ?? 'Loading description...',
                   style: const TextStyle(fontSize: 13, fontFamily: "OpenSans", height: 1.2),
+                ),
+                ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    FloatingActionButton(onPressed: () {
+                      // Implement menu opening logic here
+                    },
+                    shape: const CircleBorder(),
+                    child: const Icon(Icons.phone, color: Colors.white, size: 30,),
+                    ),
+                    FloatingActionButton(onPressed: () {
+                      // Implement menu opening logic here
+                    },
+                    shape: const CircleBorder(),
+                    child: const Icon(Icons.directions_outlined, color: Colors.white, size: 30,),
+                    ),
+                    FloatingActionButton(onPressed: () {
+                      // Implement menu opening logic here
+                    },
+                    shape: const CircleBorder(),
+                    child: const Icon(Icons.bookmark_border_rounded, color: Colors.white, size: 30,),
+                    ),
+                  ]
                 ),
               ),
               Padding(
@@ -251,10 +291,7 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                     Text('Hours: ${widget.restaurant.businessHours != null ? widget.restaurant.businessHours!.entries.map((e) => '${e.key}: ${e.value}').join(', ') : 'N/A'}'),
                     Text('Status: ${widget.restaurant.isClosed ? 'Closed' : 'Open'}'),
                     const SizedBox(height: 16),
-                    Text(
-                      widget.restaurant.description ?? 'No description available.',
-                      style: const TextStyle(fontSize: 16),
-                    ),
+                    
                     if (widget.restaurant.menuUrl != null)
                       ElevatedButton(
                         onPressed: () {

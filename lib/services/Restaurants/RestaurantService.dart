@@ -59,7 +59,7 @@ class YelpRestaurantService {
     'price': _convertPricing(pricing),
     'radius': _convertDistance(distance),
     'sort_by': 'best_match',
-    'limit': '50',
+    'limit': '10',
   };
 
   print(_userLocation!.latitude.toString());
