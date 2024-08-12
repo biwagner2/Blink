@@ -3,6 +3,7 @@ import 'package:blink_v1/navigation/customNavBar.dart';
 import 'package:blink_v1/pages/decision_making/category_selection.dart';
 import 'package:blink_v1/pages/friends/friendHub.dart';
 import 'package:blink_v1/pages/profile/profilePage.dart';
+import 'package:blink_v1/utility/labeledIconButton.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
@@ -34,6 +35,26 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
     setState(() {
       _description = description;
     });
+  }
+
+  Future<void> _handleCallPress() async {
+    final success = await widget.restaurant.makePhoneCall();
+    if (!mounted) return;
+    if (!success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not launch phone call')),
+      );
+    }
+  }
+
+  Future<void> _handleDirectionsPress() async {
+    final success = await widget.restaurant.openDirections();
+    if (!mounted) return;
+    if (!success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open directions')),
+      );
+    }
   }
 
   void _onItemTapped(int index) {
@@ -112,6 +133,7 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                     top: screenHeight/18,
                     left: screenWidth/40,
                     child: FloatingActionButton(
+                      heroTag: 'backButton',
                       elevation: 0,
                       onPressed: () => Navigator.pop(context),
                       backgroundColor: Colors.transparent,
@@ -249,25 +271,24 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    FloatingActionButton(onPressed: () {
-                      // Implement menu opening logic here
-                    },
-                    shape: const CircleBorder(),
-                    child: const Icon(Icons.phone, color: Colors.white, size: 30,),
+                    LabeledIconButton(
+                      onPressed: _handleCallPress,
+                      icon: Icons.phone,
+                      label: 'Call',
                     ),
-                    FloatingActionButton(onPressed: () {
-                      // Implement menu opening logic here
-                    },
-                    shape: const CircleBorder(),
-                    child: const Icon(Icons.directions_outlined, color: Colors.white, size: 30,),
+                    LabeledIconButton(
+                      onPressed: _handleDirectionsPress,
+                      icon: Icons.directions_outlined,
+                      label: 'Directions',
                     ),
-                    FloatingActionButton(onPressed: () {
-                      // Implement menu opening logic here
-                    },
-                    shape: const CircleBorder(),
-                    child: const Icon(Icons.bookmark_border_rounded, color: Colors.white, size: 30,),
+                    LabeledIconButton(
+                      onPressed: () {
+                        // Implement save logic here
+                      },
+                      icon: Icons.bookmark_border_rounded,
+                      label: 'Save',
                     ),
-                  ]
+                  ],
                 ),
               ),
               Padding(

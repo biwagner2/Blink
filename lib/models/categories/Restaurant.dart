@@ -6,6 +6,8 @@ import 'package:google_directions_api/google_directions_api.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:map_launcher/map_launcher.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Restaurant {
   final String id;
@@ -16,6 +18,8 @@ class Restaurant {
   final int reviewCount;
   final List<String> categories;
   final double? rating;
+  final double latitude;
+  final double longitude;
   final String? price;
   final String address;
   final String phone;
@@ -38,6 +42,8 @@ class Restaurant {
     required this.reviewCount,
     required this.categories,
     this.rating,
+    required this.latitude,
+    required this.longitude,
     required this.price,
     required this.address,
     required this.phone,
@@ -60,6 +66,8 @@ class Restaurant {
       reviewCount: json['review_count'],
       categories: (json['categories'] as List).map((c) => c['title'] as String).toList(),
       rating: json['rating'].toDouble(),
+      latitude: json['coordinates']['latitude'],
+      longitude: json['coordinates']['longitude'],
       price: json['price'],
       address: json['location']['display_address'].join(', '),
       phone: json['phone'],
@@ -195,28 +203,68 @@ String _formatTime(String time) {
     return _cachedDescription;
   }
 
-  bool isCurrentlyClosed() {
-  if (businessHours == null) return true;
-  
-  final now = DateTime.now();
-  final currentDay = DateFormat('EEEE').format(now);
-  final currentTime = DateFormat('HH:mm').format(now);
-  
-  if (!businessHours!.containsKey(currentDay)) return true;
-  
-  final hours = businessHours![currentDay]!;
-  final times = hours.split(' - ');
-  if (times.length != 2) return true;
-  
-  final openTime = DateFormat('hh:mm a').parse(times[0]);
-  var closeTime = DateFormat('hh:mm a').parse(times[1]);
-  
-  // If closing time is earlier than opening time, it means it closes after midnight
-  if (closeTime.isBefore(openTime)) {
-    closeTime = closeTime.add(const Duration(days: 1));
+  bool isCurrentlyClosed() 
+  {
+    if (businessHours == null) return true;
+    
+    final now = DateTime.now();
+    final currentDay = DateFormat('EEEE').format(now);
+    final currentTime = DateFormat('HH:mm').format(now);
+    
+    if (!businessHours!.containsKey(currentDay)) return true;
+    
+    final hours = businessHours![currentDay]!;
+    final times = hours.split(' - ');
+    if (times.length != 2) return true;
+    
+    final openTime = DateFormat('hh:mm a').parse(times[0]);
+    var closeTime = DateFormat('hh:mm a').parse(times[1]);
+    
+    // If closing time is earlier than opening time, it means it closes after midnight
+    if (closeTime.isBefore(openTime)) {
+      closeTime = closeTime.add(const Duration(days: 1));
+    }
+    
+    final currentDateTime = DateFormat('HH:mm').parse(currentTime);
+    return currentDateTime.isBefore(openTime) || currentDateTime.isAfter(closeTime);
   }
-  
-  final currentDateTime = DateFormat('HH:mm').parse(currentTime);
-  return currentDateTime.isBefore(openTime) || currentDateTime.isAfter(closeTime);
-}
+
+  Future<bool> makePhoneCall() async 
+  {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phone,
+    );
+    try {
+      if (await canLaunchUrl(launchUri)) {
+        return await launchUrl(launchUri);
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('Error making phone call: $e');
+      return false;
+    }
+  }
+
+  Future<bool> openDirections() async 
+  {
+    try {
+      final coords = Coords(latitude, longitude);
+      final availableMaps = await MapLauncher.installedMaps;
+
+      if (availableMaps.isNotEmpty) {
+        await availableMaps.first.showMarker(
+          coords: coords,
+          title: name,
+        );
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('Error opening directions: $e');
+      return false;
+    }
+  }
 }
