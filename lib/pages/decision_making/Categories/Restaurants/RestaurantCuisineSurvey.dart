@@ -28,7 +28,11 @@ class _RestaurantCuisineSurveyState extends State<RestaurantCuisineSurvey> {
         // Navigate to the Friends page
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const FriendHub()),
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) => const FriendHub(),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
         );
         break;
       case 1:
@@ -38,7 +42,11 @@ class _RestaurantCuisineSurveyState extends State<RestaurantCuisineSurvey> {
         // Navigate to the Profile page
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ProfilePage()),
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) => const ProfilePage(),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
         );
         break;
     }
@@ -188,7 +196,7 @@ class _RestaurantCuisineSurveyState extends State<RestaurantCuisineSurvey> {
               label: '',
             ),
             BottomNavigationBarItem(
-              icon: Image.asset("assets/images/blink-icon-color.png", height: 40),
+              icon: Image.asset("assets/images/blink-icon-color.png", height: 45),
               label: '',
             ),
             BottomNavigationBarItem(

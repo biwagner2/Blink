@@ -42,13 +42,21 @@ class _ProfilePageState extends State<ProfilePage> {
         // Navigate to the Friends page
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const FriendHub()),
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) => const FriendHub(),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
         );
         break;
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const CategoriesPage()),
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) => const CategoriesPage(),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
         );
         break;
       case 2:
@@ -85,7 +93,7 @@ class _ProfilePageState extends State<ProfilePage> {
               label: '',
             ),
             BottomNavigationBarItem(
-              icon: Image.asset("assets/images/blink-icon-color.png", height: 40),
+              icon: Image.asset("assets/images/blink-icon-color.png", height: 45),
               label: '',
             ),
             BottomNavigationBarItem(

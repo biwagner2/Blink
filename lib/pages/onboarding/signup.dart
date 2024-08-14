@@ -249,6 +249,7 @@ class _SignUpState extends State<SignUp> {
                           UserAttributes(
                             data: {
                               'display_name': '${firstNameController.text} ${lastNameController.text}',
+                              'first_name' : firstNameController.text
                             },
                           ),
                         );

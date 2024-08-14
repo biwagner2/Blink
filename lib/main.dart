@@ -8,6 +8,7 @@ import 'package:blink_v1/pages/onboarding/signup.dart';
 import 'package:blink_v1/pages/onboarding/splashScreen.dart';
 import 'package:blink_v1/services/LocationService.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_directions_api/google_directions_api.dart';
@@ -17,7 +18,7 @@ import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
 Future<void> main() async { //Link supabase to the project
 
-  await dotenv.load(fileName: "/Users/brianwagner/Desktop/Blink/blink_v1/.env"); // Load the .env file first
+  await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
   
   final supaApiKey = dotenv.env['SUPABASE_API_KEY'];
@@ -33,8 +34,7 @@ Future<void> main() async { //Link supabase to the project
 
   final googleApiKey = dotenv.env['GOOGLE_API_KEY'];
   DirectionsService.init(googleApiKey!);
-  
-  runApp(MyApp());
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(MyApp()));
 }
 
 class MyApp extends StatelessWidget {

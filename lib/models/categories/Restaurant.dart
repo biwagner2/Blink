@@ -197,7 +197,7 @@ String _formatTime(String time) {
     }
     String descriptionCategories = categories.join(', ');
     final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
-    final content = [Content.text('Give me a one-sentence, elegant, and succinct description, of the following restaurant: $name located at $address. It should be no more than 191 characters in length. Here is extra information if needed: $descriptionCategories, with a rating of $rating stars and a price range of $price. ONLY use the extra information if you don\'t have enough to generate a description. Thanks!')];
+    final content = [Content.text('Give me a one-sentence, elegant, and succinct description, of the following restaurant: $name located at $address. It should be no more than 150 characters in length. Here is extra information if needed: $descriptionCategories, with a rating of $rating stars and a price range of $price. ONLY use the extra information if you don\'t have enough to generate a description. Thanks!')];
     final response = await model.generateContent(content);
     _cachedDescription = response.text;
     return _cachedDescription;
@@ -235,6 +235,8 @@ String _formatTime(String time) {
       scheme: 'tel',
       path: phone,
     );
+    print("Phone number: $phone");
+    print("Launch URI: $launchUri");
     try {
       if (await canLaunchUrl(launchUri)) {
         return await launchUrl(launchUri);
@@ -265,6 +267,13 @@ String _formatTime(String time) {
     } catch (e) {
       print('Error opening directions: $e');
       return false;
+    }
+  }
+
+    Future<void> visitWebsite() async {
+      final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri)) {
+      throw Exception('Could not launch $url');
     }
   }
 }

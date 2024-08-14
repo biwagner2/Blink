@@ -12,8 +12,8 @@ class LabeledIconButton extends StatelessWidget {
     required this.onPressed,
     required this.icon,
     required this.label,
-    this.buttonSize = 45, // Default size, adjust as needed
-    this.iconSize = 30, // Default icon size, adjust as needed
+    this.buttonSize = 50, // Default size, adjust as needed
+    this.iconSize = 32, // Default icon size, adjust as needed
   });
 
   @override
@@ -38,13 +38,16 @@ class LabeledIconButton extends StatelessWidget {
           ),
         ),
         SizedBox(height: screenHeight / 200),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12.5,
-            fontWeight: FontWeight.w500,
-            color: Colors.black,
-            fontFamily: 'OpenSans',
+        GestureDetector(
+          onTap: onPressed,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+              fontFamily: 'OpenSans',
+            ),
           ),
         ),
       ],

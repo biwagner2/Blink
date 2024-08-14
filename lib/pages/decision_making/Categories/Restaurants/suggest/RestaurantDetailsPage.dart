@@ -8,6 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:blink_v1/models/categories/Restaurant.dart';
+import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 
@@ -67,14 +68,22 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
         // Navigate to the Friends page
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const FriendHub()),
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) => const FriendHub(),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
         );
         break;
       case 1:
         // Navigate to the Categories page
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const CategoriesPage()),
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) => const CategoriesPage(),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
         );
         break;
 
@@ -82,7 +91,11 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
         // Navigate to the Profile page
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ProfilePage()),
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) => const ProfilePage(),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
         );
         break;
     }
@@ -109,7 +122,7 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                   CarouselSlider(
                     carouselController: _controller,
                     options: CarouselOptions(
-                      height: screenHeight / 3.2,
+                      height: screenHeight / 3.9,
                       enlargeCenterPage: false,
                       viewportFraction: 1,
                       onPageChanged: (index, reason) {
@@ -156,7 +169,7 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                         ),
                         //Padded column with spacers to flex them out.
                         child: Padding(
-                          padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
+                          padding: const EdgeInsets.only(left: 16, right: 16, top: 12),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -267,7 +280,7 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                 ),
                 ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -292,41 +305,162 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                padding: const EdgeInsets.only(bottom: 14.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      widget.restaurant.name,
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const Icon(Icons.star, color: Colors.yellow),
-                        Text('${widget.restaurant.rating} (${widget.restaurant.reviewCount} reviews)'),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text('Distance: ${widget.restaurant.getFormattedDistance()}'),
-                    Text('Hours: ${widget.restaurant.businessHours != null ? widget.restaurant.businessHours!.entries.map((e) => '${e.key}: ${e.value}').join(', ') : 'N/A'}'),
-                    Text('Status: ${widget.restaurant.isClosed ? 'Closed' : 'Open'}'),
-                    const SizedBox(height: 16),
-                    
-                    if (widget.restaurant.menuUrl != null)
-                      ElevatedButton(
-                        onPressed: () {
-                          // Implement menu opening logic here
-                        },
-                        child: const Text('View Menu'),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.all(Radius.circular(8)),
+                        border: Border.all(color: const Color.fromRGBO(209, 209, 209, 1), width: 1.1),
                       ),
-                    if (widget.restaurant.reservationUrl != null)
-                      ElevatedButton(
-                        onPressed: () {
-                          // Implement reservation logic here
-                        },
-                        child: const Text('Make Reservation'),
+                      height: screenWidth/5,
+                      width: screenWidth/2.8,
+                      child: const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '0', //Eventually make it a counter variable. Maybe convert numbers into 1K, 21.6K format etc. 
+                            style: TextStyle(fontSize: 25, fontFamily: "OpenSans",)
+                          ),
+                          Text(
+                            'friends also saved this',
+                            style: TextStyle(fontSize: 10, fontFamily: "OpenSans", color: Color.fromRGBO(120, 120, 120, 1))
+                          )
+                        ],
                       ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                          'Hours',
+                          style: TextStyle(fontSize: 22),
+                        ),
+                        Row(
+                          children: [
+                            Text(widget.restaurant.isClosed ? 'Closed now' : 'Open',
+                                  style: TextStyle(color: widget.restaurant.isClosed ? Colors.red : Colors.green, fontSize: 14, fontFamily: "OpenSans-Bold")
+                            ),
+                            SizedBox(width: screenWidth / 110),
+                            const Icon(Icons.circle, size: 4,),
+                            SizedBox(width: screenWidth / 110),
+                            Text(widget.restaurant.businessHours?[weekday] ?? '*Check Hours',
+                                style: const TextStyle(fontSize: 14, fontFamily: "OpenSans")
+                            ),
+                          ],
+                        )
+                        ]
+                      ),
+                    ),
+                    const Spacer(),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: IconButton(onPressed: () => {}, icon: Image.asset('assets/images/icons8-arrow-right-96.png', height: screenWidth/13, width: screenWidth/13,)),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                          'Website',
+                          style: TextStyle(fontSize: 22),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              widget.restaurant.name.length > 20 ? 'https://www.yelp.com/${widget.restaurant.name.substring(0,20).replaceAll(' ', '-').toLowerCase()}' : 'https://www.yelp.com/${widget.restaurant.name.replaceAll(' ', '-').toLowerCase()}',                             
+                              style: const TextStyle(fontSize: 14, fontFamily: "OpenSans")
+                            ),
+                          ],
+                        )
+                        ]
+                      ),
+                    ),
+                    const Spacer(),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: IconButton(onPressed: widget.restaurant.visitWebsite, icon: Image.asset('assets/images/icons8-arrow-right-96.png', height: screenWidth/13, width: screenWidth/13,)),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                          'Menu',
+                          style: TextStyle(fontSize: 22),
+                        ),
+                        Row(children: [
+                            Text(
+                              '6:00 PM - 10:00 PM',
+                              style: const TextStyle(fontSize: 14, fontFamily: "OpenSans")
+                            )
+                          ],
+                        )
+                        ]
+                      ),
+                    ),
+                    const Spacer(),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: IconButton(onPressed: () => {}, icon: Image.asset('assets/images/icons8-arrow-right-96.png', height: screenWidth/13, width: screenWidth/13,)),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  children: [
+                    const Padding(
+                      padding: const EdgeInsets.only(left: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                          'Reserve',
+                          style: TextStyle(fontSize: 22),
+                        ),
+                        Row(children: [
+                            Text(
+                              '6:00 PM - 10:00 PM',
+                              style: const TextStyle(fontSize: 14, fontFamily: "OpenSans")
+                            )
+                          ],
+                        ),
+                        ]
+                      ),
+                    ),
+                    const Spacer(),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: IconButton(onPressed: () => {}, icon: Image.asset('assets/images/icons8-arrow-right-96.png', height: screenWidth/13, width: screenWidth/13,)),
+                    ),
                   ],
                 ),
               ),
@@ -342,7 +476,7 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                 label: '',
               ),
               BottomNavigationBarItem(
-                icon: Image.asset("assets/images/blink-icon-color.png", height: 40),
+                icon: Image.asset("assets/images/blink-icon-color.png", height: 45),
                 label: '',
               ),
               BottomNavigationBarItem(
