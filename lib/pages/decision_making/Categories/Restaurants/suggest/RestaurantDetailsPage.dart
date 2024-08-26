@@ -118,29 +118,48 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
             children: [
               Stack(
                 children: [
-                  CarouselSlider(
-                    carouselController: _controller,
-                    options: CarouselOptions(
-                      height: screenHeight / 3.9,
-                      enlargeCenterPage: false,
-                      viewportFraction: 1,
-                      onPageChanged: (index, reason) {
-                        setState(() {
-                          _current = index;
-                        });
-                      }),
-                    items: [ 
-                      for(int x = 0; x < widget.restaurant.additionalImages!.length; x++)
-                        CachedNetworkImage(
-                          height: screenHeight / 3.2,
-                          width: screenWidth,
-                          imageUrl: widget.restaurant.additionalImages?[x] ?? widget.restaurant.imageUrl,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
-                          errorWidget: (context, url, error) => const Icon(Icons.error),
-                        ),
-                    ],
-                  ),
+                  GestureDetector(
+                    onPanUpdate: (details) {
+                      // Swiping in right direction.
+                      if (details.delta.dx > -.5) {
+                        _controller.previousPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                      // Swiping in left direction.
+                      else if (details.delta.dx < .5) {
+                        _controller.nextPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.linearToEaseOut,
+                        );
+                      }
+                    },
+                    child: Stack(
+                      children: [
+                      CarouselSlider(
+                        carouselController: _controller,
+                        options: CarouselOptions(
+                          height: screenHeight / 3.9,
+                          enlargeCenterPage: false,
+                          viewportFraction: 1,
+                          onPageChanged: (index, reason) {
+                            setState(() {
+                              _current = index;
+                            });
+                          }),
+                        items: [ 
+                          for(int x = 0; x < widget.restaurant.additionalImages!.length; x++)
+                            CachedNetworkImage(
+                              height: screenHeight / 3.2,
+                              width: screenWidth,
+                              imageUrl: widget.restaurant.additionalImages?[x] ?? widget.restaurant.imageUrl,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                              errorWidget: (context, url, error) => const Icon(Icons.error),
+                            ),
+                        ],
+                      ),
                   Positioned(
                     top: screenHeight/18,
                     left: screenWidth/40,
@@ -158,86 +177,89 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                     left: 0,
                     right: 0,
                     child: Container(
-                        height: screenHeight / 10,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.bottomCenter,
-                            end: Alignment.topCenter,
-                            colors: [Colors.black.withOpacity(0.8), Colors.transparent],
+                          height: screenHeight / 10,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                              colors: [Colors.black.withOpacity(0.8), Colors.transparent],
+                            ),
                           ),
-                        ),
-                        //Padded column with spacers to flex them out.
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 16, right: 16, top: 12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              AutoSizeText(
-                                widget.restaurant.name,
-                                style: const TextStyle(
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                  maxLines: 1,
-                                  minFontSize: 22,
-                                  overflowReplacement: Text(widget.restaurant.name, 
-                                        style: const TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                        height: 1.1,
-                                      ),
-                                  ),
-                              ),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    flex: 3,
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          '${widget.restaurant.rating}',
-                                          style: const TextStyle(color: Colors.white, fontFamily: "OpenSans", fontSize: 15),
-                                        ),
-                                        SizedBox(width: screenWidth / 110),
-                                        const Icon(Icons.star, color: Color.fromARGB(255, 183, 236, 236), size: 20),
-                                        SizedBox(width: screenWidth / 110),
-                                        Text(
-                                          widget.restaurant.formatReviewCount(),
-                                          style: const TextStyle(color: Colors.white, fontFamily: "OpenSans-Bold", fontSize: 14, fontWeight: FontWeight.w400),
-                                        ),
-                                      ],
+                          //Padded column with spacers to flex them out.
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 16, right: 16, top: 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                AutoSizeText(
+                                  widget.restaurant.name,
+                                  style: const TextStyle(
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 4,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: widget.restaurant.additionalImages!.asMap().entries.map((entry) {
-                                        return Container(
-                                          width: 11,
-                                          height: 11,
-                                          margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: Colors.white.withOpacity(_current == entry.key ? 0.9 : 0.4),
+                                    maxLines: 1,
+                                    minFontSize: 22,
+                                    overflowReplacement: Text(widget.restaurant.name, 
+                                          style: const TextStyle(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                          height: 1.1,
+                                        ),
+                                    ),
+                                ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 3,
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            '${widget.restaurant.rating}',
+                                            style: const TextStyle(color: Colors.white, fontFamily: "OpenSans", fontSize: 15),
                                           ),
-                                        );
-                                      }).toList(),
+                                          SizedBox(width: screenWidth / 110),
+                                          const Icon(Icons.star, color: Color.fromARGB(255, 183, 236, 236), size: 20),
+                                          SizedBox(width: screenWidth / 110),
+                                          Text(
+                                            widget.restaurant.formatReviewCount(),
+                                            style: const TextStyle(color: Colors.white, fontFamily: "OpenSans-Bold", fontSize: 14, fontWeight: FontWeight.w400),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                  const Expanded(
-                                    flex: 3,
-                                    child: SizedBox(), // Empty space to balance the layout
-                                  ),
-                                ],
-                              )
-                            ]
-                          )
-                        )
-                    )
+                                    Expanded(
+                                      flex: 4,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: widget.restaurant.additionalImages!.asMap().entries.map((entry) {
+                                          return Container(
+                                            width: 11,
+                                            height: 11,
+                                            margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: Colors.white.withOpacity(_current == entry.key ? 0.9 : 0.4),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
+                                    const Expanded(
+                                      flex: 3,
+                                      child: SizedBox(), // Empty space to balance the layout
+                                    ),
+                              ],
+                                ),
+                              ],
+                            ),
+                          ),
+                    ),
                   )
+                      ],
+                    )
+                  ),
                 ],
               ),
               Padding(

@@ -51,7 +51,7 @@ class MyApp extends StatelessWidget {
         colorScheme:
             ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 183, 236, 236)),
       ),
-      home: SignUp(), // Set SplashScreen as the initial screen
+      home: CategoriesPage(), // Set SplashScreen as the initial screen
       
     );
   }
