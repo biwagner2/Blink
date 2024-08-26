@@ -1,10 +1,10 @@
-import 'package:blink_v1/navigation/customNavBar.dart';
 import 'package:blink_v1/pages/decision_making/Categories/Restaurants/RestaurantTabControllerPage.dart';
 import 'package:blink_v1/pages/friends/friendHub.dart';
 import 'package:blink_v1/pages/profile/profilePage.dart';
 import 'package:blink_v1/services/supabaseService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:blink_v1/navigation/customNavBar.dart';
 
 class RestaurantCuisineSurvey extends StatefulWidget {
   const RestaurantCuisineSurvey({super.key});

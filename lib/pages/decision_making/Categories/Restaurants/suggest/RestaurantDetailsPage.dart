@@ -8,6 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:blink_v1/models/categories/Restaurant.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
@@ -365,7 +366,28 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                     const Spacer(),
                     Padding(
                       padding: const EdgeInsets.only(right: 16),
-                      child: IconButton(onPressed: () => {}, icon: Image.asset('assets/images/icons8-arrow-right-96.png', height: screenWidth/13, width: screenWidth/13,)),
+                      child: IconButton(
+                        onPressed: () { 
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Business Hours', textAlign: TextAlign.center,),
+                                content: SingleChildScrollView(child: _buildHoursContent()),
+                                actions: [
+                                  TextButton(
+                                    child: const Text('Close', style: TextStyle(fontSize: 18)),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        icon: Image.asset('assets/images/icons8-arrow-right-96.png', height: screenWidth/13, width: screenWidth/13,),
+                      ),
                     ),
                   ],
                 ),
@@ -406,19 +428,19 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: Row(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                           'Menu',
                           style: TextStyle(fontSize: 22),
                         ),
                         Row(children: [
                             Text(
-                              '6:00 PM - 10:00 PM',
-                              style: const TextStyle(fontSize: 14, fontFamily: "OpenSans")
+                              '*Available on website',
+                              style: TextStyle(fontSize: 14, fontFamily: "OpenSans")
                             )
                           ],
                         )
@@ -428,7 +450,7 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                     const Spacer(),
                     Padding(
                       padding: const EdgeInsets.only(right: 16),
-                      child: IconButton(onPressed: () => {}, icon: Image.asset('assets/images/icons8-arrow-right-96.png', height: screenWidth/13, width: screenWidth/13,)),
+                      child: IconButton(onPressed: widget.restaurant.visitWebsite, icon: Image.asset('assets/images/icons8-arrow-right-96.png', height: screenWidth/13, width: screenWidth/13,)),
                     ),
                   ],
                 ),
@@ -438,7 +460,7 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                 child: Row(
                   children: [
                     const Padding(
-                      padding: const EdgeInsets.only(left: 16),
+                      padding: EdgeInsets.only(left: 16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -448,8 +470,8 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                         ),
                         Row(children: [
                             Text(
-                              '6:00 PM - 10:00 PM',
-                              style: const TextStyle(fontSize: 14, fontFamily: "OpenSans")
+                              'Call to reserve a table',
+                              style: TextStyle(fontSize: 14, fontFamily: "OpenSans")
                             )
                           ],
                         ),
@@ -459,7 +481,7 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                     const Spacer(),
                     Padding(
                       padding: const EdgeInsets.only(right: 16),
-                      child: IconButton(onPressed: () => {}, icon: Image.asset('assets/images/icons8-arrow-right-96.png', height: screenWidth/13, width: screenWidth/13,)),
+                      child: IconButton(onPressed: _handleCallPress, icon: Image.asset('assets/images/icons8-arrow-right-96.png', height: screenWidth/13, width: screenWidth/13,)),
                     ),
                   ],
                 ),
@@ -486,6 +508,37 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
             ],
         ),
       ),
+    );
+  }
+
+  Widget _buildHoursContent() {
+    if (widget.restaurant.businessHours == null) {
+      return const Text('No hours information available. Check with the restaurant.');
+    }
+
+    List<String> daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: daysOfWeek.map((day) {
+        String hours = widget.restaurant.businessHours![day] ?? 'Closed';
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(day, style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                hours,
+                style: TextStyle(
+                  color: hours == 'Closed' ? Colors.red : null,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 }
