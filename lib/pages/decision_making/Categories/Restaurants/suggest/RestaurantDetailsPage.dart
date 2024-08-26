@@ -8,8 +8,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:blink_v1/models/categories/Restaurant.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 
@@ -103,7 +101,7 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
   }
 
   int _current = 0;
-  final CarouselController _controller = CarouselController();
+  final _controller = CarouselSliderController();
   
   @override
   Widget build(BuildContext context) {

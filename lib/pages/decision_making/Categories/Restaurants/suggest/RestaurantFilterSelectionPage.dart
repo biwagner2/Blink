@@ -39,10 +39,10 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
 
   void _toggleCuisineSelection(String cuisine) {
     setState(() {
-      if (_selectedCuisines.contains(cuisine.toLowerCase())) {
-        _selectedCuisines.remove(cuisine.toLowerCase());
+      if (_selectedCuisines.contains(cuisine)) {
+        _selectedCuisines.remove(cuisine);
       } else {
-        _selectedCuisines.add(cuisine.toLowerCase());
+        _selectedCuisines.add(cuisine);
       }
     });
     _updateFilters();
