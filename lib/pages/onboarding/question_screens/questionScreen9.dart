@@ -14,7 +14,7 @@ class QuestionScreen9 extends StatelessWidget
     int index = int.parse(pageNum);
     String question = OnboardingQuestion.questions[index-1];
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 41, 41, 41),
+      backgroundColor: const Color.fromARGB(255, 41, 41, 41),
       body: Center(
         child: Column(
           children: [

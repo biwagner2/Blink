@@ -124,17 +124,17 @@ class IntroScreen4 extends StatelessWidget{
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => transitionScreen1()),
+                  MaterialPageRoute(builder: (context) => const transitionScreen1()),
                   );
               },
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(const Color.fromARGB(255, 183, 236, 236)),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                backgroundColor: WidgetStateProperty.all<Color>(const Color.fromARGB(255, 183, 236, 236)),
+                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                          RoundedRectangleBorder(
                            borderRadius: BorderRadius.circular(50),
                           ),
               ),
-              minimumSize: MaterialStateProperty.all(const Size(365, 50)), // Set minimum width
+              minimumSize: WidgetStateProperty.all(const Size(365, 50)), // Set minimum width
             ), 
               child: const Text(
                 "Continue",

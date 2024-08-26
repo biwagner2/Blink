@@ -19,7 +19,7 @@ class transitionScreen2 extends StatelessWidget{
 
     return const PopScope(
       canPop: false,
-      child: const Scaffold(
+      child: Scaffold(
         backgroundColor: Color.fromARGB(255, 41, 41, 41),
         body: Column(
           children: [
