@@ -16,7 +16,7 @@ class SupabaseService {
   }
 
     Future<String> getUserId() async {
-    final user = await supabase.auth.currentUser;
+    final user = supabase.auth.currentUser;
     return user?.id ?? '';
   }
 

@@ -1,12 +1,17 @@
+import 'package:blink_v1/models/categories/Restaurant.dart';
 import 'package:blink_v1/navigation/blinkButton.dart';
 import 'package:blink_v1/navigation/customNavBar.dart';
+import 'package:blink_v1/navigation/readingMindScreen.dart';
 import 'package:blink_v1/pages/decision_making/Categories/Restaurants/select/RestaurantInputPage.dart';
 import 'package:blink_v1/pages/decision_making/Categories/Restaurants/suggest/RestaurantFilterSelectionPage.dart';
 import 'package:blink_v1/pages/decision_making/category_selection.dart';
 import 'package:blink_v1/pages/friends/friendHub.dart';
 import 'package:blink_v1/pages/profile/profilePage.dart';
+import 'package:blink_v1/services/LocationService.dart';
+import 'package:blink_v1/services/Restaurants/RestaurantService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:geolocator/geolocator.dart';
 
 class RestaurantTabControllerPage extends StatefulWidget {
 
@@ -16,8 +21,42 @@ class RestaurantTabControllerPage extends StatefulWidget {
   _RestaurantTabControllerPageState createState() => _RestaurantTabControllerPageState();
 }
 
-class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPage> {
+class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPage> with SingleTickerProviderStateMixin {
   int _selectedIndex = 1;
+   final recommender = YelpRestaurantService();
+  final locationService = LocationService();
+  Map<String, dynamic> _filterData = {};
+  late TabController _tabController;
+
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _getCurrentLocation();
+  }
+  
+   Future<void> _getCurrentLocation() async
+   {
+      Position? position = await locationService.getCurrentLocation();
+      position ??= await locationService.getLastKnownPosition();
+      if (position != null) {
+        setState(() {
+        });
+        recommender.setUserLocation(position);
+        print('Location: ${position.latitude}, ${position.longitude}');
+      } else {
+        print('Failed to get location');
+        // Handle the error, maybe show a message to the user
+      }
+    }
+
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -29,14 +68,22 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
         // Navigate to the Friends page
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const FriendHub()),
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) => const FriendHub(),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
         );
         break;
       case 1:
         // Navigate to the Categories page
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const CategoriesPage()),
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) => const CategoriesPage(),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
         );
         break;
 
@@ -44,11 +91,77 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
         // Navigate to the Profile page
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ProfilePage()),
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) => const ProfilePage(),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
         );
         break;
     }
   }
+
+  void _handleFilterData(Map<String, dynamic> data) 
+  {
+    setState(() {
+      _filterData = data;
+    });
+    print('Updated filter data: $_filterData');
+  }
+
+  Future<void> _onBlinkButtonPressed() async {
+  if (_tabController.index == 0) 
+  {
+    // Suggest tab
+    recommender.clearCache(); // Clear the cache before fetching new recommendations
+    Position? userLocation = await locationService.getCachedOrCurrentLocation();
+    if (userLocation == null) {
+      if(mounted)
+      {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to get location. Please try again.')),
+        );
+      }
+      return;
+    }
+    recommender.setUserLocation(userLocation);
+    Future<List<Restaurant>?> recommendationsFuture = _getRecommendations();
+    if(mounted)
+    {
+        Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ReadingMindScreen(
+          recommendations: recommendationsFuture,
+          userLocation: userLocation,
+        )),
+      );
+    }
+  } 
+  else {
+    // Select tab
+    // Implement the logic for selecting the best option from user input
+    print('Selecting best option from user input');
+  }
+}
+
+
+  Future<List<Restaurant>?> _getRecommendations() async {
+  try {
+    return await recommender.getRestaurantRecommendations(
+      cuisines: _filterData['cuisines'],
+      occasion: _filterData['occasion'],
+      pricing: _filterData['pricing'],
+      distance: _filterData['distance'],
+      rating: _filterData['minRating'],
+    );
+  } catch (e) {
+    print('Error: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error getting recommendations: $e')),
+    );
+    return [];
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +173,7 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
       length: 2,
       initialIndex: 0,  
       child: PopScope(
-        canPop: false,
+        canPop: true,
         child: Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
@@ -71,10 +184,7 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
               icon: const Icon(Icons.chevron_left_rounded, color: Colors.black),
               iconSize: iconSize,
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const CategoriesPage()),
-                );
+                Navigator.pop(context);
               },
             ),
             leadingWidth: iconSize + 8,
@@ -112,31 +222,21 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
               ),
             ),
           ),
-          body: const TabBarView(
-            physics: NeverScrollableScrollPhysics(),
+          body: TabBarView(
+            physics: const NeverScrollableScrollPhysics(),
             children: [
-              RestaurantFilterSelectionPage(),
-              RestaurantInputPage(),
+              RestaurantFilterSelectionPage(onFilterChanged: _handleFilterData),
+              const RestaurantInputPage(),
             ],
           ),
           floatingActionButton: FloatingActionButton.large(
             elevation: 0,
             backgroundColor: Colors.transparent,
-            onPressed:  () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CategoriesPage()),
-              );
-            },
+            onPressed:  () {},
             child: 
             BlinkButton(
               isEnlarged: true,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const CategoriesPage()),
-                );
-              },
+              onTap: _onBlinkButtonPressed,
             ),
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

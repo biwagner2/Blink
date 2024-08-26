@@ -32,6 +32,12 @@ class _BlinkButtonState extends State<BlinkButton> with SingleTickerProviderStat
     }
   }
 
+   @override
+  void dispose() {
+    _animationController.dispose(); // Dispose the controller
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(

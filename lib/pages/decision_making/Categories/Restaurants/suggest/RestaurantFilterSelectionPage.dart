@@ -1,12 +1,12 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 
 class RestaurantFilterSelectionPage extends StatefulWidget {
-  const RestaurantFilterSelectionPage({super.key});
+  final Function(Map<String, dynamic>) onFilterChanged;
+
+  const RestaurantFilterSelectionPage({super.key, required this.onFilterChanged});
 
   @override
   _RestaurantFilterSelectionPageState createState() => _RestaurantFilterSelectionPageState();
@@ -18,7 +18,7 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
   String? _selectedPricing;
   String? _selectedDistance;
   String? _selectedOccasion;
-  List<String> _selectedCuisines = [];
+  final List<String> _selectedCuisines = [];
   bool _isCuisineDropdownOpen = false;
 
   double _minRating = 3.0;
@@ -45,12 +45,14 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
         _selectedCuisines.add(cuisine);
       }
     });
+    _updateFilters();
   }
 
   void _removeCuisine(String cuisine) {
     setState(() {
       _selectedCuisines.remove(cuisine);
     });
+    _updateFilters();
   }
 
   @override
@@ -68,6 +70,7 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
         _selectedOccasion = occasion;
       }
     });
+    _updateFilters();
   }
 
   void _selectPricing(String pricing) {
@@ -80,6 +83,7 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
         _selectedPricing = pricing;
       }
     });
+    _updateFilters();
   }
 
   void _selectDistance(String distance) {
@@ -92,13 +96,22 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
         _selectedDistance = distance;
       }
     });
+    _updateFilters();
+  }
+
+   void _updateFilters() {
+    widget.onFilterChanged({
+      'cuisines': _selectedCuisines,
+      'occasion': _selectedOccasion,
+      'pricing': _selectedPricing,
+      'distance': _selectedDistance,
+      'minRating': _minRating,
+      'maxRating': _maxRating,
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final spacing = screenWidth * 0.05;
-    
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -366,7 +379,7 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      cuisine,
+                      cuisine.substring(0,1).toUpperCase() + cuisine.substring(1),
                       style: const TextStyle(
                         fontSize: 14,
                         color: Color.fromARGB(255, 101, 101, 101),
@@ -393,10 +406,19 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
 }
 
 
-  Widget _buildRatingsBottomSheet() {
-    String formatRating(double rating) {
-      return (rating % 1 == 0) ? rating.toStringAsFixed(0) : rating.toStringAsFixed(1);
+ Widget _buildRatingsBottomSheet() {
+  String formatRating(double rating) {
+    return (rating % 1 == 0) ? rating.toStringAsFixed(0) : rating.toStringAsFixed(1);
+  }
+
+  String getRatingDisplay() {
+    if (_minRating == _maxRating) {
+      return formatRating(_minRating);
+    } else {
+      return "${formatRating(_minRating)} - ${formatRating(_maxRating)}";
     }
+  }
+
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -422,7 +444,7 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
               ),
               _isRatingsSelected
                   ? Text(
-                      "${formatRating(_minRating)} - ${formatRating(_maxRating)}",
+                      getRatingDisplay(),
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -436,10 +458,10 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
                       ),
                     ),
               const Icon(
-                  Icons.keyboard_arrow_up,
-                  color: Colors.black,
-                  size: 32,
-                ),
+                Icons.keyboard_arrow_up,
+                color: Colors.black,
+                size: 32,
+              ),
             ],
           ),
         ),
