@@ -110,7 +110,7 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
     final weekday = DateFormat('EEEE').format(DateTime.now());
     
     return PopScope(
-      canPop: false,
+      canPop: true,
       child: Scaffold(
         body: SingleChildScrollView(
           child: Column(
