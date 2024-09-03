@@ -1,3 +1,4 @@
+import 'package:blink_v1/services/Movies/TMDBMovieService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:blink_v1/models/categories/Movie.dart';
@@ -9,7 +10,7 @@ import 'package:blink_v1/pages/decision_making/Categories/Movies/suggest/MovieFi
 import 'package:blink_v1/pages/decision_making/category_selection.dart';
 import 'package:blink_v1/pages/friends/friendHub.dart';
 import 'package:blink_v1/pages/profile/profilePage.dart';
-//import 'package:blink_v1/services/Movies/MovieService.dart';
+
 
 class MovieTabControllerPage extends StatefulWidget {
   const MovieTabControllerPage({Key? key}) : super(key: key);
@@ -86,12 +87,13 @@ class _MovieTabControllerPageState extends State<MovieTabControllerPage> with Si
     if (_tabController.index == 0) {
       recommender.clearCache();
       Future<List<Movie>> recommendationsFuture = _getRecommendations();
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => ReadingMindScreen(
-      //     recommendations: recommendationsFuture,
-      //   )),
-      // );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ReadingMindScreen(
+          recommendations: recommendationsFuture,
+          category: 'Movies',
+        )),
+      );
     } else {
       print('Selecting best option from user input');
     }

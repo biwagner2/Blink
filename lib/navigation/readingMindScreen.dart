@@ -1,25 +1,42 @@
-import 'package:blink_v1/models/categories/Restaurant.dart';
-import 'package:blink_v1/pages/decision_making/Categories/Restaurants/suggest/RestaurantSuggestionsPage.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
-
 import 'package:geolocator/geolocator.dart';
 
-class ReadingMindScreen extends StatefulWidget {
-  final Future<List<Restaurant>?> recommendations;
-  final Position userLocation;
+// Import all category models
+import 'package:blink_v1/models/categories/Restaurant.dart';
+import 'package:blink_v1/models/categories/Movie.dart';
+// import 'package:blink_v1/models/categories/Recipe.dart';
+// import 'package:blink_v1/models/categories/Book.dart';
+// import 'package:blink_v1/models/categories/Outfit.dart';
+// import 'package:blink_v1/models/categories/College.dart';
+
+// Import all suggestion pages
+import 'package:blink_v1/pages/decision_making/Categories/Restaurants/suggest/RestaurantSuggestionsPage.dart';
+import 'package:blink_v1/pages/decision_making/Categories/Movies/suggest/MovieSuggestionsPage.dart';
+// import 'package:blink_v1/pages/decision_making/Categories/Recipes/suggest/RecipeSuggestionsPage.dart';
+// import 'package:blink_v1/pages/decision_making/Categories/Books/suggest/BookSuggestionsPage.dart';
+// import 'package:blink_v1/pages/decision_making/Categories/Outfits/suggest/OutfitSuggestionsPage.dart';
+// import 'package:blink_v1/pages/decision_making/Categories/Colleges/suggest/CollegeSuggestionsPage.dart';
+
+class ReadingMindScreen<T> extends StatefulWidget {
+  final Future<List<T>?> recommendations;
+  final Position? userLocation;
+  final String category;
+  final Future<void> Function(List<T>, Position?)? processRecommendations;
 
   const ReadingMindScreen({
     super.key, 
     required this.recommendations,
-    required this.userLocation,
+    this.userLocation,
+    required this.category,
+    this.processRecommendations,
   });
 
   @override
-  _ReadingMindScreenState createState() => _ReadingMindScreenState();
+  _ReadingMindScreenState<T> createState() => _ReadingMindScreenState<T>();
 }
 
-class _ReadingMindScreenState extends State<ReadingMindScreen> with SingleTickerProviderStateMixin {
+class _ReadingMindScreenState<T> extends State<ReadingMindScreen<T>> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -34,19 +51,35 @@ class _ReadingMindScreenState extends State<ReadingMindScreen> with SingleTicker
   }
 
   Future<void> _processRecommendations() async {
-    List<Restaurant>? restaurants = await widget.recommendations;
-    if (restaurants != null) {
-      // Calculate ETAs for all restaurants
-      await Future.wait(restaurants.map((restaurant) => 
-        restaurant.calculateAndCacheEta(widget.userLocation)
-      ));
+    List<T>? items = await widget.recommendations;
+    if (items != null && widget.processRecommendations != null) {
+      await widget.processRecommendations!(items, widget.userLocation);
     }
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => RestaurantSuggestionsPage(recommendations: restaurants ?? []),
+          builder: (context) => _buildSuggestionsPage(items ?? []),
         ),
       );
+    }
+  }
+
+  Widget _buildSuggestionsPage(List<T> items) {
+    switch (widget.category) {
+      case 'Restaurants':
+        return RestaurantSuggestionsPage(recommendations: items as List<Restaurant>);
+      case 'Movies':
+        return MovieSuggestionsPage(recommendations: items as List<Movie>);
+      case 'Recipes':
+       // return RecipeSuggestionsPage(recommendations: items as List<Recipe>);
+      case 'Books':
+       // return BookSuggestionsPage(recommendations: items as List<Book>);
+      case 'Outfits':
+       // return OutfitSuggestionsPage(recommendations: items as List<Outfit>);
+      case 'Colleges':
+       // return CollegeSuggestionsPage(recommendations: items as List<College>);
+      default:
+        throw Exception('Unknown category: ${widget.category}');
     }
   }
 

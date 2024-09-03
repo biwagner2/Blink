@@ -129,13 +129,22 @@ class _RestaurantTabControllerPageState extends State<RestaurantTabControllerPag
     if(mounted)
     {
         Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ReadingMindScreen(
-          recommendations: recommendationsFuture,
-          userLocation: userLocation,
-          //category: "Restaurants",
-        )),
-      );
+  context,
+  MaterialPageRoute(
+    builder: (context) => ReadingMindScreen<Restaurant>(
+      recommendations: recommendationsFuture,
+      userLocation: userLocation,
+      category: 'Restaurants',
+      processRecommendations: (restaurants, location) async {
+        if (location != null) {
+          await Future.wait(restaurants.map((restaurant) => 
+            restaurant.calculateAndCacheEta(location)
+          ));
+        }
+      },
+    ),
+  ),
+);
     }
   } 
   else {
