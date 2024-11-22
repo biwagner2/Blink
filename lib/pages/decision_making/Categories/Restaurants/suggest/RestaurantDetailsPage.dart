@@ -1,5 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:blink_v1/navigation/blinkButton.dart';
 import 'package:blink_v1/navigation/customNavBar.dart';
+import 'package:blink_v1/pages/decision_making/Categories/selectionPage.dart';
 import 'package:blink_v1/pages/decision_making/category_selection.dart';
 import 'package:blink_v1/pages/friends/friendHub.dart';
 import 'package:blink_v1/pages/profile/profilePage.dart';
@@ -17,7 +19,7 @@ class RestaurantDetailsPage extends StatefulWidget{
   const RestaurantDetailsPage({super.key, required this.restaurant});
 
   @override
-  _RestaurantDetailsPageState createState() => _RestaurantDetailsPageState();
+  State<RestaurantDetailsPage> createState() => _RestaurantDetailsPageState();
 }
 
 class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
@@ -112,6 +114,17 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
     return PopScope(
       canPop: true,
       child: Scaffold(
+        floatingActionButton: FloatingActionButton.large(
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            onPressed:  () {},
+            child: 
+            BlinkButton(
+              isEnlarged: true,
+              onTap: _onBlinkButtonPressed,
+            ),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -518,7 +531,7 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                 label: '',
               ),
               BottomNavigationBarItem(
-                icon: Image.asset("assets/images/blink-icon-color.png", height: 45),
+                icon: Image.asset("assets/images/blink-icon-color.png", height: 0),
                 label: '',
               ),
               BottomNavigationBarItem(
@@ -559,6 +572,17 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
           ),
         );
       }).toList(),
+    );
+  }
+
+  void _onBlinkButtonPressed() {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation1, animation2) => SelectionPage(widget.restaurant.name),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
     );
   }
 }

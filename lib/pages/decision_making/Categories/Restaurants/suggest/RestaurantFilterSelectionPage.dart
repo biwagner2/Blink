@@ -214,8 +214,9 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
       onTap: () => _selectOccasion(occasion),
       child: Container(
         decoration: BoxDecoration(
-          border: isSelected ? Border.all(color: Colors.black) : Border.all(color: Colors.transparent),
+          //border: isSelected ? Border.all(color: Colors.black) : Border.all(color: Colors.transparent),
           borderRadius: BorderRadius.circular(20),
+          color: isSelected ? const Color.fromARGB(255, 183, 236, 236) : Colors.white,
         ),
         width: 130,
         margin: const EdgeInsets.only(right: 5, bottom: 15),
@@ -246,7 +247,7 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? const Color.fromARGB(255, 183, 236, 236) : Colors.white,
-          border: Border.all(color: Colors.black),
+          border: isSelected ? Border.all(color: Colors.transparent): Border.all(color: Colors.black),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
@@ -269,7 +270,7 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? const Color.fromARGB(255, 183, 236, 236) : Colors.white,
-          border: Border.all(color: Colors.black),
+          border: isSelected ? Border.all(color: Colors.transparent): Border.all(color: Colors.black),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
@@ -428,17 +429,18 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
           padding: const EdgeInsets.only(left: 8, top: 8, bottom: 8),
           width: MediaQuery.of(context).size.width / 2.1,
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.black),
+            border: _isRatingsSelected ? Border.all(color: Colors.transparent) : Border.all(color: Colors.black),
             borderRadius: BorderRadius.circular(25),
+            color: _isRatingsSelected ? const Color.fromARGB(255, 183, 236, 236) : Colors.white,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Container(
                 margin:  const EdgeInsets.only(bottom: 5),
-                child:  const Icon(
+                child: Icon(
                   Icons.star_rate_rounded,
-                  color: Color.fromARGB(255, 183, 236, 236),
+                  color: _isRatingsSelected ? Colors.black : const Color.fromARGB(255, 183, 236, 236),
                   size: 33,
                 ),
               ),
@@ -458,7 +460,7 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
                       ),
                     ),
               const Icon(
-                Icons.keyboard_arrow_up,
+                Icons.keyboard_arrow_down,
                 color: Colors.black,
                 size: 32,
               ),

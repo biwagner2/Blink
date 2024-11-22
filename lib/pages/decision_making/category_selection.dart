@@ -514,5 +514,3 @@ class _CategoriesPageState extends State<CategoriesPage> {
     return null;
   }
 }
-
-//TO DO: Make it so search suggestions only cover part of the screen.
