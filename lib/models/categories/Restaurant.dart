@@ -196,7 +196,7 @@ String _formatTime(String time) {
       return null;
     }
     String descriptionCategories = categories.join(', ');
-    final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
+    final model = GenerativeModel(model: 'gemini-1.5-flash-8b', apiKey: apiKey);
     final content = [Content.text('Give me a one-sentence, elegant, and succinct description, of the following restaurant: $name located at $address. It should be no more than 150 characters in length. Here is extra information if needed: $descriptionCategories, with a rating of $rating stars and a price range of $price. ONLY use the extra information if you don\'t have enough to generate a description. Thanks!')];
     final response = await model.generateContent(content);
     _cachedDescription = response.text;
