@@ -13,7 +13,8 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> 
 {
-    bool signedIn = false;
+    bool signedIn = false; //need to make it so that if a user is signed in on device 
+                           //they are taken to Categories Page.
 
    @override
   void initState() {
@@ -58,7 +59,6 @@ class _SplashScreenState extends State<SplashScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Your company logo goes here
                 Image.asset('assets/images/logo-white-transparent.png',
                     width: 250, height: 250),
                 const SizedBox(height: 20),
