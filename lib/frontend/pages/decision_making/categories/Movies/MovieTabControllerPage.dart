@@ -103,8 +103,12 @@ class _MovieTabControllerPageState extends State<MovieTabControllerPage> with Si
     try {
       return await recommender.getMovieRecommendations(
         genres: _filterData['genres'],
-        releaseYear: _filterData['releaseYear'],
+        platforms: _filterData['platforms'],
+        people: _filterData['people'],
+        similarMovies: _filterData['similarMovies'],
         minRating: _filterData['minRating'],
+        maxRating: _filterData['maxRating'],
+        releaseYear: _filterData['releaseYear'],  // Keep this
         sortBy: _filterData['sortBy'],
       );
     } catch (e) {
@@ -145,7 +149,7 @@ class _MovieTabControllerPageState extends State<MovieTabControllerPage> with Si
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 SvgPicture.asset(
-                  "assets/svgs/movie_illustration.svg",
+                  "assets/svgs/movie illustration.svg",
                   height: iconSize * 1.2,
                 ),
                 SizedBox(width: spacing),

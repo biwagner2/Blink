@@ -1,4 +1,5 @@
 
+import 'package:blink_v1/frontend/utility/CustomSliderShapes.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
@@ -426,7 +427,7 @@ class _RestaurantFilterSelectionPageState extends State<RestaurantFilterSelectio
       GestureDetector(
         onTap: _showRatingsBottomSheet,
         child: Container(
-          padding: const EdgeInsets.only(left: 8, top: 8, bottom: 8),
+          padding: const EdgeInsets.only(left: 8, top: 8, bottom: 8, right: 4),
           width: MediaQuery.of(context).size.width / 2.1,
           decoration: BoxDecoration(
             border: _isRatingsSelected ? Border.all(color: Colors.transparent) : Border.all(color: Colors.black),
@@ -527,11 +528,11 @@ void _showRatingsBottomSheet() {
                         showLabels: true,
                         activeColor: const Color.fromARGB(255, 183, 236, 236),
                         inactiveColor: const Color.fromARGB(255, 191, 191, 191),
-                        stepSize: .5,
+                        stepSize: .1,
                         showDividers: true,
-                        dividerShape: _DividerShape(),
-                        trackShape: _SfTrackShape(),
-                        thumbShape: _SfThumbShape(),
+                        dividerShape: CustomDividerShape(),
+                        trackShape: CustomTrackShape(),
+                        thumbShape: CustomThumbShape(),
                         onChanged: (SfRangeValues values) {
                           setState(() {
                             _minRating = values.start;
@@ -552,7 +553,6 @@ void _showRatingsBottomSheet() {
                   ),
                   onPressed: () {
                     Navigator.pop(context);
-                    // You can add logic here to use the _minRating and _maxRating values
                     this.setState(() {
                       _isRatingsSelected = true;
                     });
@@ -570,91 +570,4 @@ void _showRatingsBottomSheet() {
     },
   );
 }
-}
-
-class _DividerShape extends SfDividerShape {
-  @override
-  void paint(PaintingContext context, Offset center, Offset? thumbCenter,
-      Offset? startThumbCenter, Offset? endThumbCenter,
-      {required RenderBox parentBox,
-      required SfSliderThemeData themeData,
-      SfRangeValues? currentValues,
-      dynamic currentValue,
-      required Paint? paint,
-      required Animation<double> enableAnimation,
-      required TextDirection textDirection}) 
-  {
-    final bool isActive = center.dx >= startThumbCenter!.dx && center.dx <= endThumbCenter!.dx;
-    if (!isActive) {
-      context.canvas.drawCircle(center, 8.0,
-          Paint()
-            ..isAntiAlias = true
-            ..style = PaintingStyle.fill
-            ..color = const Color.fromARGB(255, 100, 100, 100));
-    }
-  }
-}
-
-class _SfTrackShape extends SfTrackShape {
-  @override
-  void paint(PaintingContext context, Offset offset, Offset? thumbCenter,
-      Offset? startThumbCenter, Offset? endThumbCenter,
-      {required RenderBox parentBox,
-      required SfSliderThemeData themeData,
-      SfRangeValues? currentValues,
-      dynamic currentValue,
-      required Animation<double> enableAnimation,
-      required Paint? inactivePaint,
-      required Paint? activePaint,
-      required TextDirection textDirection}) 
-  {
-    final Paint activePaint = Paint()
-      ..color = const Color.fromARGB(255, 183, 236, 236)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 6;
-    
-    final Paint inactivePaint = Paint()
-      ..color = const Color.fromARGB(255, 191, 191, 191)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 6;
-
-    super.paint(context, offset, thumbCenter, startThumbCenter, endThumbCenter,
-        parentBox: parentBox,
-        themeData: themeData,
-        enableAnimation: enableAnimation,
-        inactivePaint: inactivePaint,
-        activePaint: activePaint,
-        textDirection: textDirection
-    );
-  }
-}
-
-class _SfThumbShape extends SfThumbShape {
-  @override
-  void paint(PaintingContext context, Offset center,
-      {required RenderBox parentBox,
-      required RenderBox? child,
-      required SfSliderThemeData themeData,
-      SfRangeValues? currentValues,
-      dynamic currentValue,
-      required Paint? paint,
-      required Animation<double> enableAnimation,
-      required TextDirection textDirection,
-      required SfThumb? thumb}) {
-    context.canvas.drawCircle(
-      center,
-      16.0,
-      Paint()
-        ..color = const Color.fromARGB(255, 183, 236, 236)
-        ..style = PaintingStyle.fill
-        ..strokeWidth = 10
-    );
-    context.canvas.drawCircle(
-      center,
-      8.0,
-      Paint()
-        ..color = Colors.white
-        ..style = PaintingStyle.fill
-    );
-  }
 }
