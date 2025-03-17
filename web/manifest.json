@@ -1,6 +1,6 @@
 {
-    "name": "blink_v1",
-    "short_name": "blink_v1",
+    "name": "blink",
+    "short_name": "blink",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#hexcode",

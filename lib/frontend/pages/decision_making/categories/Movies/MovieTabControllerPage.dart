@@ -1,15 +1,15 @@
-import 'package:blink_v1/backend/services/categories/Movies/TMDBMovieService.dart';
+import 'package:blink/backend/services/categories/Movies/TMDBMovieService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:blink_v1/models/categories/Movie.dart';
-import 'package:blink_v1/frontend/navigation/blinkButton.dart';
-import 'package:blink_v1/frontend/navigation/customNavBar.dart';
-import 'package:blink_v1/frontend/navigation/readingMindScreen.dart';
-import 'package:blink_v1/frontend/pages/decision_making/categories/Movies/select/MovieInputPage.dart';
-import 'package:blink_v1/frontend/pages/decision_making/categories/Movies/suggest/MovieFilterSelectionPage.dart';
-import 'package:blink_v1/frontend/pages/decision_making/category_selection.dart';
-import 'package:blink_v1/frontend/pages/friends/friendHub.dart';
-import 'package:blink_v1/frontend/pages/profile/profilePage.dart';
+import 'package:blink/models/categories/Movie.dart';
+import 'package:blink/frontend/navigation/blinkButton.dart';
+import 'package:blink/frontend/navigation/customNavBar.dart';
+import 'package:blink/frontend/navigation/readingMindScreen.dart';
+import 'package:blink/frontend/pages/decision_making/categories/Movies/select/MovieInputPage.dart';
+import 'package:blink/frontend/pages/decision_making/categories/Movies/suggest/MovieFilterSelectionPage.dart';
+import 'package:blink/frontend/pages/decision_making/category_selection.dart';
+import 'package:blink/frontend/pages/friends/friendHub.dart';
+import 'package:blink/frontend/pages/profile/profilePage.dart';
 
 
 class MovieTabControllerPage extends StatefulWidget {

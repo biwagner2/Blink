@@ -1,12 +1,12 @@
-import 'package:blink_v1/models/categories/Restaurant.dart';
-import 'package:blink_v1/frontend/pages/decision_making/categories/Restaurants/suggest/RestaurantDetailsPage.dart';
-import 'package:blink_v1/frontend/pages/decision_making/category_selection.dart';
-import 'package:blink_v1/frontend/pages/friends/friendHub.dart';
-import 'package:blink_v1/frontend/pages/profile/profilePage.dart';
+import 'package:blink/models/categories/Restaurant.dart';
+import 'package:blink/frontend/pages/decision_making/categories/Restaurants/suggest/RestaurantDetailsPage.dart';
+import 'package:blink/frontend/pages/decision_making/category_selection.dart';
+import 'package:blink/frontend/pages/friends/friendHub.dart';
+import 'package:blink/frontend/pages/profile/profilePage.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
-import 'package:blink_v1/frontend/navigation/customNavBar.dart';
+import 'package:blink/frontend/navigation/customNavBar.dart';
 import 'package:flutter_svg/svg.dart';
 
 class RestaurantSuggestionsPage extends StatefulWidget {

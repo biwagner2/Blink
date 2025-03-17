@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:blink_v1/backend/services/categories/Movies/MediaSearchResult.dart';
-import 'package:blink_v1/backend/services/categories/Movies/TMDBMovieService.dart';
-import 'package:blink_v1/backend/services/utility/SearchService.dart';
+import 'package:blink/backend/services/categories/Movies/MediaSearchResult.dart';
+import 'package:blink/backend/services/categories/Movies/TMDBMovieService.dart';
+import 'package:blink/backend/services/utility/SearchService.dart';
 
 class TMDBMovieSearchService implements SearchService {
   final TMDBMovieService _tmdbService;

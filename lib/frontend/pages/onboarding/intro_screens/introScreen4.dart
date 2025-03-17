@@ -1,4 +1,4 @@
-import 'package:blink_v1/frontend/pages/onboarding/transition_screens/transition_screen1.dart';
+import 'package:blink/frontend/pages/onboarding/transition_screens/transition_screen1.dart';
 import 'package:flutter/material.dart';
 
 class IntroScreen4 extends StatelessWidget{

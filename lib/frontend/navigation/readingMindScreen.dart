@@ -3,20 +3,20 @@ import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 
 // Import all category models
-import 'package:blink_v1/models/categories/Restaurant.dart';
-import 'package:blink_v1/models/categories/Movie.dart';
-// import 'package:blink_v1/models/categories/Recipe.dart';
-// import 'package:blink_v1/models/categories/Book.dart';
-// import 'package:blink_v1/models/categories/Outfit.dart';
-// import 'package:blink_v1/models/categories/College.dart';
+import 'package:blink/models/categories/Restaurant.dart';
+import 'package:blink/models/categories/Movie.dart';
+// import 'package:blink/models/categories/Recipe.dart';
+// import 'package:blink/models/categories/Book.dart';
+// import 'package:blink/models/categories/Outfit.dart';
+// import 'package:blink/models/categories/College.dart';
 
 // Import all suggestion pages
-import 'package:blink_v1/frontend/pages/decision_making/categories/Restaurants/suggest/RestaurantSuggestionsPage.dart';
-import 'package:blink_v1/frontend/pages/decision_making/categories/Movies/suggest/MovieSuggestionsPage.dart';
-// import 'package:blink_v1/pages/decision_making/Categories/Recipes/suggest/RecipeSuggestionsPage.dart';
-// import 'package:blink_v1/pages/decision_making/Categories/Books/suggest/BookSuggestionsPage.dart';
-// import 'package:blink_v1/pages/decision_making/Categories/Outfits/suggest/OutfitSuggestionsPage.dart';
-// import 'package:blink_v1/pages/decision_making/Categories/Colleges/suggest/CollegeSuggestionsPage.dart';
+import 'package:blink/frontend/pages/decision_making/categories/Restaurants/suggest/RestaurantSuggestionsPage.dart';
+import 'package:blink/frontend/pages/decision_making/categories/Movies/suggest/MovieSuggestionsPage.dart';
+// import 'package:blink/pages/decision_making/Categories/Recipes/suggest/RecipeSuggestionsPage.dart';
+// import 'package:blink/pages/decision_making/Categories/Books/suggest/BookSuggestionsPage.dart';
+// import 'package:blink/pages/decision_making/Categories/Outfits/suggest/OutfitSuggestionsPage.dart';
+// import 'package:blink/pages/decision_making/Categories/Colleges/suggest/CollegeSuggestionsPage.dart';
 
 class ReadingMindScreen<T> extends StatefulWidget {
   final Future<List<T>?> recommendations;

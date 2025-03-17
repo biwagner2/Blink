@@ -1,6 +1,6 @@
-import "package:blink_v1/frontend/navigation/customNavBar.dart";
-import "package:blink_v1/frontend/pages/decision_making/category_selection.dart";
-import "package:blink_v1/frontend/pages/profile/profilePage.dart";
+import "package:blink/frontend/navigation/customNavBar.dart";
+import "package:blink/frontend/pages/decision_making/category_selection.dart";
+import "package:blink/frontend/pages/profile/profilePage.dart";
 import "package:flutter/material.dart";
 import "package:flutter_svg/flutter_svg.dart";
 

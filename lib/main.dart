@@ -1,12 +1,12 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
-//import 'package:blink_v1/pages/decision_making/Categories/Restaurants/RestaurantCuisineSurvey.dart';
-import 'package:blink_v1/frontend/pages/decision_making/category_selection.dart';
-//import 'package:blink_v1/pages/onboarding/question_screens/questionScreen1.dart';
-//import 'package:blink_v1/pages/onboarding/question_screens/questionScreen4.dart';
-//import 'package:blink_v1/pages/onboarding/signup.dart';
-import 'package:blink_v1/frontend/pages/onboarding/splashScreen.dart';
-import 'package:blink_v1/backend/services/utility/LocationService.dart';
+//import 'package:blink/pages/decision_making/Categories/Restaurants/RestaurantCuisineSurvey.dart';
+import 'package:blink/frontend/pages/decision_making/category_selection.dart';
+//import 'package:blink/pages/onboarding/question_screens/questionScreen1.dart';
+//import 'package:blink/pages/onboarding/question_screens/questionScreen4.dart';
+//import 'package:blink/pages/onboarding/signup.dart';
+import 'package:blink/frontend/pages/onboarding/splashScreen.dart';
+import 'package:blink/backend/services/utility/LocationService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';

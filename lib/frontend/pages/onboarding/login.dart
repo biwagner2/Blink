@@ -1,7 +1,7 @@
-import 'package:blink_v1/frontend/pages/decision_making/category_selection.dart';
-import 'package:blink_v1/frontend/pages/onboarding/legal/PrivacyPolicyPage.dart';
-import 'package:blink_v1/frontend/pages/onboarding/legal/TermsAndConditionsPage.dart';
-import 'package:blink_v1/frontend/pages/onboarding/signup.dart';
+import 'package:blink/frontend/pages/decision_making/category_selection.dart';
+import 'package:blink/frontend/pages/onboarding/legal/PrivacyPolicyPage.dart';
+import 'package:blink/frontend/pages/onboarding/legal/TermsAndConditionsPage.dart';
+import 'package:blink/frontend/pages/onboarding/signup.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';

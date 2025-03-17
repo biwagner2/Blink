@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:blink_v1/frontend/pages/onboarding/transition_screens/transition_screen2.dart';
+import 'package:blink/frontend/pages/onboarding/transition_screens/transition_screen2.dart';
 import 'package:flutter/material.dart';
 
 class transitionScreen1 extends StatelessWidget{

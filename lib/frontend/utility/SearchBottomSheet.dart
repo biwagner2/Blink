@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:blink_v1/backend/services/utility/SearchService.dart';
+import 'package:blink/backend/services/utility/SearchService.dart';
 import 'package:flutter/material.dart';
 
 class SearchBottomSheet extends StatefulWidget {

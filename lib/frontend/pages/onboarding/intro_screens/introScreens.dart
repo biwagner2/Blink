@@ -1,6 +1,6 @@
-import 'package:blink_v1/frontend/pages/onboarding/intro_screens/introScreen1.dart';
-import 'package:blink_v1/frontend/pages/onboarding/intro_screens/introScreen2.dart';
-import 'package:blink_v1/frontend/pages/onboarding/intro_screens/introScreen3.dart';
+import 'package:blink/frontend/pages/onboarding/intro_screens/introScreen1.dart';
+import 'package:blink/frontend/pages/onboarding/intro_screens/introScreen2.dart';
+import 'package:blink/frontend/pages/onboarding/intro_screens/introScreen3.dart';
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 

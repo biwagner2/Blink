@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:blink_v1/models/categories/Restaurant.dart';
+import 'package:blink/models/categories/Restaurant.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';

@@ -1,5 +1,5 @@
-import 'package:blink_v1/frontend/pages/onboarding/intro_screens/introScreen4.dart';
-import 'package:blink_v1/frontend/pages/onboarding/signup.dart';
+import 'package:blink/frontend/pages/onboarding/intro_screens/introScreen4.dart';
+import 'package:blink/frontend/pages/onboarding/signup.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 

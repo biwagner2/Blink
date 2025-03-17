@@ -1,12 +1,12 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:blink_v1/frontend/navigation/customNavBar.dart';
-import 'package:blink_v1/frontend/pages/decision_making/category_selection.dart';
-import 'package:blink_v1/frontend/pages/friends/friendHub.dart';
-import 'package:blink_v1/frontend/pages/profile/profilePage.dart';
-import 'package:blink_v1/frontend/utility/labeledIconButton.dart';
+import 'package:blink/frontend/navigation/customNavBar.dart';
+import 'package:blink/frontend/pages/decision_making/category_selection.dart';
+import 'package:blink/frontend/pages/friends/friendHub.dart';
+import 'package:blink/frontend/pages/profile/profilePage.dart';
+import 'package:blink/frontend/utility/labeledIconButton.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:blink_v1/models/categories/Movie.dart';
+import 'package:blink/models/categories/Movie.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 

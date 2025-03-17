@@ -1,4 +1,4 @@
-import 'package:blink_v1/models/onboarding/onboardingAnswer.dart';
+import 'package:blink/models/onboarding/onboardingAnswer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseService {

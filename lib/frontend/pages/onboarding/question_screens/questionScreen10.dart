@@ -1,5 +1,5 @@
-import 'package:blink_v1/models/onboarding/onboardingQuestion.dart';
-import 'package:blink_v1/frontend/pages/onboarding/signup.dart';
+import 'package:blink/models/onboarding/onboardingQuestion.dart';
+import 'package:blink/frontend/pages/onboarding/signup.dart';
 import 'package:flutter/material.dart';
 //import 'package:supabase_flutter/supabase_flutter.dart';
 

@@ -1,8 +1,8 @@
-import 'package:blink_v1/backend/services/categories/Movies/MediaSearchResult.dart';
-import 'package:blink_v1/backend/services/categories/Movies/TMDBMovieService.dart';
-import 'package:blink_v1/backend/services/categories/Movies/TMDBSearchService.dart';
-import 'package:blink_v1/frontend/utility/CustomSliderShapes.dart';
-import 'package:blink_v1/frontend/utility/SearchBottomSheet.dart';
+import 'package:blink/backend/services/categories/Movies/MediaSearchResult.dart';
+import 'package:blink/backend/services/categories/Movies/TMDBMovieService.dart';
+import 'package:blink/backend/services/categories/Movies/TMDBSearchService.dart';
+import 'package:blink/frontend/utility/CustomSliderShapes.dart';
+import 'package:blink/frontend/utility/SearchBottomSheet.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';

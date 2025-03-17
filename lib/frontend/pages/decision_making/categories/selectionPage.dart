@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:blink_v1/frontend/pages/decision_making/category_selection.dart';
+import 'package:blink/frontend/pages/decision_making/category_selection.dart';
 import 'package:flutter/material.dart';
 
 class SelectionPage extends StatefulWidget {

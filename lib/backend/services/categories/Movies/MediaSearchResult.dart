@@ -1,4 +1,4 @@
-import 'package:blink_v1/backend/services/utility/SearchService.dart';
+import 'package:blink/backend/services/utility/SearchService.dart';
 
 class MediaSearchResult implements SearchResult {
   final String _title;

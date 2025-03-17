@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:blink_v1/backend/services/categories/Movies/MediaSearchResult.dart';
-import 'package:blink_v1/models/categories/Movie.dart';
+import 'package:blink/backend/services/categories/Movies/MediaSearchResult.dart';
+import 'package:blink/models/categories/Movie.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
