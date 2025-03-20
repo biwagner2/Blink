@@ -98,20 +98,22 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Container(
+              padding: const EdgeInsets.only(bottom: 1, right: 8),
+              height: deviceHeight / 23,
               decoration: BoxDecoration(
                 color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(10),
               ),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: widget.hintText,
-                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 15),
+                child: TextField(
+                  cursorHeight: 20,
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: widget.hintText,
+                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                    border: InputBorder.none,
+                  ),
+                  onChanged: _debounceSearch,
                 ),
-                onChanged: _debounceSearch,
-              ),
             ),
           ),
           if (_isLoading)

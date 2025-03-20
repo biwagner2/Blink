@@ -28,7 +28,7 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
   late TMDBMovieSearchService _movieSearchService;
   late TMDBShowSearchService _showSearchService;
   final List<PersonSearchResult> _selectedPeople = [];
-  final List<MediaSearchResult> _selectedSimilarMovies = [];
+  List<MediaSearchResult> _selectedSimilarMovies = [];
   double _minRating = 0.0;
   double _maxRating = 100.0;
   bool _isRatingSelected = false;
@@ -127,6 +127,7 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final deviceHeight = MediaQuery.of(context).size.height; // deviceHeight = 874 for Iphone 16 Pro
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -135,8 +136,8 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 5),
-              const Text(
+              SizedBox(height: deviceHeight/175), // 5 = deviceHeight/175
+               const Text(
                 'You have your criteria. Let us make you a recommendation.',
                 softWrap: true,
                 style: TextStyle(
@@ -146,15 +147,15 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: deviceHeight/36.5),
               _buildMovieShowToggle(),
-              const SizedBox(height: 24),
+              SizedBox(height: deviceHeight/36.5),
               _buildGenreDropdown(),
-              const SizedBox(height: 24),
+              SizedBox(height: deviceHeight/36.5),
               _buildPlatformDropdown(),
-              const SizedBox(height: 24),
+              SizedBox(height: deviceHeight/36.5),
               _buildSearchButtons(),
-              const SizedBox(height: 24),
+              SizedBox(height: deviceHeight/36.5),
               _buildRatingsDropdownButton(),
             ],
           ),
@@ -230,6 +231,7 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
   }
 
   Widget _buildGenreDropdown() {
+    final deviceWidth = MediaQuery.of(context).size.width; // deviceWidth = 402 for Iphone 16 Pro
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -331,7 +333,7 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
                           fontFamily: 'HammerSmithOne-Regular',
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      SizedBox(width: deviceWidth/67),
                       GestureDetector(
                         onTap: () => _removeGenre(genre),
                         child: const Icon(
@@ -473,6 +475,8 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
   }
 
   Widget _buildSearchButtons() {
+    final deviceHeight = MediaQuery.of(context).size.height;
+    final deviceWidth = MediaQuery.of(context).size.width;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -528,15 +532,18 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        person.title,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Color.fromARGB(255, 101, 101, 101),
-                          fontFamily: 'HammerSmithOne-Regular',
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: deviceWidth/1.5),
+                        child: Text(
+                          person.title,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Color.fromARGB(255, 101, 101, 101),
+                            fontFamily: 'HammerSmithOne-Regular',
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      SizedBox(width: deviceWidth/67),
                       GestureDetector(
                         onTap: () => _removePerson(person),
                         child: const Icon(
@@ -552,7 +559,7 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
             ),
           ),
 
-        const SizedBox(height: 24),
+        SizedBox(height: deviceHeight/36.5),
 
         // Similar Movies Search Button
         GestureDetector(
@@ -606,15 +613,20 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        movie.title,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Color.fromARGB(255, 101, 101, 101),
-                          fontFamily: 'HammerSmithOne-Regular',
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: deviceWidth/1.5),
+                        child: Text(
+                          movie.title,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Color.fromARGB(255, 101, 101, 101),
+                            fontFamily: 'HammerSmithOne-Regular',
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      SizedBox(width: deviceWidth/67),
                       GestureDetector(
                         onTap: () => _removeSimilarMovie(movie),
                         child: const Icon(
@@ -664,34 +676,25 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
   }
 
   void _showSimilarMoviesSearch() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => GridSearchBottomSheet(
-        title: _isMovieSelected ? 'Movies Similar To' : 'Shows Similar To',
-        hintText: _isMovieSelected ? 'Search for movies...' : 'Search for shows...',
-        searchService: _isMovieSelected ? _movieSearchService : _showSearchService,
-        onSelect: (result) {
-          final media = result as MediaSearchResult;
-          // Create a unique identifier using both title and release date
-          final uniqueId = '${media.title}_${media.releaseDate}';
-          
-          setState(() {
-            // Check if a media with the same title and date already exists
-            bool isDuplicate = _selectedSimilarMovies.any((existingMedia) => 
-              '${existingMedia.title}_${existingMedia.releaseDate}' == uniqueId
-            );
-            
-            if (!isDuplicate) {
-              _selectedSimilarMovies.add(media);
-            }
-          });
-          _updateFilters();
-        },
-      ),
-    );
-  }
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) => GridSearchBottomSheet(
+      title: _isMovieSelected ? 'Movies Similar To' : 'Shows Similar To',
+      hintText: _isMovieSelected ? 'Search for movies...' : 'Search for shows...',
+      searchService: _isMovieSelected ? _movieSearchService : _showSearchService,
+      initialSelections: _selectedSimilarMovies, // Pass current selections
+      onSave: (selectedResults) {
+        setState(() {
+          // Update with the complete list of selections
+          _selectedSimilarMovies = List<MediaSearchResult>.from(selectedResults);
+        });
+        _updateFilters();
+      },
+    ),
+  );
+}
 
   Widget _buildRatingsDropdownButton() {
 
@@ -797,7 +800,7 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: deviceHeight/87.4),
                   const Text(
                     'Move the slider to adjust the range you\'re looking for.',
                     style: TextStyle(
@@ -807,7 +810,7 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
                       fontFamily: 'HammerSmithOne-Regular',
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: deviceHeight/109),
                   SizedBox(
                     child: SfSliderTheme(
                       data: const SfSliderThemeData(
