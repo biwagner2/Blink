@@ -6,14 +6,15 @@ import 'package:blink/frontend/utility/SearchBottomSheet.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
+import 'package:blink/frontend/utility/GridSearchBottomSheet.dart';
 
 class MovieFilterSelectionPage extends StatefulWidget {
   final Function(Map<String, dynamic>) onFilterChanged;
 
-  const MovieFilterSelectionPage({Key? key, required this.onFilterChanged}) : super(key: key);
+  const MovieFilterSelectionPage({super.key, required this.onFilterChanged});
 
   @override
-  _MovieFilterSelectionPageState createState() => _MovieFilterSelectionPageState();
+  State<MovieFilterSelectionPage> createState() => _MovieFilterSelectionPageState();
 }
 
 class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
@@ -22,7 +23,6 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
   final List<String> _selectedPlatforms = [];
   bool _isGenreDropdownOpen = false;
   bool _isPlatformDropdownOpen = false;
-  bool _isRatingDropdownOpen = false;
   final TMDBMovieService _tmdbService = TMDBMovieService();
   late TMDBPeopleSearchService _peopleSearchService;
   late TMDBMovieSearchService _movieSearchService;
@@ -155,7 +155,7 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
               const SizedBox(height: 24),
               _buildSearchButtons(),
               const SizedBox(height: 24),
-              _buildRatingsDropdown(),
+              _buildRatingsDropdownButton(),
             ],
           ),
         ),
@@ -668,8 +668,8 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => SearchBottomSheet(
-        title: _isMovieSelected ? 'Search Similar Movies' : 'Search Similar Shows',
+      builder: (context) => GridSearchBottomSheet(
+        title: _isMovieSelected ? 'Movies Similar To' : 'Shows Similar To',
         hintText: _isMovieSelected ? 'Search for movies...' : 'Search for shows...',
         searchService: _isMovieSelected ? _movieSearchService : _showSearchService,
         onSelect: (result) {
@@ -693,8 +693,10 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
     );
   }
 
-  Widget _buildRatingsDropdown() {
-    String getRatingDisplay() {
+  Widget _buildRatingsDropdownButton() {
+
+    String getRatingDisplay() 
+    {
       if (_minRating == _maxRating) {
         return '${_minRating.toInt()}%';
       } else {
@@ -778,7 +780,16 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(height: deviceHeight/20 - 10),
+                  // Handle bar
+                  Container(
+                    width: deviceWidth * 0.2,
+                    height: deviceHeight / 180,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2.5),
+                    ),
+                  ),
+                  SizedBox(height: deviceHeight/20 - 20),
                   const Text(
                     'Rating',
                     style: TextStyle(
@@ -806,10 +817,10 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
                       child: SfRangeSlider(
                         min: 0.0,
                         max: 100.0,
-                        interval: 20,
+                        interval: 100,
                         dragMode: SliderDragMode.onThumb,
                         values: SfRangeValues(_minRating, _maxRating),
-                        showLabels: true,
+                        showLabels: false,
                         activeColor: const Color.fromARGB(255, 183, 236, 236),
                         inactiveColor: const Color.fromARGB(255, 191, 191, 191),
                         stepSize: 1,
@@ -826,7 +837,45 @@ class _MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
                       ),
                     )
                   ),
-                  SizedBox(height: deviceHeight/20 - 10),
+                  SizedBox(
+                    height: deviceHeight/20 - 10,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(width: deviceWidth/22),
+                        const Text(
+                          '0%',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal,
+                            fontFamily: 'HammerSmithOne-Regular',
+                          ),
+                        ),
+                        SizedBox(width: deviceWidth/4.4),
+                        SizedBox(width: deviceWidth/3.2,
+                          child: Center(
+                            child: Text(
+                                '${_minRating.toInt()}% - ${_maxRating.toInt()}%',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                          ),
+                        ),
+                        SizedBox(width: deviceWidth/5.6),
+                        const Text(
+                          '100%',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal,
+                            fontFamily: 'HammerSmithOne-Regular',
+                          ),
+                        ),
+                      ],
+                    )
+                  ),
+                  SizedBox(height: deviceHeight/45 - 10),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 183, 236, 236),
