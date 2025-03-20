@@ -8,14 +8,16 @@ class GridSearchBottomSheet extends StatefulWidget {
   final String title;
   final String hintText;
   final SearchService searchService;
-  final Function(SearchResult) onSelect;
+  final Function(List<SearchResult>) onSave;
+  final List<SearchResult>? initialSelections;
 
   const GridSearchBottomSheet({
     super.key,
     required this.title,
     required this.hintText,
     required this.searchService,
-    required this.onSelect,
+    required this.onSave,
+    this.initialSelections,
   });
 
   @override
@@ -25,8 +27,18 @@ class GridSearchBottomSheet extends StatefulWidget {
 class _GridSearchBottomSheetState extends State<GridSearchBottomSheet> {
   final TextEditingController _searchController = TextEditingController();
   List<SearchResult> _searchResults = [];
+  List<SearchResult> _selectedItems = [];
   Timer? _debounceTimer;
   bool _isLoading = false;
+  
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with any preselected items
+    if (widget.initialSelections != null) {
+      _selectedItems = List.from(widget.initialSelections!);
+    }
+  }
   
   @override
   void dispose() {
@@ -65,6 +77,27 @@ class _GridSearchBottomSheetState extends State<GridSearchBottomSheet> {
     });
   }
   
+  // Toggle selection state of an item
+  void _toggleSelection(SearchResult result) {
+    setState(() {
+      // Check if the item is already selected by matching title and subtitle
+      bool isAlreadySelected = _selectedItems.any((item) => 
+        item.title == result.title && item.subtitle == result.subtitle);
+      
+      if (isAlreadySelected) {
+        _selectedItems.removeWhere((item) => 
+          item.title == result.title && item.subtitle == result.subtitle);
+      } else {
+        _selectedItems.add(result);
+      }
+    });
+  }
+  
+  // Check if an item is selected
+  bool _isSelected(SearchResult result) {
+    return _selectedItems.any((item) => 
+      item.title == result.title && item.subtitle == result.subtitle);
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -104,117 +137,132 @@ class _GridSearchBottomSheetState extends State<GridSearchBottomSheet> {
           
           // Search bar
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.only(left: 20, right: 20),
             child: Container(
+              padding: const EdgeInsets.only(bottom: 1, right: 8),
+              height: deviceHeight / 23,
               decoration: BoxDecoration(
                 color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(10),
               ),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: widget.hintText,
-                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 15),
+                child: TextField(
+                  cursorHeight: 20,
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: widget.hintText,
+                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                    border: InputBorder.none,
+                  ),
+                  onChanged: _debounceSearch,
                 ),
-                onChanged: _debounceSearch,
-              ),
             ),
           ),
           
           // Results grid
           Expanded(
             child: 
-              _isLoading ? const Center(child: CircularProgressIndicator()) : _searchResults.isEmpty
-                ? Center(
-                    child: Text(
-                      _searchController.text.isEmpty 
-                        ? widget.hintText
-                        : 'No results found',
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  )
-                : Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    child: GridView.builder(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.7,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                      ),
-                      itemCount: _searchResults.length,
-                      itemBuilder: (context, index) {
-                        final result = _searchResults[index];
-                        return _buildGridItem(result);
-                      },
-                    ),
+              _isLoading ? 
+                const Center(child: CircularProgressIndicator()) 
+              : _searchResults.isEmpty ?
+                Center(
+                  child: Text(
+                    _searchController.text.isEmpty 
+                      ? widget.hintText
+                      : 'No results found',
+                    style: TextStyle(color: Colors.grey[600]),
                   ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 16),
+                  child: GridView.builder(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.65, // Consistent poster aspect ratio
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 6,
+                    ),
+                    itemCount: _searchResults.length,
+                    itemBuilder: (context, index) {
+                      final result = _searchResults[index];
+                      final isSelected = _isSelected(result);
+                      return _buildGridItem(result, isSelected);
+                    },
+                  ),
+                ),
           ),
+          
           // Save button
-          ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 183, 236, 236),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          minimumSize: Size(deviceWidth/1.5, deviceHeight/20),
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Text(
-                          'Save',
-                          style: TextStyle(fontSize: 18, color: Colors.black),
-                        ),
-                      ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 36, left: 24, right: 24),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 183, 236, 236),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                minimumSize: Size(deviceWidth/1.5, deviceHeight/20),
+              ),
+              onPressed: () {
+                widget.onSave(_selectedItems);
+                Navigator.pop(context);
+              },
+              child: const Text(
+                'Save',
+                style: TextStyle(fontSize: 18, color: Colors.black),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
   
-  Widget _buildGridItem(SearchResult result) {
+  Widget _buildGridItem(SearchResult result, bool isSelected) {
+    final deviceHeight = MediaQuery.of(context).size.height;
     return GestureDetector(
-      onTap: () => widget.onSelect(result),
+      onTap: () => _toggleSelection(result),
       child: Column(
         children: [
-          // Poster
+          // Poster container with fixed size to ensure consistency
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: const Color.fromARGB(255, 183, 236, 236),
-                  width: 2,
+            child: AspectRatio(
+              aspectRatio: 2/3, // Standard movie poster aspect ratio
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: isSelected 
+                      ? const Color.fromARGB(255, 183, 236, 236) 
+                      : Colors.transparent,
+                    width: 8, // Thicker border to make selection more visible
+                  ),
                 ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: result.imageUrl != null
-                  ? Image.network(
-                      result.imageUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
+                child: ClipRRect(
+                  child: result.imageUrl != null
+                    ? Image.network(
+                        result.imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: Colors.grey[200],
+                          child: const Center(
+                            child: Icon(Icons.movie, size: 45, color: Colors.grey),
+                          ),
+                        ),
+                      )
+                    : Container(
                         color: Colors.grey[200],
                         child: const Center(
-                          child: Icon(Icons.movie, size: 40, color: Colors.grey),
+                          child: Icon(Icons.movie, size: 50, color: Colors.grey),
                         ),
                       ),
-                    )
-                  : Container(
-                      color: Colors.grey[200],
-                      child: const Center(
-                        child: Icon(Icons.movie, size: 40, color: Colors.grey),
-                      ),
-                    ),
+                ),
               ),
             ),
           ),
           
           // Title
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
+          Container(
+            height: deviceHeight/40, 
+            alignment: Alignment.center,
             child: Text(
               result.title,
               textAlign: TextAlign.center,
@@ -222,20 +270,24 @@ class _GridSearchBottomSheetState extends State<GridSearchBottomSheet> {
                 fontWeight: FontWeight.w500,
                 fontSize: 14,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis, // Cut text with ellipsis if too long
             ),
           ),
           
           // Year/subtitle if available
-          if (result.subtitle != null)
-            Text(
-              result.subtitle!,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
-            ),
+          SizedBox(
+            height: deviceHeight/60, // Fixed height for year/subtitle
+            child: result.subtitle != null
+              ? Text(
+                  result.subtitle!,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                )
+              : const SizedBox(), // Empty container if no subtitle to maintain height
+          ),
         ],
       ),
     );
