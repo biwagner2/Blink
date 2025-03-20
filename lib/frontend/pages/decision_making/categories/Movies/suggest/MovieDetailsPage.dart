@@ -13,10 +13,10 @@ import 'package:url_launcher/url_launcher.dart';
 class MovieDetailsPage extends StatefulWidget {
   final Movie movie;
 
-  const MovieDetailsPage({Key? key, required this.movie}) : super(key: key);
+  const MovieDetailsPage({super.key, required this.movie});
 
   @override
-  _MovieDetailsPageState createState() => _MovieDetailsPageState();
+  State<MovieDetailsPage> createState() => _MovieDetailsPageState();
 }
 
 class _MovieDetailsPageState extends State<MovieDetailsPage> {

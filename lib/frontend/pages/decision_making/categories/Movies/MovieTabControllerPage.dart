@@ -11,24 +11,35 @@ import 'package:blink/frontend/pages/decision_making/category_selection.dart';
 import 'package:blink/frontend/pages/friends/friendHub.dart';
 import 'package:blink/frontend/pages/profile/profilePage.dart';
 
-
 class MovieTabControllerPage extends StatefulWidget {
-  const MovieTabControllerPage({Key? key}) : super(key: key);
+  const MovieTabControllerPage({super.key});
 
   @override
-  _MovieTabControllerPageState createState() => _MovieTabControllerPageState();
+  State<MovieTabControllerPage> createState() => _MovieTabControllerPageState();
 }
 
 class _MovieTabControllerPageState extends State<MovieTabControllerPage> with SingleTickerProviderStateMixin {
   int _selectedIndex = 1;
   final recommender = TMDBMovieService();
-  Map<String, dynamic> _filterData = {};
+  Map<String, dynamic> _movieFilterData = {};
+  Map<String, dynamic> _showFilterData = {};
   late TabController _tabController;
+  
+  // Reference to the filter selection page key to access its state
+  final GlobalKey<MovieFilterSelectionPageState> _filterPageKey = GlobalKey<MovieFilterSelectionPageState>();
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    
+    // Add a listener to react to tab changes
+    _tabController.addListener(() {
+      // This will be called when the tab changes
+      setState(() {
+        // Any state updates needed when tab changes
+      });
+    });
   }
 
   @override
@@ -76,40 +87,60 @@ class _MovieTabControllerPageState extends State<MovieTabControllerPage> with Si
     }
   }
 
-  void _handleFilterData(Map<String, dynamic> data) {
+void _handleFilterData(Map<String, dynamic> data) {
+  // Don't update state if we're in the middle of a build
+  if (!mounted) return;
+
+  // Store filter data based on content type (movie or show)
+  if (data['isMovie'] == true) {
     setState(() {
-      _filterData = data;
+      _movieFilterData = data;
     });
-    print('Updated filter data: $_filterData');
+  } else {
+    setState(() {
+      _showFilterData = data;
+    });
   }
+}
 
   Future<void> _onBlinkButtonPressed() async {
     if (_tabController.index == 0) {
+      // Reset filters after generating recommendations
+      if (_filterPageKey.currentState != null) {
+        _filterPageKey.currentState!.resetFilters();
+      }
+      
+      // Get the appropriate filter data based on current selection
+      final filterData = _movieFilterData['isMovie'] == false ? _showFilterData : _movieFilterData;
+      
+      // Suggest tab - clear cache and fetch recommendations
       recommender.clearCache();
-      Future<List<Movie>> recommendationsFuture = _getRecommendations();
+      Future<List<Movie>> recommendationsFuture = _getRecommendations(filterData);
+      
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => ReadingMindScreen(
           recommendations: recommendationsFuture,
-          category: 'Movies',
+          category: filterData['isMovie'] == false ? 'Shows' : 'Movies',
         )),
       );
     } else {
+      // Select tab functionality
       print('Selecting best option from user input');
     }
   }
 
-  Future<List<Movie>> _getRecommendations() async {
+  Future<List<Movie>> _getRecommendations(Map<String, dynamic> filterData) async {
     try {
       return await recommender.getMovieRecommendations(
-        genres: _filterData['genres'],
-        platforms: _filterData['platforms'],
-        people: _filterData['people'],
-        similarMovies: _filterData['similarMovies'],
-        minRating: _filterData['minRating'],
-        maxRating: _filterData['maxRating'],
-        releaseYear: _filterData['releaseYear'],  // Keep this
-        sortBy: _filterData['sortBy'],
+        genres: filterData['genres'],
+        platforms: filterData['platforms'],
+        people: filterData['people'],
+        similarMovies: filterData['similarMovies'],
+        minRating: filterData['minRating'],
+        maxRating: filterData['maxRating'],
+        releaseYear: filterData['releaseYear'],
+        sortBy: filterData['sortBy'],
       );
     } catch (e) {
       print('Error: $e');
@@ -126,11 +157,14 @@ class _MovieTabControllerPageState extends State<MovieTabControllerPage> with Si
     final iconSize = screenWidth * 0.1;
     final spacing = screenWidth * 0.05;
 
-    return DefaultTabController(
-      length: 2,
-      initialIndex: 0,
-      child: PopScope(
+    return PopScope(
         canPop: true,
+        onPopInvokedWithResult: (bool didPop, dynamic result) {
+          // Reset filters when going back to category selection page
+          if (didPop && _filterPageKey.currentState != null) {
+            _filterPageKey.currentState!.resetFilters();
+          }
+        },
         child: Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
@@ -141,6 +175,10 @@ class _MovieTabControllerPageState extends State<MovieTabControllerPage> with Si
               icon: const Icon(Icons.chevron_left_rounded, color: Colors.black),
               iconSize: iconSize,
               onPressed: () {
+                // Reset filters when manually navigating back
+                if (_filterPageKey.currentState != null) {
+                  _filterPageKey.currentState!.resetFilters();
+                }
                 Navigator.pop(context);
               },
             ),
@@ -154,7 +192,7 @@ class _MovieTabControllerPageState extends State<MovieTabControllerPage> with Si
                 ),
                 SizedBox(width: spacing),
                 const Text(
-                  'Movies',
+                  'Movies/Shows',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 25,
@@ -163,8 +201,9 @@ class _MovieTabControllerPageState extends State<MovieTabControllerPage> with Si
                 ),
               ],
             ),
-            bottom: const TabBar(
-              tabs: [
+            bottom: TabBar(
+              controller: _tabController, // Connect TabBar to your controller
+              tabs: const [
                 Tab(text: 'Suggest'),
                 Tab(text: 'Select'),
               ],
@@ -172,7 +211,7 @@ class _MovieTabControllerPageState extends State<MovieTabControllerPage> with Si
               unselectedLabelColor: Colors.grey,
               indicatorColor: Colors.black,
               indicatorSize: TabBarIndicatorSize.tab,
-              labelStyle: TextStyle(
+              labelStyle: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'OpenSans',
@@ -180,9 +219,13 @@ class _MovieTabControllerPageState extends State<MovieTabControllerPage> with Si
             ),
           ),
           body: TabBarView(
+            controller: _tabController, // Make sure this is the same controller
             physics: const NeverScrollableScrollPhysics(),
             children: [
-              MovieFilterSelectionPage(onFilterChanged: _handleFilterData),
+              MovieFilterSelectionPage(
+                key: _filterPageKey,
+                onFilterChanged: _handleFilterData
+              ),
               const MovieInputPage(),
             ],
           ),
@@ -215,7 +258,6 @@ class _MovieTabControllerPageState extends State<MovieTabControllerPage> with Si
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }
