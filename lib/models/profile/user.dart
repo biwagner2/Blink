@@ -1,4 +1,3 @@
-import 'package:blink_v1/models/profile/BioPicture.dart';
 
 class User {
   
@@ -18,10 +17,10 @@ class User {
 
   User({required this.id, required this.firstName, required this.lastName, required this.emailAddress, required this.password, })
   {
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.emailAddress = emailAddress;
-    this.password = password;
+    firstName = firstName;
+    lastName = lastName;
+    emailAddress = emailAddress;
+    password = password;
   }
 
 
