@@ -14,7 +14,7 @@ class CategoriesPage extends StatefulWidget {
   const CategoriesPage({super.key});
 
   @override
-  _CategoriesPageState createState() => _CategoriesPageState();
+  State<CategoriesPage> createState() => _CategoriesPageState();
 }
 
 class _CategoriesPageState extends State<CategoriesPage> {
@@ -25,12 +25,12 @@ class _CategoriesPageState extends State<CategoriesPage> {
   List<String> _recentCategories = [];
 
   //List of all categories that the user can choose from
-  final List<String> _allCategories = ['Restaurants', 'Movies', 'Recipes', 'Books', 'Outfits', 'Colleges'];
+  final List<String> _allCategories = ['Restaurants', 'Movies/Shows', 'Recipes', 'Books', 'Outfits', 'Colleges'];
 
-  /// Map of synonyms for each category to improve search functionality.
+  // Map of synonyms for each category to improve search functionality.
   final Map<String, List<String>> _synonyms = {
     'Restaurants': ['food', 'dining', 'eatery', 'cuisine', 'grub', 'munchies'],
-    'Movies': ['films', 'cinema', 'flicks'],
+    'Movies/Shows': ['films', 'cinema', 'flicks', 'series', 'television', 'streaming', 'TV'],
     'Recipes': ['cooking', 'dishes', 'meals'],
     'Books': ['reading', 'literature', 'novels'],
     'Outfits': ['clothes', 'fashion', 'attire', 'garments', 'wardrobe', 'apparel', 'fit'],
@@ -102,7 +102,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
           MaterialPageRoute(builder: (context) => const RestaurantTabControllerPage()),
         );
         break;
-      case "Movies":
+      case "Movies/Shows":
         // Navigate to the Movies page
         Navigator.push(
           context,
@@ -307,7 +307,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                   ),
                   _buildCategoryBox(
                     SvgPicture.asset("assets/svgs/movie illustration.svg"),
-                    'Movies',
+                    'Movies/Shows',
                   ),
                   _buildCategoryBox(
                     SvgPicture.asset("assets/svgs/recipes illustration.svg"),
@@ -423,7 +423,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
     switch (category) {
       case 'Restaurants':
         return SvgPicture.asset("assets/svgs/restaurant illustration.svg");
-      case 'Movies':
+      case 'Movies/Shows':
         return SvgPicture.asset("assets/svgs/movie illustration.svg");
       case 'Recipes':
         return SvgPicture.asset("assets/svgs/recipes illustration.svg");

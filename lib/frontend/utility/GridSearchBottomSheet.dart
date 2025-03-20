@@ -148,6 +148,11 @@ class _GridSearchBottomSheetState extends State<GridSearchBottomSheet> {
                 child: TextField(
                   cursorHeight: 20,
                   controller: _searchController,
+                  enableInteractiveSelection: true,
+                  enableSuggestions: false,
+                  autocorrect: false,
+                  keyboardType: TextInputType.text, // Use name type for better keyboard
+                  textInputAction: TextInputAction.search,
                   decoration: InputDecoration(
                     hintText: widget.hintText,
                     prefixIcon: const Icon(Icons.search, color: Colors.grey),
