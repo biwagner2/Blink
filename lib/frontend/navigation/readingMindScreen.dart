@@ -5,18 +5,10 @@ import 'package:geolocator/geolocator.dart';
 // Import all category models
 import 'package:blink/models/categories/Restaurant.dart';
 import 'package:blink/models/categories/Movie.dart';
-// import 'package:blink/models/categories/Recipe.dart';
-// import 'package:blink/models/categories/Book.dart';
-// import 'package:blink/models/categories/Outfit.dart';
-// import 'package:blink/models/categories/College.dart';
 
 // Import all suggestion pages
 import 'package:blink/frontend/pages/decision_making/categories/Restaurants/suggest/RestaurantSuggestionsPage.dart';
 import 'package:blink/frontend/pages/decision_making/categories/Movies/suggest/MovieSuggestionsPage.dart';
-// import 'package:blink/pages/decision_making/Categories/Recipes/suggest/RecipeSuggestionsPage.dart';
-// import 'package:blink/pages/decision_making/Categories/Books/suggest/BookSuggestionsPage.dart';
-// import 'package:blink/pages/decision_making/Categories/Outfits/suggest/OutfitSuggestionsPage.dart';
-// import 'package:blink/pages/decision_making/Categories/Colleges/suggest/CollegeSuggestionsPage.dart';
 
 class ReadingMindScreen<T> extends StatefulWidget {
   final Future<List<T>?> recommendations;
@@ -38,6 +30,8 @@ class ReadingMindScreen<T> extends StatefulWidget {
 
 class _ReadingMindScreenState<T> extends State<ReadingMindScreen<T>> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  bool _isError = false;
+  String _errorMessage = '';
 
   @override
   void initState() {
@@ -51,16 +45,39 @@ class _ReadingMindScreenState<T> extends State<ReadingMindScreen<T>> with Single
   }
 
   Future<void> _processRecommendations() async {
-    List<T>? items = await widget.recommendations;
-    if (items != null && widget.processRecommendations != null) {
-      await widget.processRecommendations!(items, widget.userLocation);
-    }
-    if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => _buildSuggestionsPage(items ?? []),
-        ),
+    try {
+      List<T>? items = await widget.recommendations.timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw TimeoutException('Request timed out. Please try again.');
+        },
       );
+      
+      if (items == null || items.isEmpty) {
+        setState(() {
+          _isError = true;
+          _errorMessage = 'No results found for your criteria. Try adjusting your filters.';
+        });
+        return;
+      }
+      
+      if (widget.processRecommendations != null) {
+        await widget.processRecommendations!(items, widget.userLocation);
+      }
+      
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => _buildSuggestionsPage(items),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error processing recommendations: $e');
+      setState(() {
+        _isError = true;
+        _errorMessage = 'Something went wrong: ${e.toString().split('\n')[0]}';
+      });
     }
   }
 
@@ -70,14 +87,8 @@ class _ReadingMindScreenState<T> extends State<ReadingMindScreen<T>> with Single
         return RestaurantSuggestionsPage(recommendations: items as List<Restaurant>);
       case 'Movies':
         return MovieSuggestionsPage(recommendations: items as List<Movie>);
-      case 'Recipes':
-       // return RecipeSuggestionsPage(recommendations: items as List<Recipe>);
-      case 'Books':
-       // return BookSuggestionsPage(recommendations: items as List<Book>);
-      case 'Outfits':
-       // return OutfitSuggestionsPage(recommendations: items as List<Outfit>);
-      case 'Colleges':
-       // return CollegeSuggestionsPage(recommendations: items as List<College>);
+      case 'Shows':
+        return MovieSuggestionsPage(recommendations: items as List<Movie>);
       default:
         throw Exception('Unknown category: ${widget.category}');
     }
@@ -97,26 +108,70 @@ class _ReadingMindScreenState<T> extends State<ReadingMindScreen<T>> with Single
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              "Reading your mind...",
-              style: TextStyle(
-                fontFamily: "HammersmithOne",
-                fontSize: 36,
-                fontWeight: FontWeight.w500,
-                height: 1.2,
+            if (_isError) ...[
+              const Icon(
+                Icons.error_outline,
                 color: Colors.white,
+                size: 60,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 35),
-            RotationTransition(
-              turns: _controller,
-              child: Image.asset(
-                "assets/images/blink-icon-color.png",
-                width: 200,
-                height: 200,
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: Text(
+                  _errorMessage,
+                  style: const TextStyle(
+                    fontFamily: "HammersmithOne",
+                    fontSize: 24,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
-            ),
+              const SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 183, 236, 236),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  child: Text(
+                    "Go Back",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+            ] else ...[
+              const Text(
+                "Reading your mind...",
+                style: TextStyle(
+                  fontFamily: "HammersmithOne",
+                  fontSize: 36,
+                  fontWeight: FontWeight.w500,
+                  height: 1.2,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 35),
+              RotationTransition(
+                turns: _controller,
+                child: Image.asset(
+                  "assets/images/blink-icon-color.png",
+                  width: 200,
+                  height: 200,
+                ),
+              ),
+            ],
           ],
         ),
       ),

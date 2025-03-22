@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class Movie {
   final String id;
   final String title;
@@ -32,5 +30,25 @@ class Movie {
       releaseDate: json['release_date'],
       runtime: json['runtime'] ?? 0,
     );
+  }
+
+  String get formattedRating => rating.toStringAsFixed(1);
+
+  String get formattedReleaseYear {
+    try {
+      return releaseDate.substring(0, 4);
+    } catch (_) {
+      return '';
+    }
+  }
+
+  String get formattedRuntime {
+    final hours = runtime ~/ 60;
+    final minutes = runtime % 60;
+    if (hours > 0) {
+      return '${hours}h ${minutes}m';
+    } else {
+      return '${minutes}m';
+    }
   }
 }
