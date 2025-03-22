@@ -12,16 +12,22 @@ import 'package:flutter_svg/svg.dart';
 class MovieSuggestionsPage extends StatefulWidget {
   final List<Movie> recommendations;
 
-  const MovieSuggestionsPage({Key? key, required this.recommendations}) : super(key: key);
+  const MovieSuggestionsPage({super.key, required this.recommendations});
 
   @override
-  _MovieSuggestionsPageState createState() => _MovieSuggestionsPageState();
+  State<MovieSuggestionsPage> createState() => _MovieSuggestionsPageState();
 }
 
 class _MovieSuggestionsPageState extends State<MovieSuggestionsPage> {
   int _selectedIndex = 1;
   Map<String, bool> likedMovies = {};
   Map<String, bool> dislikedMovies = {};
+  final CardSwiperController _cardSwiperController = CardSwiperController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -86,9 +92,18 @@ class _MovieSuggestionsPageState extends State<MovieSuggestionsPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Check if recommendations are empty
+    if (widget.recommendations.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    // 3 movies per card
+    final int cardsCount = (widget.recommendations.length / 3.0).ceil();
+    
     return Scaffold(
       body: CardSwiper(
-        cardsCount: (widget.recommendations.length / 3).ceil(),
+        controller: _cardSwiperController,
+        cardsCount: cardsCount,
         cardBuilder: (context, index, _, __) {
           int startIndex = index * 3;
           return Column(
@@ -137,6 +152,76 @@ class _MovieSuggestionsPageState extends State<MovieSuggestionsPage> {
       ),
     );
   }
+
+  Widget _buildEmptyState() {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              "assets/images/blink-icon-color.png",
+              height: 100,
+              width: 100,
+            ),
+            const SizedBox(height: 20),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 40),
+              child: Text(
+                "No recommendations found. Try adjusting your filters.",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 183, 236, 236),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                child: Text(
+                  "Go Back",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: CustomBottomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: [
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/images/Connect.png", height: 40),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/images/blink-icon-color.png", height: 45),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: SvgPicture.asset("assets/svgs/Profile.svg", height: 40),
+            label: '',
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class MovieCard extends StatelessWidget {
@@ -147,13 +232,13 @@ class MovieCard extends StatelessWidget {
   final VoidCallback onDislike;
 
   const MovieCard({
-    Key? key,
+    super.key,
     required this.movie,
     required this.isLiked,
     required this.isDisliked,
     required this.onLike,
     required this.onDislike,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -177,12 +262,17 @@ class MovieCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
+            // Movie poster image
             CachedNetworkImage(
               imageUrl: movie.imageUrl,
               fit: BoxFit.cover,
               placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
-              errorWidget: (context, url, error) => const Icon(Icons.error),
+              errorWidget: (context, url, error) => Container(
+                color: Colors.grey[300],
+                child: const Icon(Icons.error, size: 50, color: Colors.grey),
+              ),
             ),
+            // Gradient overlay for better text visibility
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -192,6 +282,7 @@ class MovieCard extends StatelessWidget {
                 ),
               ),
             ),
+            // Movie information
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -206,11 +297,14 @@ class MovieCard extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
+                      // Dislike button
                       GestureDetector(
                         onTap: onDislike,
                         child: Icon(
@@ -219,20 +313,23 @@ class MovieCard extends StatelessWidget {
                           size: 28,
                         ),
                       ),
+                      // Rating
                       Row(
                         children: [
                           const Icon(Icons.star_rounded, color: Color.fromARGB(255, 183, 236, 236), size: 28),
                           SizedBox(width: screenWidth / 50),
                           Text(
-                            '${movie.rating}',
+                            movie.formattedRating,
                             style: const TextStyle(color: Colors.white, fontSize: 18),
                           ),
                         ],
                       ),
+                      // Release year
                       Text(
-                        movie.releaseDate.substring(0, 4),
+                        movie.formattedReleaseYear,
                         style: const TextStyle(color: Colors.white, fontSize: 18),
                       ),
+                      // Like button
                       GestureDetector(
                         onTap: onLike,
                         child: Icon(

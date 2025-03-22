@@ -12,10 +12,13 @@ import 'package:blink/frontend/utility/GridSearchBottomSheet.dart';
 class MovieFilterSelectionPage extends StatefulWidget {
   final Function(Map<String, dynamic>) onFilterChanged;
 
-  const MovieFilterSelectionPage({super.key, required this.onFilterChanged});
+  const MovieFilterSelectionPage({
+    super.key, 
+    required this.onFilterChanged,
+  });
 
   @override
-  MovieFilterSelectionPageState createState() => MovieFilterSelectionPageState();
+  State<MovieFilterSelectionPage> createState() => MovieFilterSelectionPageState();
 }
 
 class MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
@@ -112,12 +115,17 @@ void initState() {
 
   // Updates filter values and notifies parent component
   void _updateFilters() {
+    // Extract people names from PersonSearchResult objects
+    List<String> peopleNames = _activeFilters.people.map((person) => person.title).toList();
+    // Extract movie/show titles from MediaSearchResult objects
+    List<String> similarMediaTitles = _activeFilters.similarMedia.map((media) => media.title).toList();
+    
     widget.onFilterChanged({
       'genres': _activeFilters.genres,
       'platforms': _activeFilters.platforms,
       'isMovie': _isMovieSelected,
-      'people': _activeFilters.people.map((person) => person.title).toList(),
-      'similarMedia': _activeFilters.similarMedia.map((media) => media.title).toList(),
+      'people': peopleNames,
+      'similarMedia': similarMediaTitles,
       'minRating': _activeFilters.isRatingSelected ? _activeFilters.minRating : null,
       'maxRating': _activeFilters.isRatingSelected ? _activeFilters.maxRating : null,
     });

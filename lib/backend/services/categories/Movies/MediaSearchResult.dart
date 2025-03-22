@@ -5,15 +5,17 @@ class MediaSearchResult implements SearchResult {
   final String? _posterPath;
   final String? _releaseDate;
 
+  // Constructor
   MediaSearchResult({
-    required String title,
-    String? posterPath,
+    required String title, 
+    String? posterPath, 
     String? releaseDate,
-  }) : 
-    _title = title,
-    _posterPath = posterPath,
+    }) : 
+    _title = title, 
+    _posterPath = posterPath, 
     _releaseDate = releaseDate;
 
+  // Getters
   @override
   String get title => _title;
   
