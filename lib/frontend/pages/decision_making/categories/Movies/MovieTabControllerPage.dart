@@ -21,8 +21,7 @@ class MovieTabControllerPage extends StatefulWidget {
 class _MovieTabControllerPageState extends State<MovieTabControllerPage> with SingleTickerProviderStateMixin {
   int _selectedIndex = 1;
   final recommender = TMDBMovieService();
-  Map<String, dynamic> _movieFilterData = {};
-  Map<String, dynamic> _showFilterData = {};
+  Map<String, dynamic> _filterData = {};
   late TabController _tabController;
   
   // Reference to the filter selection page key to access its state
@@ -33,11 +32,10 @@ class _MovieTabControllerPageState extends State<MovieTabControllerPage> with Si
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     
-    // Add a listener to react to tab changes
+    // Listen for tab changes to update the IndexedStack
     _tabController.addListener(() {
-      // This will be called when the tab changes
       setState(() {
-        // Any state updates needed when tab changes
+        // Forces a rebuild with the new tab index
       });
     });
   }
@@ -87,67 +85,74 @@ class _MovieTabControllerPageState extends State<MovieTabControllerPage> with Si
     }
   }
 
-void _handleFilterData(Map<String, dynamic> data) {
-  // Don't update state if we're in the middle of a build
-  if (!mounted) return;
-
-  // Store filter data based on content type (movie or show)
-  if (data['isMovie'] == true) {
+  void _handleFilterData(Map<String, dynamic> data) {
     setState(() {
-      _movieFilterData = data;
+      _filterData = data;
     });
-  } else {
-    setState(() {
-      _showFilterData = data;
-    });
+    print('Updated filter data: $_filterData');
   }
-}
 
   Future<void> _onBlinkButtonPressed() async {
     if (_tabController.index == 0) {
-      // Reset filters after generating recommendations
-      if (_filterPageKey.currentState != null) {
-        _filterPageKey.currentState!.resetFilters();
+      // Reset cache before fetching new recommendations
+      recommender.clearCache();
+      
+      // Check if we have filter data
+      if (_filterData.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select at least one filter')),
+        );
+        return;
       }
       
-      // Get the appropriate filter data based on current selection
-      final filterData = _movieFilterData['isMovie'] == false ? _showFilterData : _movieFilterData;
+      // Get movie or show recommendations based on isMovie flag
+      final bool isMovie = _filterData['isMovie'] ?? true;
+      Future<List<Movie>> recommendationsFuture;
       
-      // Suggest tab - clear cache and fetch recommendations
-      recommender.clearCache();
-      Future<List<Movie>> recommendationsFuture = _getRecommendations(filterData);
-      
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ReadingMindScreen(
-          recommendations: recommendationsFuture,
-          category: filterData['isMovie'] == false ? 'Shows' : 'Movies',
-        )),
-      );
+      try {
+        if (isMovie) {
+          print('Getting movie recommendations with filters: $_filterData');
+          recommendationsFuture = recommender.getMovieRecommendations(
+            genres: _filterData['genres']?.cast<String>(),
+            platforms: _filterData['platforms']?.cast<String>(),
+            people: _filterData['people']?.cast<String>(),
+            similarMovies: _filterData['similarMedia']?.cast<String>(),
+            minRating: _filterData['minRating'],
+            maxRating: _filterData['maxRating'],
+          );
+        } else {
+          print('Getting show recommendations with filters: $_filterData');
+          recommendationsFuture = recommender.getShowRecommendations(
+            genres: _filterData['genres']?.cast<String>(),
+            platforms: _filterData['platforms']?.cast<String>(),
+            people: _filterData['people']?.cast<String>(),
+            similarShows: _filterData['similarMedia']?.cast<String>(),
+            minRating: _filterData['minRating'],
+            maxRating: _filterData['maxRating'],
+          );
+        }
+        
+        // Navigate to loading screen while fetching recommendations
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ReadingMindScreen<Movie>(
+                recommendations: recommendationsFuture,
+                category: isMovie ? 'Movies' : 'Shows',
+              ),
+            ),
+          );
+        }
+      } catch (e) {
+        print('Error preparing recommendations: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
     } else {
-      // Select tab functionality
+      // Select tab functionality (for future implementation)
       print('Selecting best option from user input');
-    }
-  }
-
-  Future<List<Movie>> _getRecommendations(Map<String, dynamic> filterData) async {
-    try {
-      return await recommender.getMovieRecommendations(
-        genres: filterData['genres'],
-        platforms: filterData['platforms'],
-        people: filterData['people'],
-        similarMovies: filterData['similarMovies'],
-        minRating: filterData['minRating'],
-        maxRating: filterData['maxRating'],
-        releaseYear: filterData['releaseYear'],
-        sortBy: filterData['sortBy'],
-      );
-    } catch (e) {
-      print('Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error getting recommendations: $e')),
-      );
-      return [];
     }
   }
 
@@ -158,106 +163,104 @@ void _handleFilterData(Map<String, dynamic> data) {
     final spacing = screenWidth * 0.05;
 
     return PopScope(
-        canPop: true,
-        onPopInvokedWithResult: (bool didPop, dynamic result) {
-          // Reset filters when going back to category selection page
-          if (didPop && _filterPageKey.currentState != null) {
-            _filterPageKey.currentState!.resetFilters();
-          }
-        },
-        child: Scaffold(
+      canPop: true,
+      onPopInvoked: (bool didPop) {
+        // We only reset filters when the user is leaving the page entirely
+        if (didPop && _filterPageKey.currentState != null) {
+          _filterPageKey.currentState!.resetFilters();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
           backgroundColor: Colors.white,
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 0,
-            automaticallyImplyLeading: true,
-            leading: IconButton(
-              icon: const Icon(Icons.chevron_left_rounded, color: Colors.black),
-              iconSize: iconSize,
-              onPressed: () {
-                // Reset filters when manually navigating back
-                if (_filterPageKey.currentState != null) {
-                  _filterPageKey.currentState!.resetFilters();
-                }
-                Navigator.pop(context);
-              },
-            ),
-            leadingWidth: iconSize + 8,
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SvgPicture.asset(
-                  "assets/svgs/movie illustration.svg",
-                  height: iconSize * 1.2,
-                ),
-                SizedBox(width: spacing),
-                const Text(
-                  'Movies/Shows',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 25,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ],
-            ),
-            bottom: TabBar(
-              controller: _tabController, // Connect TabBar to your controller
-              tabs: const [
-                Tab(text: 'Suggest'),
-                Tab(text: 'Select'),
-              ],
-              labelColor: Colors.black,
-              unselectedLabelColor: Colors.grey,
-              indicatorColor: Colors.black,
-              indicatorSize: TabBarIndicatorSize.tab,
-              labelStyle: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'OpenSans',
-              ),
-            ),
+          elevation: 0,
+          automaticallyImplyLeading: true,
+          leading: IconButton(
+            icon: const Icon(Icons.chevron_left_rounded, color: Colors.black),
+            iconSize: iconSize,
+            onPressed: () {
+              // Navigate back
+              Navigator.pop(context);
+            },
           ),
-          body: TabBarView(
-            controller: _tabController, // Make sure this is the same controller
-            physics: const NeverScrollableScrollPhysics(),
+          leadingWidth: iconSize + 8,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              MovieFilterSelectionPage(
-                key: _filterPageKey,
-                onFilterChanged: _handleFilterData
+              SvgPicture.asset(
+                "assets/svgs/movie illustration.svg",
+                height: iconSize * 1.2,
               ),
-              const MovieInputPage(),
+              SizedBox(width: spacing),
+              const Text(
+                'Movies/Shows',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 25,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
             ],
           ),
-          floatingActionButton: FloatingActionButton.large(
-            elevation: 0,
-            backgroundColor: Colors.transparent,
-            onPressed: () {},
-            child: BlinkButton(
-              isEnlarged: true,
-              onTap: _onBlinkButtonPressed,
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(text: 'Suggest'),
+              Tab(text: 'Select'),
+            ],
+            labelColor: Colors.black,
+            unselectedLabelColor: Colors.grey,
+            indicatorColor: Colors.black,
+            indicatorSize: TabBarIndicatorSize.tab,
+            labelStyle: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'OpenSans',
             ),
-          ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-          bottomNavigationBar: CustomBottomNavigationBar(
-            selectedIndex: _selectedIndex,
-            onTap: _onItemTapped,
-            items: [
-              BottomNavigationBarItem(
-                icon: Image.asset("assets/images/Connect.png", height: 40),
-                label: '',
-              ),
-              BottomNavigationBarItem(
-                icon: Image.asset("assets/images/blink-icon-color.png", height: 0),
-                label: '',
-              ),
-              BottomNavigationBarItem(
-                icon: SvgPicture.asset("assets/svgs/Profile.svg", height: 40),
-                label: '',
-              ),
-            ],
           ),
         ),
-      );
+        // Use IndexedStack to maintain widget state when switching tabs
+        body: IndexedStack(
+          index: _tabController.index,
+          children: [
+            // These widgets will maintain their state when tab changes
+            MovieFilterSelectionPage(
+              key: _filterPageKey,
+              onFilterChanged: _handleFilterData,
+            ),
+            const MovieInputPage(),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton.large(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          onPressed: () {},
+          child: BlinkButton(
+            isEnlarged: true,
+            onTap: _onBlinkButtonPressed,
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        bottomNavigationBar: CustomBottomNavigationBar(
+          selectedIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          items: [
+            BottomNavigationBarItem(
+              icon: Image.asset("assets/images/Connect.png", height: 40),
+              label: '',
+            ),
+            BottomNavigationBarItem(
+              icon: Image.asset("assets/images/blink-icon-color.png", height: 0),
+              label: '',
+            ),
+            BottomNavigationBarItem(
+              icon: SvgPicture.asset("assets/svgs/Profile.svg", height: 40),
+              label: '',
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
