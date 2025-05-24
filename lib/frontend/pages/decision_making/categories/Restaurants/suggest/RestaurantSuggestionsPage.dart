@@ -97,6 +97,7 @@ class _RestaurantSuggestionsPageState extends State<RestaurantSuggestionsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       body: CardSwiper(
         cardsCount: (widget.recommendations.length / 3).ceil(),
@@ -128,23 +129,26 @@ class _RestaurantSuggestionsPageState extends State<RestaurantSuggestionsPage> {
           ),
           padding: const EdgeInsets.all(0),
         ),
-      bottomNavigationBar: CustomBottomNavigationBar(
-        selectedIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: [
-            BottomNavigationBarItem(
-              icon: Image.asset("assets/images/Connect.png", height: 40),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Image.asset("assets/images/blink-icon-color.png", height: 45),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: SvgPicture.asset("assets/svgs/Profile.svg", height: 40),
-              label: '',
-            ),
-          ],
+      bottomNavigationBar: MediaQuery(
+        data: MediaQuery.of(context).removePadding(removeBottom: true),
+        child: CustomBottomNavigationBar(
+          selectedIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          items: [
+              BottomNavigationBarItem(
+                icon: Image.asset("assets/images/Connect.png", height: screenHeight / 21.3),  
+                label: '',
+              ),
+              BottomNavigationBarItem(
+                icon: Image.asset("assets/images/blink-icon-color.png", height: screenHeight / 18.9),
+                label: '',
+              ),
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset("assets/svgs/Profile.svg", height: screenHeight / 21.3),
+                label: '',
+              ),
+            ],
+        ),
       ),
     );
   }
