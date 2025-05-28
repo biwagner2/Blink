@@ -312,7 +312,7 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                   _description ?? 'Loading description...',
                   style: const TextStyle(fontSize: 13, fontFamily: "OpenSans", height: 1.2),
                 ),
-                ),
+              ),
               Padding(
                 padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
                 child: Row(

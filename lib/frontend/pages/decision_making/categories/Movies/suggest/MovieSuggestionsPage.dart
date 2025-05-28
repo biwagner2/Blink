@@ -22,7 +22,7 @@ class _MovieSuggestionsPageState extends State<MovieSuggestionsPage> {
   int _selectedIndex = 1;
   Map<String, bool> likedMovies = {};
   Map<String, bool> dislikedMovies = {};
-  final CardSwiperController _cardSwiperController = CardSwiperController();
+  int _currentCardIndex = 0;
 
   @override
   void initState() {
@@ -98,19 +98,27 @@ class _MovieSuggestionsPageState extends State<MovieSuggestionsPage> {
     }
 
     // 3 movies per card
-    final int cardsCount = (widget.recommendations.length / 3.0).ceil();
+    final List<Movie> displayedRecommendations = widget.recommendations.take(10).toList();
+    final int cardsCount = (displayedRecommendations.length / 3.0).ceil();
     final screenHeight = MediaQuery.of(context).size.height;
     
     return Scaffold(
       body: CardSwiper(
-        controller: _cardSwiperController,
         cardsCount: cardsCount,
+        onSwipe: (previousIndex, currentIndex, direction) {
+          if (currentIndex != null) {
+            setState(() {
+              _currentCardIndex = currentIndex;
+            });
+          }
+          return true;
+        },
         cardBuilder: (context, index, _, __) {
           int startIndex = index * 3;
           return Column(
             children: List.generate(3, (i) {
-              if (startIndex + i < widget.recommendations.length) {
-                Movie movie = widget.recommendations[startIndex + i];
+              if (startIndex + i < displayedRecommendations.length) {
+                Movie movie = displayedRecommendations[startIndex + i];
                 return Expanded(
                   child: MovieCard(
                     movie: movie,
@@ -120,14 +128,42 @@ class _MovieSuggestionsPageState extends State<MovieSuggestionsPage> {
                     onDislike: () => toggleDislike(movie.id),
                   ),
                 );
-              } else {
+              } 
+              else if (_currentCardIndex == cardsCount - 1 && i == 1) {
+                // Last card, last slot → show end message
+                return Expanded(
+                  child: Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.check_circle_outline, size: 60, color: Color.fromARGB(255, 183, 236, 236)),
+                        SizedBox(height: screenHeight / 56.8),
+                        const Text(
+                          "You've seen all recommendations!",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: screenHeight / 85.2),
+                        const Text(
+                          "(Try refining your criteria to see more)",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+              else {
                 return const Expanded(child: SizedBox());
               }
             }),
           );
         },
         numberOfCardsDisplayed: 1,
-        isDisabled: false,
+        isDisabled: _currentCardIndex >= cardsCount - 1,
         allowedSwipeDirection: const AllowedSwipeDirection.only(
           left: true,
         ),
@@ -160,7 +196,7 @@ class _MovieSuggestionsPageState extends State<MovieSuggestionsPage> {
   Widget _buildEmptyState() {
     final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color.fromARGB(255, 41, 41, 41),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -170,19 +206,20 @@ class _MovieSuggestionsPageState extends State<MovieSuggestionsPage> {
               height: 100,
               width: 100,
             ),
-            const SizedBox(height: 20),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 40),
-              child: Text(
+            SizedBox(height: screenHeight / 42.6),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: screenHeight / 21.3),
+              child: const Text(
                 "No recommendations found. Try adjusting your filters.",
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
+                  color: Colors.white,
                 ),
                 textAlign: TextAlign.center,
               ),
             ),
-            const SizedBox(height: 40),
+            SizedBox(height: screenHeight / 21.3),
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(context);
@@ -193,37 +230,16 @@ class _MovieSuggestionsPageState extends State<MovieSuggestionsPage> {
                   borderRadius: BorderRadius.circular(30),
                 ),
               ),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Text(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: screenHeight / 35.5, vertical: screenHeight / 71),
+                child: const Text(
                   "Go Back",
                   style: TextStyle(
                     fontSize: 18,
-                    color: Colors.black,
+                    color: Colors.white,
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: MediaQuery(
-        data: MediaQuery.of(context).removePadding(removeBottom: true),
-        child: CustomBottomNavigationBar(
-          selectedIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          items: [
-            BottomNavigationBarItem(
-              icon: Image.asset("assets/images/Connect.png", height: screenHeight / 21.3),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Image.asset("assets/images/blink-icon-color.png", height: screenHeight / 18.9),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: SvgPicture.asset("assets/svgs/Profile.svg", height: screenHeight / 21.3),
-              label: '',
             ),
           ],
         ),
@@ -251,6 +267,7 @@ class MovieCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return GestureDetector(
       onTap: () {
@@ -274,10 +291,11 @@ class MovieCard extends StatelessWidget {
             CachedNetworkImage(
               imageUrl: movie.imageUrl,
               fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
               placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
               errorWidget: (context, url, error) => Container(
                 color: Colors.grey[300],
-                child: const Icon(Icons.error, size: 50, color: Colors.grey),
+                child: Icon(Icons.error, size: screenHeight / 17.04, color: Colors.grey),
               ),
             ),
             // Gradient overlay for better text visibility
@@ -292,7 +310,7 @@ class MovieCard extends StatelessWidget {
             ),
             // Movie information
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.only(bottom: 12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -308,34 +326,47 @@ class MovieCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: screenHeight / 106.5),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       // Dislike button
-                      GestureDetector(
-                        onTap: onDislike,
-                        child: Icon(
-                          isDisliked ? Icons.thumb_down : Icons.thumb_down_outlined,
-                          color: const Color.fromARGB(255, 183, 236, 236),
-                          size: 28,
-                        ),
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: onDislike,
+                            child: Icon(
+                              isDisliked ? Icons.thumb_down : Icons.thumb_down_outlined,
+                              color: const Color.fromARGB(255, 183, 236, 236),
+                              size: 28,
+                            ),
+                          ),
+                          SizedBox(width: screenWidth / 50),
+                          Text(
+                            movie.formattedRuntime,
+                            style: const TextStyle(color: Colors.white, fontSize: 17, fontFamily: "Open Sans", fontWeight: FontWeight.w700),
+                          ),
+                        ],
                       ),
                       // Rating
                       Row(
                         children: [
-                          const Icon(Icons.star_rounded, color: Color.fromARGB(255, 183, 236, 236), size: 28),
-                          SizedBox(width: screenWidth / 50),
+                          const Icon(Icons.favorite, color: Color.fromARGB(255, 183, 236, 236), size: 28),
+                          SizedBox(width: screenWidth / 100),
                           Text(
-                            movie.formattedRating,
-                            style: const TextStyle(color: Colors.white, fontSize: 18),
+                            movie.rottenTomatoesScore,
+                            style: const TextStyle(color: Colors.white, fontSize: 17, fontFamily: "Open Sans", fontWeight: FontWeight.w700),
                           ),
                         ],
                       ),
                       // Release year
                       Text(
                         movie.formattedReleaseYear,
-                        style: const TextStyle(color: Colors.white, fontSize: 18),
+                        style: const TextStyle(color: Colors.white, fontSize: 17, fontFamily: "Open Sans", fontWeight: FontWeight.w700),
+                      ),
+                      Text(
+                        movie.genres[0],
+                        style: const TextStyle(color: Colors.white, fontSize: 17, fontFamily: "Open Sans", fontWeight: FontWeight.w700),
                       ),
                       // Like button
                       GestureDetector(
@@ -343,7 +374,7 @@ class MovieCard extends StatelessWidget {
                         child: Icon(
                           isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
                           color: const Color.fromARGB(255, 183, 236, 236),
-                          size: 28,
+                          size: screenHeight / 30.43,
                         ),
                       ),
                     ],

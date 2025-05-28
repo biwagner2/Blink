@@ -77,12 +77,20 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
   }
 
   Future<void> _launchTrailer() async {
-    // YouTube search URL for the movie trailer
-    final Uri url = Uri.parse(
-      'https://www.youtube.com/results?search_query=${Uri.encodeComponent("${widget.movie.title} trailer ${widget.movie.formattedReleaseYear}")}'
-    );
-    if (!await launchUrl(url)) {
-      throw Exception('Could not launch $url');
+    if (widget.movie.trailerKey.isNotEmpty) 
+    {
+      final Uri url = Uri.parse('https://www.youtube.com/watch?v=${widget.movie.trailerKey}');
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        throw Exception('Could not launch $url');
+      }
+    } 
+    else {
+      final Uri fallback = Uri.parse(
+        'https://www.youtube.com/results?search_query=${Uri.encodeComponent("${widget.movie.title} trailer ${widget.movie.formattedReleaseYear}")}'
+      );
+      if (!await launchUrl(fallback, mode: LaunchMode.externalApplication)) {
+        throw Exception('Could not launch $fallback');
+      }
     }
   }
 
@@ -135,18 +143,21 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
               // Header image with gradient overlay and movie title
               Stack(
                 children: [
+                  // Movie Poster
                   CachedNetworkImage(
-                    height: screenHeight / 3,
-                    width: screenWidth,
                     imageUrl: widget.movie.imageUrl,
+                    width: screenWidth,
+                    height: screenHeight / 3,
                     fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
                     placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
                     errorWidget: (context, url, error) => Container(
                       color: Colors.grey[300],
                       child: const Icon(Icons.error, size: 60, color: Colors.grey),
                     ),
                   ),
-                  // Back button
+
+                  // Back Button
                   Positioned(
                     top: screenHeight / 18,
                     left: screenWidth / 40,
@@ -159,223 +170,149 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                       child: Icon(Icons.chevron_left_rounded, color: Colors.white, size: screenHeight / 20),
                     ),
                   ),
-                  // Gradient overlay for text readability
+
+                  // Bottom Overlay with Info
                   Positioned(
                     bottom: 0,
                     left: 0,
                     right: 0,
                     child: Container(
-                      height: screenHeight / 10,
+                      height: screenHeight / 4.5,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.bottomCenter,
                           end: Alignment.topCenter,
-                          colors: [Colors.black.withOpacity(0.8), Colors.transparent],
+                          colors: [Colors.black.withOpacity(0.85), Colors.transparent],
                         ),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 16, right: 16, top: 12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Movie title
-                            AutoSizeText(
-                              widget.movie.title,
-                              style: const TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          AutoSizeText(
+                            widget.movie.title,
+                            style: const TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            maxLines: 1,
+                            minFontSize: 22,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: screenHeight / 142),
+
+                          // Sub-info Row
+                          Row(
+                            children: [
+                              Text(
+                                widget.movie.rottenTomatoesScore,
+                                style: const TextStyle(color: Colors.white, fontSize: 15, fontFamily: 'Open Sans', fontWeight: FontWeight.w500),
                               ),
-                              maxLines: 1,
-                              minFontSize: 22,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            // Movie stats (rating and year)
-                            Row(
-                              children: [
-                                Text(
-                                  '${widget.movie.formattedRating}',
-                                  style: const TextStyle(color: Colors.white, fontFamily: "OpenSans", fontSize: 15),
-                                ),
-                                SizedBox(width: screenWidth / 110),
-                                const Icon(Icons.star, color: Color.fromARGB(255, 183, 236, 236), size: 20),
-                                SizedBox(width: screenWidth / 110),
-                                Text(
-                                  widget.movie.formattedReleaseYear,
-                                  style: const TextStyle(color: Colors.white, fontFamily: "OpenSans-Bold", fontSize: 14, fontWeight: FontWeight.w400),
-                                ),
-                              ],
-                            ),
-                          ],
+                              SizedBox(width: screenHeight / 142),
+                              const Icon(Icons.favorite, color: Color.fromARGB(255, 183, 236, 236), size: 18),
+                              SizedBox(width: screenHeight / 142),
+                              Text(
+                                widget.movie.formatReviewCount(),
+                                style: const TextStyle(color: Colors.white, fontSize: 15, fontFamily: 'Open Sans', fontWeight: FontWeight.w700),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  if (widget.movie.trailerKey.isNotEmpty)
+                    Positioned(
+                      bottom: 12,
+                      right: 16,
+                      child: ElevatedButton.icon(
+                        onPressed: _launchTrailer,
+                        icon: const Icon(Icons.play_arrow_rounded),
+                        iconAlignment: IconAlignment.end,
+                        label: const Text('Play trailer', style: TextStyle(fontSize: 12, fontFamily: 'Open Sans', fontWeight: FontWeight.w500)),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.only(left: 8, bottom: 4, top: 4, right: 4),
+                          backgroundColor: Colors.black.withOpacity(0.5),
+                          foregroundColor: Colors.white,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          minimumSize: Size.zero, // Prevent extra height/width
+                          elevation: 0,
                         ),
                       ),
                     ),
-                  )
                 ],
               ),
-              // Action buttons
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.access_time, size: 22,),
+                    SizedBox(width: screenWidth / 100),
+                    Text(widget.movie.formattedRuntime, 
+                        style: const TextStyle(fontSize: 14, fontFamily: "OpenSans-Bold")
+                    ),
+                    SizedBox(width: screenWidth / 110),
+                    const Icon(Icons.circle, size: 8,),
+                    SizedBox(width: screenWidth / 110),
+                    Text(widget.movie.formattedReleaseYear,
+                        style: const TextStyle(fontSize: 14, fontFamily: "OpenSans-Bold")
+                    ),
+                    SizedBox(width: screenWidth / 110),
+                    const Icon(Icons.circle, size: 8,),
+                    SizedBox(width: screenWidth / 110),
+                    Text(widget.movie.genres.length >= 2
+                          ? '${widget.movie.genres[0]}/${widget.movie.genres[1]}'
+                          : widget.movie.genres[0],
+                      style: const TextStyle(fontSize: 14, fontFamily: "OpenSans-Bold"),
+                    ),
+                    SizedBox(width: screenWidth / 110),
+                    const Icon(Icons.circle, size: 8,),
+                    SizedBox(width: screenWidth / 110),
+                    Text(widget.movie.rated!,
+                        style: const TextStyle(fontSize: 14, fontFamily: "OpenSans-Bold")
+                    )
+                  ]
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: AutoSizeText(
+                  widget.movie.overview,
+                  style: const TextStyle(fontSize: 13, fontFamily: "OpenSans", height: 1.2),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16, top: 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     LabeledIconButton(
-                      onPressed: _launchIMDb,
-                      icon: Icons.movie_outlined,
-                      label: 'IMDb',
-                    ),
-                    LabeledIconButton(
                       onPressed: _launchTrailer,
-                      icon: Icons.play_arrow_rounded,
-                      label: 'Trailer',
+                      icon: Icons.phone,
+                      label: widget.movie.rottenTomatoesScore,
                     ),
                     LabeledIconButton(
-                      onPressed: _toggleSave,
-                      icon: _isSaved ? Icons.bookmark : Icons.bookmark_border_rounded,
+                      onPressed: _launchIMDb,
+                      icon: Icons.directions_outlined,
+                      label: "${widget.movie.imdbRating}/10",
+                    ),
+                    LabeledIconButton(
+                      onPressed: () {
+                        // Implement save logic here
+                      },
+                      icon: Icons.bookmark_border_rounded,
                       label: 'Save',
                     ),
                   ],
                 ),
-              ),
-              // Movie details
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Overview section
-                    const Text(
-                      'Overview',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      widget.movie.overview,
-                      style: const TextStyle(fontSize: 16, height: 1.5),
-                    ),
-                    // Genre tags section
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Genres',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: widget.movie.genres.isNotEmpty ? 
-                        widget.movie.genres.map((genre) {
-                          return Chip(
-                            label: Text(genre),
-                            backgroundColor: const Color.fromARGB(255, 183, 236, 236),
-                            labelStyle: const TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                          );
-                        }).toList() : 
-                        [const Chip(
-                          label: Text('Not Available'),
-                          backgroundColor: Color.fromARGB(255, 220, 220, 220),
-                        )],
-                    ),
-                    
-                    // Additional Details section
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Release Date',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              widget.movie.releaseDate,
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            const Text(
-                              'Runtime',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              widget.movie.runtime > 0 
-                                ? widget.movie.formattedRuntime 
-                                : 'Not Available',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    
-                    // "Friends who saved" section (placeholder for now)
-                    const SizedBox(height: 32),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Center(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-                          child: Column(
-                            children: [
-                              Text(
-                                '0', // Placeholder - would be dynamic in production
-                                style: TextStyle(
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[800],
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'friends also saved this',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    
-                    // Streaming platforms section (placeholder for future implementation)
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Available On',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    Center(
-                      child: Text(
-                        'Information not available', // Placeholder - would be populated with actual data
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[600],
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 84), // Space for floating action button
-                  ],
-                ),
-              ),
+              ), // Space for floating action button
             ],
+              ),
           ),
-        ),
         bottomNavigationBar: MediaQuery(
           data: MediaQuery.of(context).removePadding(removeBottom: true),
           child: CustomBottomNavigationBar(
@@ -397,7 +334,7 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
             ],
           ),
         ),
-      ),
+      )
     );
   }
 }
