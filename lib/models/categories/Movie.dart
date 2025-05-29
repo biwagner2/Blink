@@ -10,6 +10,7 @@ class Movie {
 
   final String imdbRating;
   String imdbVotes;
+  final String imdbId;
   final String rottenTomatoesScore;
   final List<String> providers;
   final List<CastMember> cast;
@@ -28,6 +29,7 @@ class Movie {
     required this.runtime,
     required this.imdbRating,
     required this.imdbVotes,
+    required this.imdbId,
     required this.rottenTomatoesScore,
     required this.providers,
     required this.cast,
@@ -47,6 +49,7 @@ class Movie {
       runtime: json['runtime'] ?? 0,
       imdbRating: json['imdb_rating'] ?? 'N/A',
       imdbVotes: json['imdb_votes'] ?? 'N/A',
+      imdbId: json['imdb_id'] ?? 'N/A',
       rottenTomatoesScore: json['rotten_tomatoes_score'] ?? 'N/A',
       providers: (json['providers'] as List<dynamic>?)
               ?.map((provider) => provider['provider_name'] as String)

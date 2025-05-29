@@ -70,7 +70,7 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
   }
 
   Future<void> _launchIMDb() async {
-    final Uri url = Uri.parse('https://www.imdb.com/title/${widget.movie.id}/');
+    final Uri url = Uri.parse('https://www.imdb.com/title/${widget.movie.imdbId}/');
     if (!await launchUrl(url)) {
       throw Exception('Could not launch $url');
     }
@@ -309,10 +309,165 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                     ),
                   ],
                 ),
-              ), // Space for floating action button
-            ],
               ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 14.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.all(Radius.circular(8)),
+                        border: Border.all(color: const Color.fromRGBO(209, 209, 209, 1), width: 1.1),
+                      ),
+                      height: screenWidth/5,
+                      width: screenWidth/2.8,
+                      child: const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '0', //Eventually make it a counter variable. Maybe convert numbers into 1K, 21.6K format etc. 
+                            style: TextStyle(fontSize: 25, fontFamily: "OpenSans",)
+                          ),
+                          Text(
+                            'friends also saved this',
+                            style: TextStyle(fontSize: 10, fontFamily: "OpenSans", color: Color.fromRGBO(120, 120, 120, 1))
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Left column with title and preview
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Platforms',
+                            style: TextStyle(fontSize: 22),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              for (int i = 0; i < widget.movie.providers.length && i < 3; i++) ...[
+                                Text(
+                                  widget.movie.providers[i],
+                                  style: const TextStyle(fontSize: 14, fontFamily: "OpenSans"),
+                                ),
+                                if (i < widget.movie.providers.length - 1 && i < 2)
+                                  const Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: 4),
+                                    child: Icon(Icons.circle, size: 6),
+                                  ),
+                              ],
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: IconButton(
+                        onPressed: () { 
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Available On', textAlign: TextAlign.center,),
+                                content: SingleChildScrollView(child: 
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: widget.movie.providers.map((provider) {
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 4),
+                                        child: Text(
+                                          provider,
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    child: const Text('Close', style: TextStyle(fontSize: 18)),
+                                    onPressed: () => Navigator.of(context).pop(),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        icon: Image.asset(
+                          'assets/images/icons8-arrow-right-96.png',
+                          height: MediaQuery.of(context).size.width / 13,
+                          width: MediaQuery.of(context).size.width / 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Cast',
+                            style: TextStyle(fontSize: 22),
+                          ),
+                          Row(
+                            children: [
+                              const Text(
+                                "Director: ",
+                                style: TextStyle(fontSize: 14)
+                              ),
+                              Text(
+                                widget.movie.cast.isNotEmpty ? widget.movie.cast[0].name : 'N/A',                         
+                                style: const TextStyle(fontSize: 14, fontFamily: "OpenSans")
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const Text(
+                                "Starring: ",
+                                style: TextStyle(fontSize: 14)
+                              ),
+                              Text(
+                                widget.movie.cast.isNotEmpty ? widget.movie.cast[1].name : 'N/A',                         
+                                style: const TextStyle(fontSize: 14, fontFamily: "OpenSans")
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: IconButton(onPressed: _launchIMDb, icon: Image.asset('assets/images/icons8-arrow-right-96.png', height: screenWidth/13, width: screenWidth/13,)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
+        ),
         bottomNavigationBar: MediaQuery(
           data: MediaQuery.of(context).removePadding(removeBottom: true),
           child: CustomBottomNavigationBar(

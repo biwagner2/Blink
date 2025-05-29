@@ -335,7 +335,7 @@ class TMDBMovieService {
         }
 
         // IMDb & RT Ratings
-        final imdbId = details['external_ids']['imdb_id'];
+        final imdbId = details['imdb_id'];
         String imdbRating = 'N/A';
         String imdbVotes = '0';
         String rottenTomatoes = 'N/A';
@@ -381,6 +381,7 @@ class TMDBMovieService {
           runtime: details['runtime'] ?? 0,
           imdbRating: imdbRating,
           imdbVotes: imdbVotes,
+          imdbId: imdbId ?? 'N/A',
           rottenTomatoesScore: rottenTomatoes,
           providers: providerList.toSet().toList(),
           cast: castMembers,
