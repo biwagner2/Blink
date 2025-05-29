@@ -6,6 +6,7 @@ import 'package:blink/frontend/pages/decision_making/category_selection.dart';
 import 'package:blink/frontend/pages/friends/friendHub.dart';
 import 'package:blink/frontend/pages/profile/profilePage.dart';
 import 'package:blink/frontend/utility/labeledIconButton.dart';
+import 'package:blink/models/icons/my_flutter_app_icons.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:blink/models/categories/Movie.dart';
@@ -292,12 +293,12 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                   children: [
                     LabeledIconButton(
                       onPressed: _launchTrailer,
-                      icon: Icons.phone,
-                      label: widget.movie.rottenTomatoesScore,
+                      svgAsset: "assets/svgs/rotten_tomatoes.svg",
+                      label: widget.movie.rottenTomatoesScore
                     ),
                     LabeledIconButton(
                       onPressed: _launchIMDb,
-                      icon: Icons.directions_outlined,
+                      svgAsset: "assets/svgs/imdb.svg",
                       label: "${widget.movie.imdbRating}/10",
                     ),
                     LabeledIconButton(
