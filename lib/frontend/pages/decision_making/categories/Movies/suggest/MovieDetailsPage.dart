@@ -77,6 +77,20 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
     }
   }
 
+  Future<void> _launchRottenTomatoes(String title) async {
+    // Generate a Rotten Tomatoes-style slug from the movie title
+    String slug = title
+        .toLowerCase()
+        .replaceAll(RegExp(r"[^\w\s]"), '') // Remove non-word characters
+        .replaceAll(RegExp(r"\s+"), '_');   // Replace spaces with underscores
+
+    final Uri url = Uri.parse("https://www.rottentomatoes.com/m/$slug");
+
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
   Future<void> _launchTrailer() async {
     if (widget.movie.trailerKey.isNotEmpty) 
     {
@@ -292,14 +306,16 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     LabeledIconButton(
-                      onPressed: _launchTrailer,
-                      svgAsset: "assets/svgs/rotten_tomatoes.svg",
-                      label: widget.movie.rottenTomatoesScore
+                      onPressed: () => _launchRottenTomatoes(widget.movie.title),
+                      pngAsset: "assets/images/rotten-tomatoes.png",
+                      label: widget.movie.rottenTomatoesScore,
+                      iconSize: screenHeight /23,
                     ),
                     LabeledIconButton(
                       onPressed: _launchIMDb,
-                      svgAsset: "assets/svgs/imdb.svg",
+                      pngAsset: "assets/images/imdb.png",
                       label: "${widget.movie.imdbRating}/10",
+                      iconSize: screenHeight / 19,
                     ),
                     LabeledIconButton(
                       onPressed: () {

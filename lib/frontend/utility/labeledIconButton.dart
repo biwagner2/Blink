@@ -8,6 +8,7 @@ class LabeledIconButton extends StatelessWidget {
   final double buttonSize;
   final double iconSize;
   final String? svgAsset; // Optional SVG asset path
+  final String? pngAsset;
 
 
   const LabeledIconButton({
@@ -15,6 +16,7 @@ class LabeledIconButton extends StatelessWidget {
     required this.onPressed,
     this.icon,
     this.svgAsset,
+    this.pngAsset,
     required this.label,
     this.buttonSize = 50, // Default size, adjust as needed
     this.iconSize = 32, // Default icon size, adjust as needed
@@ -44,13 +46,18 @@ class LabeledIconButton extends StatelessWidget {
                     svgAsset!,
                     width: iconSize,
                     height: iconSize,
-                    color: Colors.white, 
                   )
-                : Icon(
-                    icon,
-                    color: Colors.white,
-                    size: iconSize,
-                  ),
+                : pngAsset != null
+                    ? Image.asset(
+                        pngAsset!,
+                        width: iconSize,
+                        height: iconSize,
+                      )
+                    : Icon(
+                        icon,
+                        size: iconSize,
+                        color: Colors.white,
+                    ),
           ),
         ),
         SizedBox(height: screenHeight / 200),
