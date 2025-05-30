@@ -357,127 +357,128 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Left column with title and preview
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16),
+                    Flexible(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Platforms',
-                            style: TextStyle(fontSize: 22),
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
+                          const Text('Platforms', style: TextStyle(fontSize: 22)),
+                          Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 6,
+                            runSpacing: 4,
                             children: [
                               for (int i = 0; i < widget.movie.providers.length && i < 3; i++) ...[
                                 Text(
                                   widget.movie.providers[i],
-                                  style: const TextStyle(fontSize: 14, fontFamily: "OpenSans"),
+                                  style: const TextStyle(fontSize: 15, fontFamily: "OpenSans"),
                                 ),
                                 if (i < widget.movie.providers.length - 1 && i < 2)
-                                  const Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 4),
-                                    child: Icon(Icons.circle, size: 6),
-                                  ),
-                              ],
+                                  const Icon(Icons.circle, size: 6),
+                              ]
                             ],
                           ),
                         ],
                       ),
                     ),
-                    const Spacer(),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: IconButton(
-                        onPressed: () { 
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text('Available On', textAlign: TextAlign.center,),
-                                content: SingleChildScrollView(child: 
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: widget.movie.providers.map((provider) {
-                                      return Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 4),
-                                        child: Text(
-                                          provider,
-                                          style: const TextStyle(fontSize: 16),
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
+                    IconButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Available On', textAlign: TextAlign.center),
+                              content: SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: widget.movie.providers.map((provider) {
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 4),
+                                      child: Text(provider, style: const TextStyle(fontSize: 16)),
+                                    );
+                                  }).toList(),
                                 ),
-                                actions: [
-                                  TextButton(
-                                    child: const Text('Close', style: TextStyle(fontSize: 18)),
-                                    onPressed: () => Navigator.of(context).pop(),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        icon: Image.asset(
-                          'assets/images/icons8-arrow-right-96.png',
-                          height: MediaQuery.of(context).size.width / 13,
-                          width: MediaQuery.of(context).size.width / 13,
-                        ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  child: const Text('Close', style: TextStyle(fontSize: 18)),
+                                  onPressed: () => Navigator.of(context).pop(),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      icon: Image.asset(
+                        'assets/images/icons8-arrow-right-96.png',
+                        height: screenWidth / 13,
+                        width: screenWidth / 13,
                       ),
                     ),
                   ],
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16),
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Cast',
-                            style: TextStyle(fontSize: 22),
+                          const Text('Cast', style: TextStyle(fontSize: 22)),
+                          RichText(
+                            text: TextSpan(
+                              style: const TextStyle(fontSize: 15, fontFamily: "OpenSans", color: Colors.black),
+                              children: [
+                                const TextSpan(
+                                  text: "Director: ",
+                                  style: TextStyle(fontFamily: "HammersmithOne"),
+                                ),
+                                TextSpan(
+                                  text: widget.movie.cast.isNotEmpty
+                                      ? widget.movie.cast[0].name
+                                      : 'N/A',
+                                ),
+                              ],
+                            ),
                           ),
-                          Row(
-                            children: [
-                              const Text(
-                                "Director: ",
-                                style: TextStyle(fontSize: 14)
-                              ),
-                              Text(
-                                widget.movie.cast.isNotEmpty ? widget.movie.cast[0].name : 'N/A',                         
-                                style: const TextStyle(fontSize: 14, fontFamily: "OpenSans")
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              const Text(
-                                "Starring: ",
-                                style: TextStyle(fontSize: 14)
-                              ),
-                              Text(
-                                widget.movie.cast.isNotEmpty ? widget.movie.cast[1].name : 'N/A',                         
-                                style: const TextStyle(fontSize: 14, fontFamily: "OpenSans")
-                              ),
-                            ],
+                          RichText(
+                            text: TextSpan(
+                              style: const TextStyle(fontSize: 15, fontFamily: "OpenSans", color: Colors.black),
+                              children: [
+                                const TextSpan(
+                                  text: "Starring: ",
+                                  style: TextStyle(fontFamily: "HammersmithOne"),
+                                ),
+                                TextSpan(
+                                  text: widget.movie.cast.length > 1
+                                      ? widget.movie.cast
+                                          .skip(1)
+                                          .take(3)
+                                          .map((actor) => actor.name)
+                                          .join(" | ")
+                                      : 'N/A',
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    const Spacer(),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: IconButton(onPressed: _launchIMDb, icon: Image.asset('assets/images/icons8-arrow-right-96.png', height: screenWidth/13, width: screenWidth/13,)),
+
+                    // Right Icon Button
+                    IconButton(
+                      onPressed: _launchIMDb,
+                      icon: Image.asset(
+                        'assets/images/icons8-arrow-right-96.png',
+                        height: screenWidth / 13,
+                        width: screenWidth / 13,
+                      ),
                     ),
                   ],
                 ),
