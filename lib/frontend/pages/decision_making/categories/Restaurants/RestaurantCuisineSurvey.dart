@@ -80,6 +80,7 @@ class _RestaurantCuisineSurveyState extends State<RestaurantCuisineSurvey> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     final iconSize = screenWidth * 0.1;
     final spacing = screenWidth * 0.05;
 
@@ -187,23 +188,26 @@ class _RestaurantCuisineSurveyState extends State<RestaurantCuisineSurvey> {
             ],
           ),
         ),
-        bottomNavigationBar: CustomBottomNavigationBar(
-          selectedIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          items: [
-            BottomNavigationBarItem(
-              icon: Image.asset("assets/images/Connect.png", height: 40),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Image.asset("assets/images/blink-icon-color.png", height: 45),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: SvgPicture.asset("assets/svgs/Profile.svg", height: 40),
-              label: '',
-            ),
-          ],
+        bottomNavigationBar: MediaQuery(
+          data: MediaQuery.of(context).removePadding(removeBottom: true),
+          child: CustomBottomNavigationBar(
+            selectedIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            items: [
+              BottomNavigationBarItem(
+                icon: Image.asset("assets/images/Connect.png", height: screenHeight / 21.3),
+                label: '',
+              ),
+              BottomNavigationBarItem(
+                icon: Image.asset("assets/images/blink-icon-color.png", height: screenHeight / 18.9),
+                label: '',
+              ),
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset("assets/svgs/Profile.svg", height: screenHeight / 21.3),
+                label: '',
+              ),
+            ],
+          ),
         ),
       ),
     );

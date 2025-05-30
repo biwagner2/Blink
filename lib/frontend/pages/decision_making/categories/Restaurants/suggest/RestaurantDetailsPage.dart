@@ -312,7 +312,7 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                   _description ?? 'Loading description...',
                   style: const TextStyle(fontSize: 13, fontFamily: "OpenSans", height: 1.2),
                 ),
-                ),
+              ),
               Padding(
                 padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
                 child: Row(
@@ -522,23 +522,26 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
             ],
           ),
         ),
-        bottomNavigationBar: CustomBottomNavigationBar(
-          selectedIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          items: [
-              BottomNavigationBarItem(
-                icon: Image.asset("assets/images/Connect.png", height: 40),
-                label: '',
-              ),
-              BottomNavigationBarItem(
-                icon: Image.asset("assets/images/blink-icon-color.png", height: 0),
-                label: '',
-              ),
-              BottomNavigationBarItem(
-                icon: SvgPicture.asset("assets/svgs/Profile.svg", height: 40),
-                label: '',
-              ),
-            ],
+        bottomNavigationBar: MediaQuery(
+          data: MediaQuery.of(context).removePadding(removeBottom: true),
+          child: CustomBottomNavigationBar(
+            selectedIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            items: [
+                BottomNavigationBarItem(
+                  icon: Image.asset("assets/images/Connect.png", height: screenHeight/21.3),
+                  label: '',
+                ),
+                BottomNavigationBarItem(
+                  icon: Image.asset("assets/images/blink-icon-color.png", height: 0),
+                  label: '',
+                ),
+                BottomNavigationBarItem(
+                  icon: SvgPicture.asset("assets/svgs/Profile.svg", height: screenHeight/21.3),
+                  label: '',
+                ),
+              ],
+          ),
         ),
       ),
     );

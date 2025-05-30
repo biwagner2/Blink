@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class LabeledIconButton extends StatelessWidget {
   final VoidCallback onPressed;
-  final IconData icon;
+  final IconData? icon;
   final String label;
   final double buttonSize;
   final double iconSize;
+  final String? svgAsset; // Optional SVG asset path
+  final String? pngAsset;
+
 
   const LabeledIconButton({
     super.key,
     required this.onPressed,
-    required this.icon,
+    this.icon,
+    this.svgAsset,
+    this.pngAsset,
     required this.label,
     this.buttonSize = 50, // Default size, adjust as needed
     this.iconSize = 32, // Default icon size, adjust as needed
@@ -19,6 +25,7 @@ class LabeledIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -34,7 +41,23 @@ class LabeledIconButton extends StatelessWidget {
             backgroundColor: const Color.fromARGB(255, 183, 236, 236),
             elevation: 1,
             shape: const CircleBorder(),
-            child: Icon(icon, color: Colors.white, size: iconSize),
+            child: svgAsset != null
+                ? SvgPicture.asset(
+                    svgAsset!,
+                    width: iconSize,
+                    height: iconSize,
+                  )
+                : pngAsset != null
+                    ? Image.asset(
+                        pngAsset!,
+                        width: iconSize,
+                        height: iconSize,
+                      )
+                    : Icon(
+                        icon,
+                        size: iconSize,
+                        color: Colors.white,
+                    ),
           ),
         ),
         SizedBox(height: screenHeight / 200),

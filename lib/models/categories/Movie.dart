@@ -8,6 +8,16 @@ class Movie {
   final String releaseDate;
   final int runtime;
 
+  final String imdbRating;
+  String imdbVotes;
+  final String imdbId;
+  final String rottenTomatoesScore;
+  final List<String> providers;
+  final List<CastMember> cast;
+  final String trailerKey;
+  final String? rated;
+
+
   Movie({
     required this.id,
     required this.title,
@@ -17,6 +27,14 @@ class Movie {
     required this.genres,
     required this.releaseDate,
     required this.runtime,
+    required this.imdbRating,
+    required this.imdbVotes,
+    required this.imdbId,
+    required this.rottenTomatoesScore,
+    required this.providers,
+    required this.cast,
+    required this.trailerKey,
+    required this.rated,
   });
 
   factory Movie.fromJson(Map<String, dynamic> json) {
@@ -29,10 +47,45 @@ class Movie {
       genres: (json['genre_ids'] as List).map((id) => id.toString()).toList(),
       releaseDate: json['release_date'],
       runtime: json['runtime'] ?? 0,
+      imdbRating: json['imdb_rating'] ?? 'N/A',
+      imdbVotes: json['imdb_votes'] ?? 'N/A',
+      imdbId: json['imdb_id'] ?? 'N/A',
+      rottenTomatoesScore: json['rotten_tomatoes_score'] ?? 'N/A',
+      providers: (json['providers'] as List<dynamic>?)
+              ?.map((provider) => provider['provider_name'] as String)
+              .toList() ??
+          [],
+      cast: (json['cast'] as List<dynamic>?)
+              ?.map((member) => CastMember(
+                    name: member['name'],
+                    job: member['character'],
+                  ))
+              .toList() ??
+          [],
+      trailerKey: json['trailer_key'] ?? '',
+      rated: json['rated'] ?? 'N/A',
     );
   }
 
   String get formattedRating => rating.toStringAsFixed(1);
+
+  String formatReviewCount()
+  {
+    //Remove commas from imdbVotes
+    if(imdbVotes == 'N/A' || imdbVotes.isEmpty)
+    {
+      return '(N/A)';
+    }
+    imdbVotes = imdbVotes.replaceAll(',', '');
+    if(int.parse(imdbVotes) > 1000)
+    {
+      return '(${(int.parse(imdbVotes) / 1000).toStringAsFixed(1)}K+)';
+    }
+    else
+    {
+      return '($imdbVotes)';
+    }
+  }
 
   String get formattedReleaseYear {
     try {
@@ -51,4 +104,11 @@ class Movie {
       return '${minutes}m';
     }
   }
+}
+
+class CastMember {
+  final String name;
+  final String job;
+
+  CastMember({required this.name, required this.job});
 }

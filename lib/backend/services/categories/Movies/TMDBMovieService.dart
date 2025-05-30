@@ -8,6 +8,8 @@ class TMDBMovieService {
   final String _apiKey;
   final String _baseUrl = 'https://api.themoviedb.org/3';
   final Map<String, List<Movie>> _cache = {};
+  final Map<String, List<Movie>> _tvCache = {};
+
 
   TMDBMovieService() : _apiKey = dotenv.env['TMDB_API_KEY'] ?? '' {
     if (_apiKey.isEmpty) {
@@ -282,52 +284,120 @@ class TMDBMovieService {
   
   // Enriches movie data with additional details
   Future<List<Movie>> _enrichMoviesWithDetails(List movieResults) async {
-    final enrichedMovies = <Movie>[];
-    
-    for (final result in movieResults) {
+    final tasks = movieResults.take(10).map<Future<Movie?>>((result) async {
       try {
         final movieId = result['id'].toString();
-        final detailsUri = Uri.parse('$_baseUrl/movie/$movieId')
-            .replace(queryParameters: {'api_key': _apiKey, 'language': 'en-US'});
-        
+        final detailsUri = Uri.parse('$_baseUrl/movie/$movieId').replace(queryParameters: {
+          'api_key': _apiKey,
+          'language': 'en-US',
+          'append_to_response': 'credits,videos,external_ids,watch/providers',
+        });
+
         final detailsResponse = await http.get(detailsUri);
-        
-        if (detailsResponse.statusCode == 200) {
-          final movieDetails = json.decode(detailsResponse.body);
-          
-          // Create a comprehensive movie object
-          final Movie movie = Movie(
-            id: movieId,
-            title: result['title'] ?? movieDetails['title'] ?? 'Unknown Title',
-            imageUrl: result['poster_path'] != null && result['poster_path'].toString().isNotEmpty
-                ? 'https://image.tmdb.org/t/p/w500${result['poster_path']}'
-                : 'https://via.placeholder.com/500x750?text=No+Image',
-            overview: result['overview'] ?? movieDetails['overview'] ?? 'No overview available',
-            rating: (result['vote_average'] ?? movieDetails['vote_average'] ?? 0).toDouble(),
-            genres: _extractGenres(movieDetails),
-            releaseDate: result['release_date'] ?? movieDetails['release_date'] ?? '2000-01-01',
-            runtime: movieDetails['runtime'] ?? 0,
-          );
-          
-          enrichedMovies.add(movie);
-        } else {
-          // Fallback to basic movie without details
-          final Movie movie = Movie.fromJson(result);
-          enrichedMovies.add(movie);
+        if (detailsResponse.statusCode != 200) throw Exception('TMDB fetch failed');
+
+        final details = json.decode(detailsResponse.body);
+
+        // Director and top 3 actors
+        final crew = details['credits']['crew'] as List;
+        final director = crew.firstWhere(
+          (member) => member['job'] == 'Director',
+          orElse: () => null,
+        );
+
+        final castMembers = <CastMember>[];
+        if (director != null) {
+          castMembers.add(CastMember(name: director['name'], job: 'Director'));
         }
+
+        final cast = (details['credits']['cast'] as List)
+            .take(3)
+            .map((actor) => CastMember(name: actor['name'], job: 'Actor'))
+            .toList();
+
+        castMembers.addAll(cast);
+
+        // Trailer
+        final trailer = (details['videos']['results'] as List?)?.firstWhere(
+          (v) => v['type'] == 'Trailer' && v['site'] == 'YouTube',
+          orElse: () => null,
+        );
+        final trailerKey = trailer != null ? trailer['key'] : '';
+
+        // Providers
+        final providerData = details['watch/providers']['results']['US'];
+        final providerList = <String>[];
+        for (final type in ['flatrate', 'rent', 'buy']) {
+          final entries = providerData?[type] as List?;
+          if (entries != null) {
+            providerList.addAll(entries.map((e) => e['provider_name'].toString()));
+          }
+        }
+
+        // IMDb & RT Ratings
+        final imdbId = details['imdb_id'];
+        String imdbRating = 'N/A';
+        String imdbVotes = '0';
+        String rottenTomatoes = 'N/A';
+        String rated = 'N/A';
+
+        if (imdbId != null && imdbId.isNotEmpty) {
+          final omdbResponse = await http.get(Uri.parse("http://www.omdbapi.com/").replace(queryParameters: {
+            'i': imdbId,
+            'apikey': dotenv.env['OMDB_API_KEY'] ?? '',
+          }));
+
+          if (omdbResponse.statusCode == 200) {
+            final omdb = json.decode(omdbResponse.body);
+            imdbRating = omdb['imdbRating'] ?? 'N/A';
+            imdbVotes = omdb['imdbVotes']?.toString() ?? '0';
+            rated = omdb['Rated'] ?? 'N/A';
+
+            final ratingsList = omdb['Ratings'] as List?;
+            if (ratingsList != null) {
+              final rtRating = ratingsList.firstWhere(
+                (r) => r is Map && r['Source'] == 'Rotten Tomatoes',
+                orElse: () => {},
+              );
+              if (rtRating is Map && rtRating.containsKey('Value')) {
+                rottenTomatoes = rtRating['Value'];
+              }
+            }
+          }
+        }
+
+        print('Enriching: ${details['title']} | RT: $rottenTomatoes');
+
+        return Movie(
+          id: movieId,
+          title: details['title'] ?? result['title'] ?? 'Unknown Title',
+          imageUrl: details['poster_path'] != null
+              ? 'https://image.tmdb.org/t/p/w500${details['poster_path']}'
+              : 'https://via.placeholder.com/500x750?text=No+Image',
+          overview: details['overview'] ?? 'No overview available',
+          rating: (details['vote_average'] ?? 0).toDouble(),
+          genres: _extractGenres(details),
+          releaseDate: details['release_date'] ?? '2000-01-01',
+          runtime: details['runtime'] ?? 0,
+          imdbRating: imdbRating,
+          imdbVotes: imdbVotes,
+          imdbId: imdbId ?? 'N/A',
+          rottenTomatoesScore: rottenTomatoes,
+          providers: providerList.toSet().toList(),
+          cast: castMembers,
+          trailerKey: trailerKey,
+          rated: rated,
+        );
       } catch (e) {
-        print('Error enriching movie data: $e');
-        try {
-          final Movie movie = Movie.fromJson(result);
-          enrichedMovies.add(movie);
-        } catch (_) {
-          // Ignore completely invalid entries
-        }
+        print('Error enriching movie: $e');
+        return null; // Allow failure without breaking others
       }
-    }
-    
-    return enrichedMovies;
+    }).toList();
+
+    final enrichedMovies = await Future.wait(tasks);
+    return enrichedMovies.whereType<Movie>().toList();
   }
+
   
   // Extract genre names from movie details
   List<String> _extractGenres(Map<String, dynamic> movieDetails) {
@@ -408,64 +478,216 @@ class TMDBMovieService {
 
   // Fetch TV show recommendations with similar filtering
   Future<List<Movie>> getShowRecommendations({
-    List<String>? genres,
-    List<String>? platforms,
-    List<String>? people,
-    List<String>? similarShows,
-    double? minRating,
-    double? maxRating,
-    String? firstAirYear,
-    String? sortBy,
-  }) async {
-    // Example for basic discover TV without the complex filters
+  List<String>? genres,
+  List<String>? platforms,
+  List<String>? people,
+  List<String>? similarShows,
+  double? minRating,
+  double? maxRating,
+  String? firstAirYear,
+  String? sortBy,
+}) async {
+  List<Movie> finalResults = [];
+
+  // Handle similar shows
+  if (similarShows != null && similarShows.isNotEmpty) {
+    for (final title in similarShows) {
+      final results = await _getSimilarTVShows(title);
+      finalResults.addAll(results);
+    }
+  }
+
+  // Handle people filter
+  if (people != null && people.isNotEmpty) {
+    for (final person in people) {
+      final results = await _getTVShowsByPerson(person);
+      finalResults.addAll(results);
+    }
+  }
+
+  // Discover TV if no people/similar filters used
+  if ((similarShows == null || similarShows.isEmpty) &&
+      (people == null || people.isEmpty)) {
+    final genreMapping = await _getTVGenreMapping();
+    final genreIds = <String>[];
+
+    if (genres != null) {
+      for (final genre in genres) {
+        if (genreMapping.containsKey(genre)) {
+          genreIds.add(genreMapping[genre].toString());
+        }
+      }
+    }
+
     final queryParameters = {
       'api_key': _apiKey,
       'language': 'en-US',
       'sort_by': sortBy ?? 'popularity.desc',
       'include_adult': 'false',
       'page': '1',
-      'vote_average.gte': minRating != null ? (minRating / 10).toString() : null, // TMDB uses 0-10 scale
-      'vote_average.lte': maxRating != null ? (maxRating / 10).toString() : null, // TMDB uses 0-10 scale
+      'with_genres': genreIds.isNotEmpty ? genreIds.join(',') : null,
+      'vote_average.gte': minRating != null ? (minRating / 10).toString() : null,
+      'vote_average.lte': maxRating != null ? (maxRating / 10).toString() : null,
       'first_air_date_year': firstAirYear,
     };
-    
-    queryParameters.removeWhere((key, value) => value == null);
-    
-    final uri = Uri.parse('$_baseUrl/discover/tv')
-        .replace(queryParameters: queryParameters);
-    
-    try {
-      final response = await http.get(uri);
-      
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final results = data['results'] as List;
-        
-        // Convert TV shows to Movie objects for compatibility with UI
-        return results.map((show) {
-          return Movie(
-            id: show['id'].toString(),
-            title: show['name'],
-            imageUrl: show['poster_path'] != null 
-                ? 'https://image.tmdb.org/t/p/w500${show['poster_path']}' 
-                : 'https://via.placeholder.com/500x750?text=No+Image',
-            overview: show['overview'] ?? 'No overview available',
-            rating: (show['vote_average'] ?? 0).toDouble(),
-            genres: [],  // Would need to fetch TV genre details
-            releaseDate: show['first_air_date'] ?? '2000-01-01',
-            runtime: 0,  // Would need episode runtime, not directly available
-          );
-        }).toList();
+
+    queryParameters.removeWhere((k, v) => v == null);
+
+    final uri = Uri.parse('$_baseUrl/discover/tv').replace(queryParameters: queryParameters);
+    final cacheKey = uri.toString();
+
+    if (_tvCache.containsKey(cacheKey)) {
+      finalResults.addAll(_tvCache[cacheKey]!);
+    } 
+    else {
+      try {
+        final response = await http.get(uri);
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          final results = data['results'] as List;
+
+          final enriched = await _enrichMoviesWithDetails(results.take(10).toList());
+          _tvCache[cacheKey] = enriched;
+          finalResults.addAll(enriched);
+        }
+      } catch (e) {
+        print('Error fetching discover TV shows: $e');
       }
-    } catch (e) {
-      print('Error fetching TV shows: $e');
     }
-    
-    return [];
   }
 
-  // Clears the recommendation cache
-  void clearCache() {
-    _cache.clear();
+  // Filter by streaming platforms
+  if (platforms != null && platforms.isNotEmpty && finalResults.isNotEmpty) {
+    finalResults = await _filterByPlatforms(finalResults, platforms);
   }
+
+  // Remove duplicates
+  final uniqueResults = <Movie>[];
+  final seenIds = <String>{};
+
+  for (final show in finalResults) {
+    if (!seenIds.contains(show.id)) {
+      seenIds.add(show.id);
+      uniqueResults.add(show);
+    }
+  }
+
+  return uniqueResults.take(15).toList();
+}
+
+Future<List<Movie>> _getSimilarTVShows(String showTitle) async {
+  final searchUri = Uri.parse('$_baseUrl/search/tv').replace(queryParameters: {
+    'api_key': _apiKey,
+    'query': showTitle,
+    'language': 'en-US',
+    'page': '1',
+  });
+
+  try {
+    final searchResponse = await http.get(searchUri);
+    if (searchResponse.statusCode != 200) return [];
+
+    final data = json.decode(searchResponse.body);
+    final results = data['results'] as List;
+    if (results.isEmpty) return [];
+
+    final showId = results[0]['id'];
+
+    final similarUri = Uri.parse('$_baseUrl/tv/$showId/similar').replace(queryParameters: {
+      'api_key': _apiKey,
+      'language': 'en-US',
+      'page': '1',
+    });
+
+    final similarResponse = await http.get(similarUri);
+    if (similarResponse.statusCode != 200) return [];
+
+    final similarData = json.decode(similarResponse.body);
+    final similarResults = similarData['results'] as List;
+
+    return await _enrichMoviesWithDetails(similarResults.take(10).toList());
+  } catch (e) {
+    print('Error fetching similar TV shows: $e');
+    return [];
+  }
+}
+
+
+Future<List<Movie>> _getTVShowsByPerson(String personName) async {
+  final searchUri = Uri.parse('$_baseUrl/search/person').replace(queryParameters: {
+    'api_key': _apiKey,
+    'query': personName,
+    'language': 'en-US',
+    'page': '1',
+    'include_adult': 'false',
+  });
+
+  try {
+    final searchResponse = await http.get(searchUri);
+    if (searchResponse.statusCode != 200) return [];
+
+    final data = json.decode(searchResponse.body);
+    final results = data['results'] as List;
+    if (results.isEmpty) return [];
+
+    final personId = results[0]['id'];
+
+    final creditsUri = Uri.parse('$_baseUrl/person/$personId/tv_credits').replace(queryParameters: {
+      'api_key': _apiKey,
+      'language': 'en-US',
+    });
+
+    final creditsResponse = await http.get(creditsUri);
+    if (creditsResponse.statusCode != 200) return [];
+
+    final creditsData = json.decode(creditsResponse.body);
+    final cast = creditsData['cast'] as List? ?? [];
+    final crew = creditsData['crew'] as List? ?? [];
+
+    final allShows = [...cast];
+    for (final job in crew) {
+      final department = job['department'];
+      if (department == 'Directing' || department == 'Writing') {
+        allShows.add(job);
+      }
+    }
+
+    allShows.sort((a, b) => (b['popularity'] as num).compareTo(a['popularity'] as num));
+    return await _enrichMoviesWithDetails(allShows.take(10).toList());
+  } catch (e) {
+    print('Error fetching TV shows by person: $e');
+    return [];
+  }
+}
+
+
+Future<Map<String, int>> _getTVGenreMapping() async {
+  final uri = Uri.parse('$_baseUrl/genre/tv/list').replace(queryParameters: {
+    'api_key': _apiKey,
+    'language': 'en-US',
+  });
+
+  try {
+    final response = await http.get(uri);
+    if (response.statusCode != 200) return {};
+
+    final data = json.decode(response.body);
+    final genres = data['genres'] as List;
+
+    return {
+      for (final genre in genres) genre['name']: genre['id'],
+    };
+  } catch (e) {
+    print('Error fetching TV genre mapping: $e');
+    return {};
+  }
+}
+
+
+
+
+  // Clears the recommendation caches
+  void clearCache() => _cache.clear();
+
+  void clearTVCache() => _tvCache.clear();
 }
