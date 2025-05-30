@@ -109,6 +109,30 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
     }
   }
 
+  final Map<String, String> platformSearchUrls = {
+    'amazon video': 'https://www.amazon.com/s?k=',
+    'apple tv': 'https://tv.apple.com/search?term=',
+    'google play movies': 'https://play.google.com/store/search?q=',
+    'youtube': 'https://www.youtube.com/results?search_query=',
+    'fandango at home': 'https://www.vudu.com/content/movies/search?searchString=',
+    'spectrum on demand': 'https://watch.spectrum.net/search?q=',
+    'plex': 'https://watch.plex.tv/search?q=',
+    'mgm plus': 'https://www.mgmplus.com/search/',
+    'netflix': 'https://www.netflix.com/search?q=',
+    'max': 'https://play.max.com/search?q=',
+    'hulu': 'https://www.hulu.com/search?q=',
+    'disney+': 'https://www.disneyplus.com/search/',
+    'apple tv+': 'https://tv.apple.com/search?term=',
+    'paramount': 'https://www.paramountplus.com/shows/?q=',
+    'crunchyroll': 'https://www.crunchyroll.com/search?from=&q=',
+    'peacock': 'https://www.peacocktv.com/search?q=',
+    'tubi': 'https://tubitv.com/search?query=',
+    'pluto tv': 'https://pluto.tv/search?q=',
+    'netflix standard with ads': 'https://www.netflix.com/search?q=',
+  };
+
+
+
   void _toggleSave() {
     setState(() {
       _isSaved = !_isSaved;
@@ -361,25 +385,28 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Flexible(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text('Platforms', style: TextStyle(fontSize: 22)),
-                          Wrap(
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            spacing: 6,
-                            runSpacing: 4,
-                            children: [
-                              for (int i = 0; i < widget.movie.providers.length && i < 3; i++) ...[
-                                Text(
-                                  widget.movie.providers[i],
-                                  style: const TextStyle(fontSize: 15, fontFamily: "OpenSans"),
-                                ),
-                                if (i < widget.movie.providers.length - 1 && i < 2)
-                                  const Icon(Icons.circle, size: 6),
-                              ]
-                            ],
+                          RichText(
+                            text: TextSpan(
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontFamily: "OpenSans",
+                                color: Colors.black,
+                              ),
+                              children: widget.movie.providers.isEmpty
+                                  ? [const TextSpan(text: 'Only in Theaters')]
+                                  : [
+                                      for (int i = 0; i < widget.movie.providers.length && i < 3; i++) ...[
+                                        TextSpan(text: widget.movie.providers[i]),
+                                        if (i < widget.movie.providers.length - 1 && i < 2)
+                                          const TextSpan(text: ' • '),
+                                      ]
+                                    ],
+                            ),
                           ),
                         ],
                       ),
@@ -394,12 +421,74 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                               content: SingleChildScrollView(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: widget.movie.providers.map((provider) {
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 4),
-                                      child: Text(provider, style: const TextStyle(fontSize: 16)),
-                                    );
-                                  }).toList(),
+                                  children: 
+                                  widget.movie.providers.isEmpty ?
+                                  [
+                                    const Text('Only in Theaters', style: TextStyle(fontSize: 16, fontFamily: "OpenSans")),
+                                  ] 
+                                  :
+                                  [ ... widget.movie.providers.map((provider) 
+                                    {
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 8),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: RichText(
+                                                text: TextSpan(
+                                                  children: [
+                                                    TextSpan(
+                                                      text: provider,
+                                                      style: const TextStyle(fontSize: 16, fontFamily: "OpenSans", fontWeight: FontWeight.bold, color: Colors.black),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            GestureDetector(
+                                              onTap: () async {
+                                                final String title = Uri.encodeComponent(widget.movie.title);
+                                                final String? baseUrl = platformSearchUrls[provider.toLowerCase()];
+                                                if (baseUrl != null) {
+                                                  final Uri uri = Uri.parse('$baseUrl$title');
+                                                  if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+                                                    throw Exception('Could not launch $uri');
+                                                  }
+                                                }
+                                              },
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
+                                                width: 70,
+                                                decoration: BoxDecoration(
+                                                  border: Border.all(color: Colors.black),
+                                                  borderRadius: BorderRadius.circular(25),
+                                                ),
+                                                child: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                  children: [
+                                                    const Text(
+                                                      "Watch",
+                                                      style: TextStyle(
+                                                        fontSize: 13,
+                                                        fontWeight: FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                    Icon(
+                                                      Icons.play_circle_outlined,
+                                                      color: Colors.black,
+                                                      size: 16,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ],
                                 ),
                               ),
                               actions: [
@@ -421,6 +510,7 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                   ],
                 ),
               ),
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
