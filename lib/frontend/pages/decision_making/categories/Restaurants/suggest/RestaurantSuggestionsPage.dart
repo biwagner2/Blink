@@ -22,6 +22,7 @@ class _RestaurantSuggestionsPageState extends State<RestaurantSuggestionsPage> {
   int _selectedIndex = 1; // Assuming this is the index for the current page in the bottom nav bar
   Map<String, bool> likedRestaurants = {};
   Map<String, bool> dislikedRestaurants = {};
+  int _currentCardIndex = 0;
 
   @override
   void initState() {
@@ -97,9 +98,25 @@ class _RestaurantSuggestionsPageState extends State<RestaurantSuggestionsPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Check if recommendations are empty
+    if (widget.recommendations.isEmpty) {
+      return _buildEmptyState();
+    }
+    
+    final screenHeight = MediaQuery.of(context).size.height;
+    final cardsCount = (widget.recommendations.length / 3).ceil();
+    
     return Scaffold(
       body: CardSwiper(
-        cardsCount: (widget.recommendations.length / 3).ceil(),
+        cardsCount: cardsCount,
+        onSwipe: (previousIndex, currentIndex, direction) {
+          if (currentIndex != null) {
+            setState(() {
+              _currentCardIndex = currentIndex;
+            });
+          }
+          return true;
+        },
         cardBuilder: (context, index, _, __) {
           int startIndex = index * 3;
           return Column(
@@ -115,36 +132,121 @@ class _RestaurantSuggestionsPageState extends State<RestaurantSuggestionsPage> {
                     onDislike: () => toggleDislike(restaurant.id),
                   ),
                 );
-                } else {
+                } 
+                else if (_currentCardIndex == cardsCount - 1 && i == 1) {
+                  // Last card, last slot → show end message
+                  return Expanded(
+                    child: Container(
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.all(32),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.check_circle_outline, size: 60, color: Color.fromARGB(255, 183, 236, 236)),
+                          SizedBox(height: screenHeight / 56.8),
+                          const Text(
+                            "You've seen all recommendations!",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: screenHeight / 85.2),
+                          const Text(
+                            "(Try refining your criteria to see more)",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+                else {
                   return const Expanded(child: SizedBox());
                 }
               }),
             );
           },
           numberOfCardsDisplayed: 1,
-          isDisabled: false,
+          isDisabled: _currentCardIndex >= cardsCount - 1,
           allowedSwipeDirection: const AllowedSwipeDirection.only(
             left: true,
           ),
           padding: const EdgeInsets.all(0),
         ),
-      bottomNavigationBar: CustomBottomNavigationBar(
-        selectedIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: [
-            BottomNavigationBarItem(
-              icon: Image.asset("assets/images/Connect.png", height: 40),
-              label: '',
+      bottomNavigationBar: MediaQuery(
+        data: MediaQuery.of(context).removePadding(removeBottom: true),
+        child: CustomBottomNavigationBar(
+          selectedIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          items: [
+              BottomNavigationBarItem(
+                icon: Image.asset("assets/images/Connect.png", height: screenHeight / 21.3),  
+                label: '',
+              ),
+              BottomNavigationBarItem(
+                icon: Image.asset("assets/images/blink-icon-color.png", height: screenHeight / 18.9),
+                label: '',
+              ),
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset("assets/svgs/Profile.svg", height: screenHeight / 21.3),
+                label: '',
+              ),
+            ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    final screenHeight = MediaQuery.of(context).size.height;
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 41, 41, 41),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              "assets/images/blink-icon-color.png",
+              height: 100,
+              width: 100,
             ),
-            BottomNavigationBarItem(
-              icon: Image.asset("assets/images/blink-icon-color.png", height: 45),
-              label: '',
+            SizedBox(height: screenHeight / 42.6),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: screenHeight / 21.3),
+              child: const Text(
+                "No recommendations found. Try adjusting your filters.",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
-            BottomNavigationBarItem(
-              icon: SvgPicture.asset("assets/svgs/Profile.svg", height: 40),
-              label: '',
+            SizedBox(height: screenHeight / 21.3),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 183, 236, 236),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: screenHeight / 35.5, vertical: screenHeight / 71),
+                child: const Text(
+                  "Go Back",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
             ),
           ],
+        ),
       ),
     );
   }
@@ -290,12 +392,12 @@ class _RestaurantCardState extends State<RestaurantCard> {
                             SizedBox(width: screenWidth/70),
                             Text(
                               widget.restaurant.formattedEta,
-                              style: const TextStyle(color: Colors.white),
+                              style: const TextStyle(color: Colors.white, fontSize: 18),
                             ),
                             SizedBox(width: screenWidth/40),
                             Text(
                               widget.restaurant.price ?? 'N/A',
-                              style: const TextStyle(color: Colors.white),
+                              style: const TextStyle(color: Colors.white, fontSize: 18),
                             ),
                           ],
                         ),

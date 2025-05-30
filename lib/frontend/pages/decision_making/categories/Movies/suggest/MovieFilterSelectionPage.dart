@@ -43,7 +43,7 @@ class MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
   ];
 
   final List<String> _platformOptions = [
-    'Netflix', 'Max', 'Prime', 'Hulu', 'Disney+', 'Apple TV+', 'Paramount', 'Crunchyroll'
+    'Netflix', 'Max', 'Amazon', 'Hulu', 'Disney+', 'Apple TV+', 'Paramount', 'Google Play', 'Crunchyroll', 'MGM Plus'
   ];
 
   @override

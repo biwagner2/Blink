@@ -102,6 +102,7 @@ class _ReadingMindScreenState<T> extends State<ReadingMindScreen<T>> with Single
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 41, 41, 41),
       body: Center(
@@ -114,7 +115,7 @@ class _ReadingMindScreenState<T> extends State<ReadingMindScreen<T>> with Single
                 color: Colors.white,
                 size: 60,
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: screenHeight / 42.6),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: Text(
@@ -128,7 +129,7 @@ class _ReadingMindScreenState<T> extends State<ReadingMindScreen<T>> with Single
                   textAlign: TextAlign.center,
                 ),
               ),
-              const SizedBox(height: 30),
+              SizedBox(height: screenHeight / 28.4),
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
@@ -162,7 +163,7 @@ class _ReadingMindScreenState<T> extends State<ReadingMindScreen<T>> with Single
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 35),
+              SizedBox(height: screenHeight / 24.3),
               RotationTransition(
                 turns: _controller,
                 child: Image.asset(
