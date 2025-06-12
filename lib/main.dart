@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 //import 'package:blink/pages/decision_making/Categories/Restaurants/RestaurantCuisineSurvey.dart';
+import 'package:blink/backend/services/categories/Movies/TMDBMovieService.dart';
 import 'package:blink/frontend/pages/decision_making/category_selection.dart';
 //import 'package:blink/pages/onboarding/question_screens/questionScreen1.dart';
 //import 'package:blink/pages/onboarding/question_screens/questionScreen4.dart';
@@ -34,6 +35,13 @@ Future<void> main() async { //Link supabase to the project
 
   final googleApiKey = dotenv.env['GOOGLE_API_KEY'];
   DirectionsService.init(googleApiKey!);
+
+  // Initialize genre map before app starts
+  await TMDBMovieService().initializeGenreMap();
+
+  // Load cached data for movies and shows
+   await TMDBMovieService().loadOmdbCache();
+
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(MyApp()));
 }
 

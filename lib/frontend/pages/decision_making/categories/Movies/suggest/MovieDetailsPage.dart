@@ -6,7 +6,6 @@ import 'package:blink/frontend/pages/decision_making/category_selection.dart';
 import 'package:blink/frontend/pages/friends/friendHub.dart';
 import 'package:blink/frontend/pages/profile/profilePage.dart';
 import 'package:blink/frontend/utility/labeledIconButton.dart';
-import 'package:blink/models/icons/my_flutter_app_icons.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:blink/models/categories/Movie.dart';
@@ -111,7 +110,9 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
 
   final Map<String, String> platformSearchUrls = {
     'amazon video': 'https://www.amazon.com/s?k=',
+    'amazon prime': 'https://www.amazon.com/s?k=',
     'apple tv': 'https://tv.apple.com/search?term=',
+    'apple tv+': 'https://tv.apple.com/search?term=',
     'google play movies': 'https://play.google.com/store/search?q=',
     'youtube': 'https://www.youtube.com/results?search_query=',
     'fandango at home': 'https://www.vudu.com/content/movies/search?searchString=',
@@ -119,19 +120,22 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
     'plex': 'https://watch.plex.tv/search?q=',
     'mgm plus': 'https://www.mgmplus.com/search/',
     'netflix': 'https://www.netflix.com/search?q=',
+    'netflix standard with ads': 'https://www.netflix.com/search?q=',
+    'netflix kids': 'https://www.netflix.com/search?q=',
     'max': 'https://play.max.com/search?q=',
+    'hbo max': 'https://play.max.com/search?q=',
     'hulu': 'https://www.hulu.com/search?q=',
     'disney+': 'https://www.disneyplus.com/search/',
-    'apple tv+': 'https://tv.apple.com/search?term=',
+    'disney plus': 'https://www.disneyplus.com/search/',
     'paramount': 'https://www.paramountplus.com/shows/?q=',
+    'paramount+': 'https://www.paramountplus.com/shows/?q=',
+    'paramount plus': 'https://www.paramountplus.com/shows/?q=',
     'crunchyroll': 'https://www.crunchyroll.com/search?from=&q=',
     'peacock': 'https://www.peacocktv.com/search?q=',
     'tubi': 'https://tubitv.com/search?query=',
+    'tubi tv': 'https://tubitv.com/search?query=',
     'pluto tv': 'https://pluto.tv/search?q=',
-    'netflix standard with ads': 'https://www.netflix.com/search?q=',
   };
-
-
 
   void _toggleSave() {
     setState(() {
@@ -246,14 +250,14 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                           Row(
                             children: [
                               Text(
-                                widget.movie.rottenTomatoesScore,
+                                widget.movie.formattedTmdbRating,
                                 style: const TextStyle(color: Colors.white, fontSize: 15, fontFamily: 'Open Sans', fontWeight: FontWeight.w500),
                               ),
                               SizedBox(width: screenHeight / 142),
                               const Icon(Icons.favorite, color: Color.fromARGB(255, 183, 236, 236), size: 18),
                               SizedBox(width: screenHeight / 142),
                               Text(
-                                widget.movie.formatReviewCount(),
+                                widget.movie.formatReviewCount,
                                 style: const TextStyle(color: Colors.white, fontSize: 15, fontFamily: 'Open Sans', fontWeight: FontWeight.w700),
                               ),
                             ],
@@ -291,7 +295,9 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                   children: [
                     const Icon(Icons.access_time, size: 22,),
                     SizedBox(width: screenWidth / 100),
-                    Text(widget.movie.formattedRuntime, 
+                    Text(widget.movie.type == 'movie'
+                            ? widget.movie.formattedRuntime // e.g. 1h 42m
+                            : '${widget.movie.runtime} min/ep',
                         style: const TextStyle(fontSize: 14, fontFamily: "OpenSans-Bold")
                     ),
                     SizedBox(width: screenWidth / 110),
@@ -304,8 +310,8 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                     const Icon(Icons.circle, size: 8,),
                     SizedBox(width: screenWidth / 110),
                     Text(widget.movie.genres.length >= 2
-                          ? '${widget.movie.genres[0]}/${widget.movie.genres[1]}'
-                          : widget.movie.genres[0],
+                          ? '${widget.movie.formatGenre(widget.movie.genres[0])}/${widget.movie.formatGenre(widget.movie.genres[1])}'
+                          : widget.movie.formatGenre(widget.movie.genres[0]),
                       style: const TextStyle(fontSize: 14, fontFamily: "OpenSans-Bold"),
                     ),
                     SizedBox(width: screenWidth / 110),
@@ -456,6 +462,14 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                                                   if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
                                                     throw Exception('Could not launch $uri');
                                                   }
+                                                }
+                                                else{
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text('No search URL available for $provider'),
+                                                      duration: const Duration(seconds: 4),
+                                                    ),
+                                                  );
                                                 }
                                               },
                                               child: Container(

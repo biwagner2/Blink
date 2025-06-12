@@ -97,13 +97,6 @@ class _MovieTabControllerPageState extends State<MovieTabControllerPage> with Si
       // Reset cache before fetching new recommendations
       recommender.clearCache();
       
-      // Check if we have filter data
-      if (_filterData.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select at least one filter')),
-        );
-        return;
-      }
       
       // Get movie or show recommendations based on isMovie flag
       final bool isMovie = _filterData['isMovie'] ?? true;
@@ -115,8 +108,8 @@ class _MovieTabControllerPageState extends State<MovieTabControllerPage> with Si
           recommendationsFuture = recommender.getMovieRecommendations(
             genres: _filterData['genres']?.cast<String>(),
             platforms: _filterData['platforms']?.cast<String>(),
-            people: _filterData['people']?.cast<String>(),
-            similarMovies: _filterData['similarMedia']?.cast<String>(),
+            peopleIDs: _filterData['peopleIDs']?.cast<int>(),
+            similarMovieIDs: _filterData['similarMediaIDs']?.cast<int>(),
             minRating: _filterData['minRating'],
             maxRating: _filterData['maxRating'],
           );
@@ -125,8 +118,8 @@ class _MovieTabControllerPageState extends State<MovieTabControllerPage> with Si
           recommendationsFuture = recommender.getShowRecommendations(
             genres: _filterData['genres']?.cast<String>(),
             platforms: _filterData['platforms']?.cast<String>(),
-            people: _filterData['people']?.cast<String>(),
-            similarShows: _filterData['similarMedia']?.cast<String>(),
+            peopleIDs: _filterData['peopleIDs']?.cast<int>(),
+            similarShowIDs: _filterData['similarMediaIDs']?.cast<int>(),
             minRating: _filterData['minRating'],
             maxRating: _filterData['maxRating'],
           );

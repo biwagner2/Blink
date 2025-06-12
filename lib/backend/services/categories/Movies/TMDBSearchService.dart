@@ -9,6 +9,7 @@ class TMDBMovieSearchService implements SearchService {
 
   TMDBMovieSearchService(this._tmdbService);
 
+  // Searches for specific movie by name
   @override
   Future<List<SearchResult>> search(String query) async {
     final uri = Uri.parse('${_tmdbService.baseUrl}/search/movie').replace(
@@ -29,6 +30,7 @@ class TMDBMovieSearchService implements SearchService {
           title: movie['title'],
           posterPath: movie['poster_path'],
           releaseDate: movie['release_date'],
+          tmdbID: movie['id'],
         )).toList();
       }
       throw Exception('Failed to search movies: ${response.statusCode}');
@@ -44,6 +46,7 @@ class TMDBShowSearchService implements SearchService {
 
   TMDBShowSearchService(this._tmdbService);
 
+  // Searches for specific show by name
   @override
   Future<List<SearchResult>> search(String query) async {
     final uri = Uri.parse('${_tmdbService.baseUrl}/search/tv').replace(
@@ -52,6 +55,7 @@ class TMDBShowSearchService implements SearchService {
         'query': query,
         'language': 'en-US',
         'page': '1', 
+        'include_adult': 'false',
       },
     );
 
@@ -63,6 +67,7 @@ class TMDBShowSearchService implements SearchService {
           title: show['name'],
           posterPath: show['poster_path'],
           firstAirDate: show['first_air_date'],
+          tmdbID: show['id'],
         )).toList();
       }
       throw Exception('Failed to search shows: ${response.statusCode}');
@@ -78,6 +83,7 @@ class TMDBPeopleSearchService implements SearchService {
 
   TMDBPeopleSearchService(this._tmdbService);
 
+  // Searches for specific person by name
   @override
   Future<List<SearchResult>> search(String query) async {
     final uri = Uri.parse('${_tmdbService.baseUrl}/search/person').replace(
@@ -95,6 +101,7 @@ class TMDBPeopleSearchService implements SearchService {
         final data = json.decode(response.body);
         return (data['results'] as List).map((person) => PersonSearchResult(
           name: person['name'],
+          tmdbID: person['id'],
           profilePath: person['profile_path'],
           knownForDepartment: person['known_for_department'],
         )).toList();

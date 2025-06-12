@@ -36,14 +36,20 @@ class MovieFilterSelectionPageState extends State<MovieFilterSelectionPage> {
   late TMDBMovieSearchService _movieSearchService;
   late TMDBShowSearchService _showSearchService;
 
-  final List<String> _genreOptions = [
+  final List<String> _movieGenreOptions = [
     'Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family',
     'Fantasy', 'History', 'Horror', 'Music', 'Mystery', 'Romance', 'Science Fiction', 'Thriller',
     'War', 'Western'
   ];
 
+  final List<String> _showGenreOptions = [
+    'Action & Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama', 
+    'Family', 'Kids', 'Mystery', 'News', 'Reality', 'Sci-Fi & Fantasy', 
+    'Soap', 'Talk', 'War & Politics', 'Western'
+  ];
+
   final List<String> _platformOptions = [
-    'Netflix', 'Max', 'Amazon', 'Hulu', 'Disney+', 'Apple TV+', 'Paramount', 'Google Play', 'Crunchyroll', 'MGM Plus'
+    'Netflix', 'Max', 'Amazon', 'Hulu', 'Disney Plus', 'Paramount+', 'Apple TV', 'Peacock', 'MGM Plus', 'Google Play', 'Crunchyroll', 'Youtube'
   ];
 
   @override
@@ -116,16 +122,20 @@ void initState() {
   // Updates filter values and notifies parent component
   void _updateFilters() {
     // Extract people names from PersonSearchResult objects
-    List<String> peopleNames = _activeFilters.people.map((person) => person.title).toList();
-    // Extract movie/show titles from MediaSearchResult objects
-    List<String> similarMediaTitles = _activeFilters.similarMedia.map((media) => media.title).toList();
+    List<int> peopleIDs = _activeFilters.people.map((person) => person.tmdbID).toList();
     
+    // Extract movie/show tmdbIDs from MediaSearchResult objects
+    final similarMediaIDs = _activeFilters.similarMedia
+    .where((media) => media is MovieSearchResult || media is ShowSearchResult)
+    .map((media) => media is MovieSearchResult ? media.tmdbID : (media as ShowSearchResult).tmdbID)
+    .toList();
+
     widget.onFilterChanged({
       'genres': _activeFilters.genres,
       'platforms': _activeFilters.platforms,
       'isMovie': _isMovieSelected,
-      'people': peopleNames,
-      'similarMedia': similarMediaTitles,
+      'peopleIDs': peopleIDs,
+      'similarMediaIDs': similarMediaIDs,
       'minRating': _activeFilters.isRatingSelected ? _activeFilters.minRating : null,
       'maxRating': _activeFilters.isRatingSelected ? _activeFilters.maxRating : null,
     });
@@ -313,7 +323,30 @@ void initState() {
             child: Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: _genreOptions.map((genre) {
+              children: _isMovieSelected ? _movieGenreOptions.map((genre) {
+                final isSelected = _activeFilters.genres.contains(genre);
+                return GestureDetector(
+                  onTap: () => _toggleGenreSelection(genre),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color.fromARGB(255, 183, 236, 236)
+                          : Colors.white,
+                      border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      genre,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'HammerSmithOne-Regular',
+                      ),
+                    ),
+                  ),
+                );
+              }).toList() : _showGenreOptions.map((genre) {
                 final isSelected = _activeFilters.genres.contains(genre);
                 return GestureDetector(
                   onTap: () => _toggleGenreSelection(genre),
@@ -592,7 +625,7 @@ void initState() {
 
         SizedBox(height: deviceHeight/36.5),
 
-        // Similar Movies Search Button
+        // Movies/Shows Similar To Search Button
         GestureDetector(
           onTap: _showSimilarMoviesSearch,
           child: Container(
@@ -627,6 +660,7 @@ void initState() {
             ),
           ),
         ),
+        // Similar movie/show chips
         if (_activeFilters.similarMedia.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 8),
@@ -699,6 +733,7 @@ void initState() {
   );
 }
 
+  // Shows the bottom sheet for searching similar movies or shows
   void _showSimilarMoviesSearch() {
     showModalBottomSheet(
       context: context,
@@ -739,9 +774,9 @@ void initState() {
             padding: const EdgeInsets.only(right: 16, top: 8, bottom: 8, left: 31),
             width: _activeFilters.isRatingSelected == false
                 ? MediaQuery.of(context).size.width / 2.5 :
-                  getRatingDisplay().length > 5 ? 
-                  MediaQuery.of(context).size.width / 1.8 :
-                  MediaQuery.of(context).size.width / 2.7,
+                  getRatingDisplay().length > 9 ? 
+                  MediaQuery.of(context).size.width / 1.7 :
+                  MediaQuery.of(context).size.width / 1.8,
             decoration: BoxDecoration(
               border: _activeFilters.isRatingSelected 
                   ? Border.all(color: Colors.transparent) 
