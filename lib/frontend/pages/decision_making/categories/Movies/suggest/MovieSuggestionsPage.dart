@@ -343,7 +343,10 @@ class MovieCard extends StatelessWidget {
                           ),
                           SizedBox(width: screenWidth / 50),
                           Text(
-                            movie.formattedRuntime,
+                            movie.type == 'movie'
+                            ? movie.formattedRuntime // e.g. 1h 42m
+                            : '${movie.runtime} min/ep',
+
                             style: const TextStyle(color: Colors.white, fontSize: 17, fontFamily: "Open Sans", fontWeight: FontWeight.w700),
                           ),
                         ],
@@ -354,7 +357,7 @@ class MovieCard extends StatelessWidget {
                           const Icon(Icons.favorite, color: Color.fromARGB(255, 183, 236, 236), size: 28),
                           SizedBox(width: screenWidth / 100),
                           Text(
-                            movie.rottenTomatoesScore,
+                            movie.formattedTmdbRating,
                             style: const TextStyle(color: Colors.white, fontSize: 17, fontFamily: "Open Sans", fontWeight: FontWeight.w700),
                           ),
                         ],
@@ -365,7 +368,9 @@ class MovieCard extends StatelessWidget {
                         style: const TextStyle(color: Colors.white, fontSize: 17, fontFamily: "Open Sans", fontWeight: FontWeight.w700),
                       ),
                       Text(
-                        movie.genres[0],
+                        movie.genres.isNotEmpty
+                          ? (movie.formatGenre(movie.genres[0]).length > 12 ? movie.formatGenre(movie.genres[0]).substring(0, 13) : movie.formatGenre(movie.genres[0]))
+                          : 'N/A',
                         style: const TextStyle(color: Colors.white, fontSize: 17, fontFamily: "Open Sans", fontWeight: FontWeight.w700),
                       ),
                       // Like button

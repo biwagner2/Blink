@@ -67,5 +67,11 @@
 		<string>tmap</string>
 		<string>szn-mapy</string>
     </array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>This app needs access to the local network for debugging and development.</string>
+	<key>NSBonjourServices</key>
+	<array>
+	<string>_dartobservatory._tcp</string>
+	</array>
 </dict>
 </plist>
