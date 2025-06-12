@@ -42,34 +42,49 @@ class MediaSearchResult implements SearchResult {
   int get hashCode => _title.hashCode ^ (_releaseDate?.hashCode ?? 0);
 }
 
+
+
+
 class MovieSearchResult extends MediaSearchResult {
+
+  final int tmdbID;
+
   MovieSearchResult({
     required super.title,
     super.posterPath,
     super.releaseDate,
+    required this.tmdbID
   });
+
 }
 
 
+
+ 
 class ShowSearchResult extends MediaSearchResult {
+  final int tmdbID;
+
   ShowSearchResult({
     required super.title,
     super.posterPath,
     String? firstAirDate,
-  }) : super(
-    releaseDate: firstAirDate,
-  );
+    required this.tmdbID
+  }) : super(releaseDate: firstAirDate);
 }
+
+
 
 class PersonSearchResult implements SearchResult {
   final String _name;
   final String? _profilePath;
   final String? _knownForDepartment;
+  final int tmdbID;
 
   PersonSearchResult({
     required String name,
     String? profilePath,
     String? knownForDepartment,
+    required this.tmdbID
   }) :
     _name = name,
     _profilePath = profilePath,
