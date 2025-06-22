@@ -65,10 +65,10 @@ class Restaurant {
       url: json['url'],
       reviewCount: json['review_count'],
       categories: (json['categories'] as List).map((c) => c['title'] as String).toList(),
-      rating: json['rating'].toDouble(),
+      rating: (json['rating'] as num?)?.toDouble(),
       latitude: json['coordinates']['latitude'],
       longitude: json['coordinates']['longitude'],
-      price: json['price'],
+      price: json['price'] as String?,
       address: json['location']['display_address'].join(', '),
       phone: json['phone'],
       distance: json['distance'],
@@ -132,10 +132,10 @@ class Restaurant {
         final data = json.decode(response.body);
         
         // Set additional images
-        additionalImages = List<String>.from(data['photos']);
+        additionalImages = (data['photos'] as List?)?.map((e) => e.toString()).toList();
 
         // Set business hours
-        if (data['hours'] != null && data['hours'].isNotEmpty) 
+        if (data['hours'] != null && data['hours'].isNotEmpty && data['hours'][0]['open'] is List) 
         {
           final openHours = data['hours'][0]['open'];
           businessHours = {};
@@ -195,9 +195,14 @@ String _formatTime(String time) {
     if (apiKey == null) {
       return null;
     }
-    String descriptionCategories = categories.join(', ');
+
     final model = GenerativeModel(model: 'gemini-1.5-flash-8b', apiKey: apiKey);
-    final content = [Content.text('Give me a one-sentence, elegant, and succinct description, of the following restaurant: $name located at $address. It should be no more than 150 characters in length. Here is extra information if needed: $descriptionCategories, with a rating of $rating stars and a price range of $price. ONLY use the extra information if you don\'t have enough to generate a description. Thanks!')];
+    final prompt = '''
+      Write a unique, polished, vivid one-sentence description for a restaurant recommendation card in a mobile app. 
+      The restaurant is called "$name". Keep it between 150 - 200 characters. Highlight what makes this spot unique or enticing. Don't use colons.
+      ''';
+
+    final content = [Content.text(prompt)];
     final response = await model.generateContent(content);
     _cachedDescription = response.text;
     return _cachedDescription;
