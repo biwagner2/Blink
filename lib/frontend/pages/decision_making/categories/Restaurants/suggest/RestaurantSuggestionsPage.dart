@@ -285,10 +285,8 @@ class _RestaurantCardState extends State<RestaurantCard> {
 
     return GestureDetector(
       onTap: () async {
-        // Store the context in a local variable
-        final context = this.context;
+        if (!mounted) return;
 
-        // Show a loading indicator
         showDialog(
           context: context,
           barrierDismissible: false,
@@ -297,36 +295,28 @@ class _RestaurantCardState extends State<RestaurantCard> {
           },
         );
 
-        // Wait for getDetails to complete
-        await widget.restaurant.getDetails();
+        try {
+          await widget.restaurant.getDetails();
+        } 
+        catch (e) {
+          if (!mounted) return;
+          Navigator.of(this.context).pop(); 
+          ScaffoldMessenger.of(this.context).showSnackBar(
+            const SnackBar(content: Text('Failed to load restaurant details.')),
+          );
+          return;
+        }
 
-        // Check if the widget is still mounted
         if (!mounted) return;
 
-        // Hide the loading indicator
-        if(context.mounted)
-        {
-          Navigator.of(context).pop();
-        }
-        else
-        {
-          return;
-        }
+        Navigator.of(this.context).pop();
 
-        // Navigate to the details page
-        if(!context.mounted)
-        {
-          return;
-        }
-        else
-        {
-            Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => RestaurantDetailsPage(restaurant: widget.restaurant),
-            ),
-          );
-        }
+        Navigator.push(
+          this.context, // ✅ no warning
+          MaterialPageRoute(
+            builder: (context) => RestaurantDetailsPage(restaurant: widget.restaurant),
+          ),
+        );
       },
       child: Card(
         margin: const EdgeInsets.all(0),

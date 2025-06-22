@@ -33,10 +33,19 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
   }
 
   Future<void> _loadDescription() async {
-    final description = await widget.restaurant.getDescription();
-    setState(() {
-      _description = description;
-    });
+    try {
+      final description = await widget.restaurant.getDescription();
+      if (!mounted) return;
+      setState(() {
+        _description = description ?? 'No description available.';
+      });
+    } 
+    catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _description = 'Description unavailable.';
+      });
+    }
   }
 
   Future<void> _handleCallPress() async {
@@ -110,6 +119,7 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final weekday = DateFormat('EEEE').format(DateTime.now());
+    final images = widget.restaurant.additionalImages ?? [widget.restaurant.imageUrl];
     
     return PopScope(
       canPop: true,
@@ -162,7 +172,7 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                             });
                           }),
                         items: [ 
-                          for(int x = 0; x < widget.restaurant.additionalImages!.length; x++)
+                          for (int x = 0; x < images.length; x++)
                             CachedNetworkImage(
                               height: screenHeight / 3.2,
                               width: screenWidth,
@@ -246,16 +256,19 @@ class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
                                       flex: 4,
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
-                                        children: widget.restaurant.additionalImages!.asMap().entries.map((entry) {
-                                          return Container(
-                                            width: 11,
-                                            height: 11,
-                                            margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: Colors.white.withOpacity(_current == entry.key ? 0.9 : 0.4),
-                                            ),
-                                          );
+                                          children: (widget.restaurant.additionalImages ?? [widget.restaurant.imageUrl])
+                                          .asMap()
+                                          .entries
+                                          .map((entry) {
+                                            return Container(
+                                              width: 11,
+                                              height: 11,
+                                              margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Colors.white.withOpacity(_current == entry.key ? 0.9 : 0.4),
+                                              ),
+                                            );
                                         }).toList(),
                                       ),
                                     ),
