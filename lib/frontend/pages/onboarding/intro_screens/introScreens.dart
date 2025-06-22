@@ -2,6 +2,7 @@ import 'package:blink/frontend/pages/onboarding/intro_screens/introScreen1.dart'
 import 'package:blink/frontend/pages/onboarding/intro_screens/introScreen2.dart';
 import 'package:blink/frontend/pages/onboarding/intro_screens/introScreen3.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class IntroScreens extends StatelessWidget{
@@ -9,6 +10,13 @@ class IntroScreens extends StatelessWidget{
   final _controller = PageController();
 
   IntroScreens({super.key});
+
+
+  Future<void> setIntroSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('intro_seen', true);
+  }
+
 
   @override
   Widget build(BuildContext context)

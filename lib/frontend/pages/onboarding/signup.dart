@@ -243,7 +243,10 @@ class _SignUpState extends State<SignUp> {
                         try{
                           
                           //Sign up new user
-                          final authResponse = await supabase.auth.signUp(email: emailController.text, password: passwordController.text);
+                          final authResponse = await supabase.auth.signUp(
+                            email: emailController.text, 
+                            password: passwordController.text
+                          );
                           
                           // Update the user's display name
                           await supabase.auth.updateUser(
@@ -258,26 +261,48 @@ class _SignUpState extends State<SignUp> {
                             content: Text("An email has been sent to ${authResponse.user!.email!}. Please verify your email."),
                           ));
                           print("Email Confirmed at: ${authResponse.user?.emailConfirmedAt}");
-                          AlertDialog(
-                                title: const Text('Email Confirmation'),
-                                content: Text("An email has been sent to ${authResponse.user!.email!}. Please verify your email."),
-                                actions: [
-                                  TextButton(
-                                    child: const Text('OK'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                ],
-                              );
+                          
+                          if (!context.mounted) return;
+                          await showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Email Confirmation'),
+                              content: Text("An email has been sent to ${authResponse.user!.email!}. Please verify your email."),
+                              actions: [
+                                TextButton(
+                                  child: const Text('OK'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (!context.mounted) return;
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (_) => const Center(child: CircularProgressIndicator()),
+                          );
                 
                            // Periodically check the user's email confirmation status
+                          bool isNavigated = false;
+
                           Timer.periodic(const Duration(seconds: 5), (timer) async {
-                            final user = supabase.auth.currentUser;
-                            if (user != null && user.emailConfirmedAt != null) {
+                            await supabase.auth.refreshSession();
+                            final refreshedUser = supabase.auth.currentUser;
+
+                            if (refreshedUser != null && refreshedUser.emailConfirmedAt != null && !isNavigated) {
+                              isNavigated = true;
                               timer.cancel();
+
                               if (!context.mounted) return;
-                              Navigator.push(
+
+                              //Dismiss spinner before navigating
+                              Navigator.of(context).pop();
+
+                              Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(builder: (context) => const CategoriesPage()),
                               );

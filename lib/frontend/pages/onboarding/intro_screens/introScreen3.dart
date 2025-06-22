@@ -2,6 +2,7 @@ import 'package:blink/frontend/pages/onboarding/intro_screens/introScreen4.dart'
 import 'package:blink/frontend/pages/onboarding/signup.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class IntroScreen3 extends StatelessWidget{
   const IntroScreen3({super.key});
@@ -47,7 +48,11 @@ class IntroScreen3 extends StatelessWidget{
             const SizedBox(height: 40,),
             GestureDetector(
               child: Image.asset("assets/images/blink-icon-color.png",height: 220, width: 220, fit: BoxFit.cover,),
-              onTap: () {
+              onTap: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setBool('intro_seen', true); // mark intro complete
+
+                if (!context.mounted) return;
                 Navigator.push(
                   context,
                   PageRouteBuilder(
@@ -57,11 +62,11 @@ class IntroScreen3 extends StatelessWidget{
                       const begin = 0.0;
                       const end = 1.0;
                       const curve = Curves.easeInOut;
-      
+
                       var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-      
+
                       var scaleAnimation = animation.drive(tween);
-      
+
                       return ScaleTransition(
                         scale: scaleAnimation,
                         child: child,
