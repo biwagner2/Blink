@@ -40,7 +40,7 @@ Future<void> main() async { //Link supabase to the project
   await TMDBMovieService().initializeGenreMap();
 
   // Load cached data for movies and shows
-   await TMDBMovieService().loadOmdbCache();
+  await TMDBMovieService().loadOmdbCache();
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(MyApp()));
 }
