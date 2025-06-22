@@ -1,6 +1,7 @@
 import 'package:blink/frontend/navigation/customNavBar.dart';
 import 'package:blink/frontend/pages/decision_making/category_selection.dart';
 import 'package:blink/frontend/pages/friends/friendHub.dart';
+import 'package:blink/frontend/pages/onboarding/signup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -84,6 +85,29 @@ class _ProfilePageState extends State<ProfilePage> {
               fontSize: 22,
             ),
           ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextButton(
+                onPressed: () async {
+                  await Supabase.instance.client.auth.signOut();
+                  if (!context.mounted) return;
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SignUp()),
+                    (route) => false,
+                  );
+                },
+                child: Text(
+                  'Sign Out',
+                  style: TextStyle(color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18
+                  ),
+                )
+              ),
+            ),
+          ],
         ),
         bottomNavigationBar: MediaQuery(
           data: MediaQuery.of(context).removePadding(removeBottom: true),
