@@ -1,6 +1,10 @@
 import 'dart:async';
+import 'package:blink/backend/services/categories/Movies/TMDBMovieService.dart';
+import 'package:blink/backend/services/utility/LocationService.dart';
 import 'package:blink/frontend/pages/onboarding/login.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_directions_api/google_directions_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,18 +19,46 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  bool showLoader = false;
+
   @override
   void initState() {
     super.initState();
     _navigateAfterSplash();
+
   }
 
   Future<void> _navigateAfterSplash() async {
-    await Future.delayed(const Duration(seconds: 2));
+
+    Timer(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          showLoader = true;
+        });
+      }
+    });
 
     final prefs = await SharedPreferences.getInstance();
     final bool introSeen = prefs.getBool('intro_seen') ?? false;
 
+    final supaApiKey = dotenv.env['SUPABASE_API_KEY'];
+    final supaUrl = dotenv.env['SUPABASE_URL'];
+
+    await Supabase.initialize(
+      url: '$supaUrl',
+      anonKey: "$supaApiKey",
+    );
+
+    await LocationService().initializeLocationServices();
+
+    final googleApiKey = dotenv.env['GOOGLE_API_KEY'];
+    DirectionsService.init(googleApiKey!);
+
+    await TMDBMovieService().initializeGenreMap();
+    await TMDBMovieService().loadOmdbCache();
+
+    await Future.delayed(const Duration(milliseconds: 500));
+    
     final user = Supabase.instance.client.auth.currentUser;
     final bool isSignedIn = user != null;
 
@@ -67,6 +99,10 @@ class _SplashScreenState extends State<SplashScreen> {
               Image.asset('assets/images/logo-white-transparent.png',
                   width: 250, height: 250),
               const SizedBox(height: 20),
+              if (showLoader)
+                const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                ),
             ],
           ),
         ),
