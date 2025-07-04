@@ -22,8 +22,8 @@
                             <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="YRO-k0-Ey4">
                                 <rect key="frame" x="196.33333333333334" y="426" width="0.33333333333334281" height="0.33333333333331439"/>
                             </imageView>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" image="LaunchLogo" translatesAutoresizingMaskIntoConstraints="NO" id="dKo-bJ-bMA">
-                                <rect key="frame" x="76" y="362" width="240" height="128"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="LaunchLogo" translatesAutoresizingMaskIntoConstraints="NO" id="dKo-bJ-bMA">
+                                <rect key="frame" x="71.666666666666686" y="301" width="250" height="250"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="250" id="Hbu-1J-osf"/>
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="250" id="Nfc-U2-TUZ"/>
@@ -36,6 +36,10 @@
                         <constraints>
                             <constraint firstItem="YRO-k0-Ey4" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="1a2-6s-vTC"/>
                             <constraint firstItem="YRO-k0-Ey4" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="4X2-HB-R7a"/>
+                            <constraint firstItem="dKo-bJ-bMA" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="LMg-sx-Sf9"/>
+                            <constraint firstItem="dKo-bJ-bMA" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="bAG-2t-hWb"/>
+                            <constraint firstItem="dKo-bJ-bMA" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="dlh-s5-xtF"/>
+                            <constraint firstItem="dKo-bJ-bMA" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="mte-Ou-qmn"/>
                         </constraints>
                     </view>
                 </viewController>
